@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="favShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#0a1128" />
+    </linearGradient>
+    <linearGradient id="favFinger" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#00f2fe" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="64" height="64" rx="16" fill="#060b18" />
+  
+  <!-- Shield Outline -->
+  <path d="M 32 8 L 51 18 C 51 36, 42 48, 32 54 C 22 48, 13 36, 13 18 Z" fill="#0a1128" stroke="url(#favShield)" stroke-width="2.5" />
+  
+  <!-- Fingerprint -->
+  <g transform="translate(19, 17) scale(0.65)" stroke="url(#favFinger)" stroke-width="2.4" stroke-linecap="round" fill="none">
+    <path d="M 6 25 C 6 12, 14 4, 20 4 C 26 4, 34 12, 34 25 C 34 32, 32 37, 30 40" />
+    <path d="M 11 27 C 11 16, 15 9, 20 9 C 25 9, 29 16, 29 27 C 29 33, 27 38, 25 41" />
+    <path d="M 16 28 C 16 22, 18 15, 20 15 C 22 15, 24 22, 24 28 C 24 35, 22 39, 20 42" />
+  </g>
+</svg>
