@@ -31,6 +31,7 @@ class AccesoController {
         $estudiantesDentro = $this->accesoModel->contarEstudiantesDentro();
         $estudiantesPorGrado = $this->accesoModel->obtenerEstudiantesDentroPorGrado();
         $usuariosDisponibles = $this->usuarioModel->obtenerTodos();
+        $estudiantesHuellas = $this->usuarioModel->obtenerEstudiantesConConteoHuellas();
 
         // Renderizar la vista pasando las variables
         require_once __DIR__ . '/../views/dashboard.php';
@@ -38,7 +39,7 @@ class AccesoController {
 
     /**
      * Procesa la lectura biométrica (huella o documento), valida el permiso y registra el acceso.
-     * Método central consumido tanto por la API REST como por la interfaz web.
+     * Identifica automáticamente a qué estudiante y a cuál de sus 6 dedos pertenece la huella.
      *
      * @param string|null $huella Hash/template de la huella dactilar capturada.
      * @param string|null $documento Número de documento (opcional o de respaldo).
@@ -59,7 +60,7 @@ class AccesoController {
             ];
         }
 
-        // 2. Buscar al usuario en la base de datos
+        // 2. Buscar al usuario en la base de datos (detecta automáticamente quién es y qué dedo usó)
         $usuario = null;
         if (!empty($huella)) {
             $usuario = $this->usuarioModel->obtenerPorHuella($huella);
@@ -81,17 +82,21 @@ class AccesoController {
             return [
                 'status' => 'rechazado',
                 'codigo' => 'NO_ENCONTRADO',
-                'mensaje' => 'Acceso denegado: Persona no registrada en la institución.',
+                'mensaje' => 'Acceso denegado: Huella no reconocida. Persona no registrada en la institución.',
                 'acceso_permitido' => false,
                 'registro_id' => $registroId,
                 'fecha_hora' => date('Y-m-d H:i:s')
             ];
         }
 
+        // Extraer dedo y slot detectados (si aplica)
+        $dedoIdentificado = $usuario['dedo_identificado'] ?? 'Huella Registrada';
+        $slotIdentificado = $usuario['slot_identificado'] ?? null;
+
         // 4. Caso: Usuario encontrado pero inactivo o suspendido
         if ($usuario['estado'] !== 'ACTIVO') {
             $tipoEvento = $tipoForzado ? strtoupper($tipoForzado) : 'ENTRADA';
-            $obs = "Acceso denegado: Usuario en estado '" . $usuario['estado'] . "'.";
+            $obs = "Acceso denegado: Usuario en estado '" . $usuario['estado'] . "'. Dedo: {$dedoIdentificado}";
 
             $registroId = $this->accesoModel->registrarAcceso($usuario['id'], $tipoEvento, 'RECHAZADO', $obs);
 
@@ -106,7 +111,9 @@ class AccesoController {
                     'documento' => $usuario['documento'],
                     'grado' => $usuario['grado'],
                     'rol' => $usuario['rol'],
-                    'estado' => $usuario['estado']
+                    'estado' => $usuario['estado'],
+                    'dedo_identificado' => $dedoIdentificado,
+                    'slot_identificado' => $slotIdentificado
                 ],
                 'registro_id' => $registroId,
                 'fecha_hora' => date('Y-m-d H:i:s')
@@ -126,7 +133,10 @@ class AccesoController {
             }
         }
 
-        $obs = "Acceso biométrico concedido ({$tipoEvento})";
+        $obs = "Acceso concedido ({$tipoEvento}) - Dedo: {$dedoIdentificado}";
+        if ($slotIdentificado) {
+            $obs .= " (Slot {$slotIdentificado})";
+        }
 
         // 6. Registrar acceso exitoso
         $registroId = $this->accesoModel->registrarAcceso($usuario['id'], $tipoEvento, 'APROBADO', $obs);
@@ -134,7 +144,7 @@ class AccesoController {
         return [
             'status' => 'exito',
             'codigo' => 'ACCESO_CONCEDIDO',
-            'mensaje' => "¡Bienvenido(a)! {$tipoEvento} registrada correctamente.",
+            'mensaje' => "¡Identificado! {$usuario['nombre']} ({$usuario['grado']}) - {$dedoIdentificado}. {$tipoEvento} registrada correctamente.",
             'acceso_permitido' => true,
             'tipo_evento' => $tipoEvento,
             'usuario' => [
@@ -142,11 +152,108 @@ class AccesoController {
                 'nombre' => $usuario['nombre'],
                 'documento' => $usuario['documento'],
                 'grado' => $usuario['grado'],
-                'rol' => $usuario['rol']
+                'rol' => $usuario['rol'],
+                'dedo_identificado' => $dedoIdentificado,
+                'slot_identificado' => $slotIdentificado
             ],
             'registro_id' => $registroId,
             'fecha_hora' => date('Y-m-d H:i:s')
         ];
+    }
+
+    /**
+     * Endpoint AJAX para consultar las huellas registradas de un estudiante (hasta 6 slots).
+     */
+    public function obtenerHuellasEstudiante(): void {
+        requireLogin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $usuarioId = isset($_GET['usuario_id']) ? (int)$_GET['usuario_id'] : 0;
+        if ($usuarioId <= 0) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'ID de usuario inválido.']);
+            exit;
+        }
+
+        $usuario = $this->usuarioModel->obtenerPorId($usuarioId);
+        if (!$usuario) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Estudiante no encontrado.']);
+            exit;
+        }
+
+        $huellas = $this->usuarioModel->obtenerHuellasPorUsuario($usuarioId);
+
+        echo json_encode([
+            'status' => 'ok',
+            'usuario' => $usuario,
+            'huellas' => $huellas,
+            'total_registradas' => count($huellas),
+            'max_huellas' => 6
+        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        exit;
+    }
+
+    /**
+     * Endpoint AJAX para guardar o actualizar una huella dactilar en un slot (1 al 6).
+     */
+    public function guardarHuellaEstudiante(): void {
+        requireLogin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $usuarioId = isset($_POST['usuario_id']) ? (int)$_POST['usuario_id'] : 0;
+        $slotNumero = isset($_POST['slot_numero']) ? (int)$_POST['slot_numero'] : 0;
+        $dedo = trim($_POST['dedo'] ?? '');
+        $huellaTemplate = trim($_POST['huella_template'] ?? '');
+
+        if ($usuarioId <= 0 || $slotNumero < 1 || $slotNumero > 6 || empty($dedo) || empty($huellaTemplate)) {
+            echo json_encode([
+                'status' => 'error',
+                'mensaje' => 'Todos los campos son obligatorios y el slot debe estar entre 1 y 6.'
+            ]);
+            exit;
+        }
+
+        $exito = $this->usuarioModel->registrarHuellaSlot($usuarioId, $slotNumero, $dedo, $huellaTemplate);
+
+        if ($exito) {
+            echo json_encode([
+                'status' => 'ok',
+                'mensaje' => "Huella para {$dedo} (Slot {$slotNumero}) guardada exitosamente."
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'mensaje' => 'No se pudo guardar la huella dactilar. Verifique que no esté duplicada.'
+            ]);
+        }
+        exit;
+    }
+
+    /**
+     * Endpoint AJAX para eliminar una huella dactilar de un slot específico.
+     */
+    public function eliminarHuellaEstudiante(): void {
+        requireLogin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $usuarioId = isset($_POST['usuario_id']) ? (int)$_POST['usuario_id'] : 0;
+        $slotNumero = isset($_POST['slot_numero']) ? (int)$_POST['slot_numero'] : 0;
+
+        if ($usuarioId <= 0 || $slotNumero < 1 || $slotNumero > 6) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Parámetros inválidos.']);
+            exit;
+        }
+
+        $exito = $this->usuarioModel->eliminarHuellaSlot($usuarioId, $slotNumero);
+
+        if ($exito) {
+            echo json_encode([
+                'status' => 'ok',
+                'mensaje' => "Huella del Slot {$slotNumero} eliminada correctamente."
+            ]);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No se pudo eliminar la huella.']);
+        }
+        exit;
     }
 
     /**

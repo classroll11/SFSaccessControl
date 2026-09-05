@@ -78,22 +78,132 @@ class UsuarioModel {
 
     /**
      * Busca un usuario coincidente con el hash o plantilla biométrica de huella.
+     * Busca primero en la tabla multi-huella (huellas_dactilares) y como respaldo en usuarios.
      *
      * @param string $huellaTemplate Hash/template de la huella enviado por el sensor.
      * @return array|null Datos del usuario o null si no existe.
      */
     public function obtenerPorHuella(string $huellaTemplate): ?array {
-        $sql = "SELECT id, documento, correo, nombre, grado, rol, estado, creado_en 
-                FROM usuarios 
-                WHERE huella_template = :huella 
+        $huellaTemplate = trim($huellaTemplate);
+
+        // 1. Buscar en tabla de huellas múltiples
+        $sql = "SELECT u.id, u.documento, u.correo, u.nombre, u.grado, u.rol, u.estado, u.creado_en,
+                       h.dedo AS dedo_identificado, h.slot_numero AS slot_identificado, h.huella_template
+                FROM huellas_dactilares h
+                INNER JOIN usuarios u ON h.usuario_id = u.id
+                WHERE h.huella_template = :huella
                 LIMIT 1";
         
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':huella', trim($huellaTemplate), PDO::PARAM_STR);
+        $stmt->bindValue(':huella', $huellaTemplate, PDO::PARAM_STR);
         $stmt->execute();
-        
         $resultado = $stmt->fetch();
-        return $resultado ?: null;
+
+        if ($resultado) {
+            return $resultado;
+        }
+
+        // 2. Respaldo: Buscar en la columna huella_template de la tabla usuarios
+        $sqlUsuarios = "SELECT id, documento, correo, nombre, grado, rol, estado, creado_en,
+                               'Huella Principal' AS dedo_identificado, 1 AS slot_identificado, huella_template
+                        FROM usuarios 
+                        WHERE huella_template = :huella 
+                        LIMIT 1";
+        
+        $stmtUsuarios = $this->db->prepare($sqlUsuarios);
+        $stmtUsuarios->bindValue(':huella', $huellaTemplate, PDO::PARAM_STR);
+        $stmtUsuarios->execute();
+        
+        $resultadoUsuarios = $stmtUsuarios->fetch();
+        return $resultadoUsuarios ?: null;
+    }
+
+    /**
+     * Obtiene todas las huellas dactilares registradas para un usuario (hasta 6 slots).
+     *
+     * @param int $usuarioId ID del usuario.
+     * @return array Lista de huellas ordenadas por slot.
+     */
+    public function obtenerHuellasPorUsuario(int $usuarioId): array {
+        $sql = "SELECT id, usuario_id, slot_numero, dedo, huella_template, creado_en, actualizado_en
+                FROM huellas_dactilares
+                WHERE usuario_id = :usuario_id
+                ORDER BY slot_numero ASC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Registra o actualiza una huella dactilar en un slot específico (1 al 6).
+     *
+     * @param int $usuarioId ID del estudiante/usuario.
+     * @param int $slotNumero Número del slot (1 al 6).
+     * @param string $dedo Nombre del dedo.
+     * @param string $huellaTemplate Template o hash biométrico.
+     * @return bool True en caso de éxito.
+     */
+    public function registrarHuellaSlot(int $usuarioId, int $slotNumero, string $dedo, string $huellaTemplate): bool {
+        if ($slotNumero < 1 || $slotNumero > 6) {
+            return false;
+        }
+
+        $sql = "INSERT INTO huellas_dactilares (usuario_id, slot_numero, dedo, huella_template)
+                VALUES (:usuario_id, :slot_numero, :dedo, :huella_template)
+                ON DUPLICATE KEY UPDATE 
+                    dedo = VALUES(dedo),
+                    huella_template = VALUES(huella_template),
+                    actualizado_en = CURRENT_TIMESTAMP";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->bindValue(':slot_numero', $slotNumero, PDO::PARAM_INT);
+        $stmt->bindValue(':dedo', trim($dedo), PDO::PARAM_STR);
+        $stmt->bindValue(':huella_template', trim($huellaTemplate), PDO::PARAM_STR);
+
+        $resultado = $stmt->execute();
+
+        // Sincronizar también con la columna huella_template del usuario si es el slot 1 o 2
+        if ($resultado && ($slotNumero === 1 || $slotNumero === 2)) {
+            $this->actualizarHuella($usuarioId, $huellaTemplate);
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * Elimina una huella dactilar de un slot específico de un usuario.
+     *
+     * @param int $usuarioId ID del usuario.
+     * @param int $slotNumero Número de slot a eliminar.
+     * @return bool True si se eliminó.
+     */
+    public function eliminarHuellaSlot(int $usuarioId, int $slotNumero): bool {
+        $sql = "DELETE FROM huellas_dactilares WHERE usuario_id = :usuario_id AND slot_numero = :slot_numero";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->bindValue(':slot_numero', $slotNumero, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    /**
+     * Obtiene el listado de todos los estudiantes junto con el conteo de huellas registradas (0/6 a 6/6).
+     *
+     * @return array
+     */
+    public function obtenerEstudiantesConConteoHuellas(): array {
+        $sql = "SELECT u.id, u.documento, u.nombre, u.grado, u.rol, u.estado,
+                       COUNT(h.id) AS total_huellas
+                FROM usuarios u
+                LEFT JOIN huellas_dactilares h ON u.id = h.usuario_id
+                WHERE u.rol = 'ESTUDIANTE'
+                GROUP BY u.id, u.documento, u.nombre, u.grado, u.rol, u.estado
+                ORDER BY u.grado ASC, u.nombre ASC";
+        
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
     }
 
     /**
@@ -102,9 +212,12 @@ class UsuarioModel {
      * @return array Lista de usuarios.
      */
     public function obtenerTodos(): array {
-        $sql = "SELECT id, documento, correo, nombre, grado, rol, estado, creado_en 
-                FROM usuarios 
-                ORDER BY nombre ASC";
+        $sql = "SELECT u.id, u.documento, u.correo, u.nombre, u.grado, u.rol, u.estado, u.creado_en,
+                       COUNT(h.id) AS total_huellas
+                FROM usuarios u
+                LEFT JOIN huellas_dactilares h ON u.id = h.usuario_id
+                GROUP BY u.id, u.documento, u.correo, u.nombre, u.grado, u.rol, u.estado, u.creado_en
+                ORDER BY u.nombre ASC";
         
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll();

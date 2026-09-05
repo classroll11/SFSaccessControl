@@ -273,6 +273,212 @@
             color: #64748b;
             font-size: 0.88rem;
         }
+
+        /* ================================================================
+           GESTIÓN DE HUELLAS DACTILARES
+           ================================================================ */
+
+        /* Tab navigation */
+        .dash-tabs .nav-link {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.88rem;
+            border: none;
+            border-bottom: 3px solid transparent;
+            border-radius: 0;
+            padding: 0.7rem 1.2rem;
+            transition: var(--transition);
+        }
+        .dash-tabs .nav-link:hover { color: #2563eb; background: transparent; }
+        .dash-tabs .nav-link.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+            background: transparent;
+        }
+
+        /* Student fingerprint card */
+        .student-finger-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.2rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .student-finger-card:hover {
+            border-color: #93c5fd;
+            box-shadow: 0 8px 24px rgba(37,99,235,0.08);
+            transform: translateY(-2px);
+        }
+        .student-finger-card.selected {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+        }
+
+        /* Finger slot grid */
+        .finger-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+        .finger-slot {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 1rem 0.6rem;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            cursor: pointer;
+        }
+        .finger-slot.registered {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 2px solid #34d399;
+            border-style: solid;
+        }
+        .finger-slot.registering {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 2px solid #60a5fa;
+            border-style: solid;
+            animation: slot-pulse 1.5s infinite;
+        }
+        @keyframes slot-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.3); }
+            50% { box-shadow: 0 0 0 6px rgba(37,99,235,0); }
+        }
+        .finger-slot .slot-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+        .finger-slot .slot-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+        .finger-slot.registered .slot-label { color: #059669; }
+        .finger-slot .slot-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            color: white;
+            font-size: 0.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+        }
+        .finger-slot .slot-delete {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            font-size: 0.6rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .finger-slot.registered:hover .slot-delete { display: flex; }
+        .finger-slot.registered:hover .slot-badge { display: none; }
+
+        /* Huella identification scanner */
+        .identify-scanner-box {
+            background: linear-gradient(160deg, #0d1b38 0%, #060b18 100%);
+            border: 1px solid rgba(56,189,248,0.25);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .identify-scanner-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(0,242,254,0.08) 0%, transparent 65%);
+        }
+        .big-fingerprint-icon {
+            font-size: 5rem;
+            color: #38bdf8;
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+        }
+        .big-fingerprint-icon.scanning {
+            animation: fp-scan 1.2s ease-in-out infinite;
+            color: #00f2fe;
+            filter: drop-shadow(0 0 12px rgba(0,242,254,0.7));
+        }
+        .big-fingerprint-icon.identified {
+            color: #34d399;
+            filter: drop-shadow(0 0 12px rgba(52,211,153,0.7));
+        }
+        .big-fingerprint-icon.unknown {
+            color: #f87171;
+            filter: drop-shadow(0 0 12px rgba(248,113,113,0.6));
+        }
+        @keyframes fp-scan {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        /* Progress bar for fingerprint slots */
+        .huella-progress {
+            height: 6px;
+            border-radius: 99px;
+            background: #e2e8f0;
+        }
+        .huella-progress-bar {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #2563eb, #00f2fe);
+            transition: width 0.5s ease;
+        }
+
+        /* Identification result card */
+        .id-result-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.4rem;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .id-result-card.result-success { border-color: #34d399; background: #ecfdf5; }
+        .id-result-card.result-error { border-color: #f87171; background: #fef2f2; }
+
+        /* Search input for student list */
+        .search-student-wrap {
+            position: relative;
+        }
+        .search-student-wrap input {
+            padding-left: 2.4rem;
+        }
+        .search-student-wrap .search-icon {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        @media (max-width: 576px) {
+            .finger-slots-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -610,6 +816,249 @@
 
     </main>
 
+    <!-- ================================================================
+         SECCIÓN: GESTIÓN DE HUELLAS DACTILARES
+         ================================================================ -->
+    <section class="container py-4" id="seccion-huellas">
+        <div class="card-surface" style="border-radius:24px; padding: 0; overflow:hidden;">
+
+            <!-- Header de sección -->
+            <div style="background: radial-gradient(circle at 20% 50%, #112349 0%, #060b18 100%); padding: 1.8rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-2"
+                             style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.25); font-size:0.8rem; color:#38bdf8; font-weight:600;">
+                            <i class="fa-solid fa-fingerprint"></i> Módulo Biométrico
+                        </div>
+                        <h2 class="h4 fw-bold text-white mb-1">Gestión de Huellas Dactilares</h2>
+                        <p class="text-light text-opacity-75 small mb-0">
+                            Registra hasta <strong>6 huellas</strong> por estudiante e identifica a quién pertenece una huella dactilar.
+                        </p>
+                    </div>
+                    <div class="text-md-end">
+                        <span class="badge rounded-pill px-3 py-2" style="background:rgba(52,211,153,0.15); color:#34d399; border:1px solid rgba(52,211,153,0.3); font-size:0.82rem;">
+                            <i class="fa-solid fa-shield-check me-1"></i> SHA-256 Cifrado
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div style="padding: 0 2rem; border-bottom: 1px solid #e2e8f0; background:#fafbfc;">
+                <ul class="nav dash-tabs" id="huellasTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tab-registrar-btn" data-bs-toggle="tab" data-bs-target="#tab-registrar" type="button">
+                            <i class="fa-solid fa-hand-pointer me-1"></i> Registrar Huellas
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-identificar-btn" data-bs-toggle="tab" data-bs-target="#tab-identificar" type="button">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Identificar Huella
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content" style="padding: 2rem;">
+
+                <!-- TAB 1: REGISTRAR HUELLAS -->
+                <div class="tab-pane fade show active" id="tab-registrar" role="tabpanel">
+                    <div class="row g-4">
+
+                        <!-- Columna izquierda: Lista de estudiantes -->
+                        <div class="col-lg-5">
+                            <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-users text-primary me-2"></i>Seleccionar Estudiante</h6>
+                            <p class="small text-muted mb-3">Haz clic en un estudiante para gestionar sus huellas.</p>
+
+                            <!-- Buscador -->
+                            <div class="search-student-wrap mb-3">
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                <input type="text" class="form-control form-control-sm" id="buscador-estudiantes"
+                                       placeholder="Buscar por nombre o documento..." oninput="filtrarEstudiantes()">
+                            </div>
+
+                            <!-- Lista de estudiantes -->
+                            <div id="lista-estudiantes-huellas" style="max-height: 420px; overflow-y: auto;">
+                                <?php if (!empty($estudiantesHuellas)): ?>
+                                    <?php foreach ($estudiantesHuellas as $est): ?>
+                                        <?php
+                                            $partes = explode(' ', trim($est['nombre']));
+                                            $iniciales = strtoupper(substr($partes[0] ?? 'X', 0, 1) . (isset($partes[1]) ? substr($partes[1], 0, 1) : ''));
+                                            $pct = round(($est['total_huellas'] / 6) * 100);
+                                        ?>
+                                        <div class="student-finger-card mb-2 estudiante-item"
+                                             data-id="<?= $est['id'] ?>"
+                                             data-nombre="<?= htmlspecialchars($est['nombre']) ?>"
+                                             data-doc="<?= htmlspecialchars($est['documento']) ?>"
+                                             data-grado="<?= htmlspecialchars($est['grado']) ?>"
+                                             onclick="seleccionarEstudiante(<?= $est['id'] ?>, '<?= htmlspecialchars(addslashes($est['nombre'])) ?>', '<?= htmlspecialchars($est['grado']) ?>')">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span class="avatar-initials" style="flex-shrink:0;"><?= $iniciales ?></span>
+                                                <div class="flex-grow-1 min-w-0">
+                                                    <strong class="d-block text-dark text-truncate" style="font-size:0.9rem;"><?= htmlspecialchars($est['nombre']) ?></strong>
+                                                    <small class="text-muted">Doc: <?= htmlspecialchars($est['documento']) ?> &bull; <?= htmlspecialchars($est['grado']) ?></small>
+                                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                                        <div class="huella-progress flex-grow-1">
+                                                            <div class="huella-progress-bar" style="width:<?= $pct ?>%"></div>
+                                                        </div>
+                                                        <span class="small fw-bold <?= $est['total_huellas'] == 6 ? 'text-success' : 'text-muted' ?>">
+                                                            <?= $est['total_huellas'] ?>/6
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="text-center py-4 text-muted small">
+                                        <i class="fa-solid fa-users-slash fs-3 d-block mb-2 opacity-50"></i>
+                                        No hay estudiantes registrados en el sistema.
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- Columna derecha: Panel de slots de huellas -->
+                        <div class="col-lg-7">
+                            <!-- Estado: sin selección -->
+                            <div id="panel-sin-seleccion" class="text-center py-5">
+                                <div class="mb-3" style="font-size:4rem; opacity:0.15;">
+                                    <i class="fa-solid fa-hand-pointer"></i>
+                                </div>
+                                <p class="text-muted fw-semibold">Selecciona un estudiante de la lista para gestionar sus huellas dactilares.</p>
+                            </div>
+
+                            <!-- Panel de gestión de slots (oculto hasta selección) -->
+                            <div id="panel-gestion-huellas" class="d-none">
+                                <!-- Info del estudiante seleccionado -->
+                                <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-4" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                    <span class="avatar-initials" id="slot-avatar" style="width:48px; height:48px; font-size:1rem;">XX</span>
+                                    <div>
+                                        <strong id="slot-nombre" class="d-block text-dark">—</strong>
+                                        <span id="slot-grado" class="small text-muted">—</span>
+                                    </div>
+                                    <div class="ms-auto text-end">
+                                        <span id="slot-conteo-badge" class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2">0/6 slots</span>
+                                    </div>
+                                </div>
+
+                                <!-- Grid de 6 slots -->
+                                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-hand me-2 text-primary"></i>Slots de Huellas Dactilares</h6>
+                                <div class="finger-slots-grid mb-4" id="finger-slots-grid">
+                                    <!-- Se carga dinámicamente por JS -->
+                                </div>
+
+                                <!-- Alerta de resultado -->
+                                <div id="huellas-alert" class="alert d-none py-2 px-3 small rounded-3 mb-3"></div>
+
+                                <!-- Modal de registro de huella -->
+                                <div id="form-registro-huella" class="d-none p-3 rounded-3" style="background:#f0f7ff; border:1px solid #bfdbfe;">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fa-solid fa-fingerprint text-primary me-2"></i>
+                                        Registrar Huella — <span id="form-slot-label">Slot X</span>
+                                    </h6>
+                                    <input type="hidden" id="form-slot-numero" value="">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Nombre del Dedo:</label>
+                                        <select class="form-select form-select-sm" id="form-dedo">
+                                            <option value="">— Seleccionar dedo —</option>
+                                            <option value="Pulgar Derecho">👍 Pulgar Derecho</option>
+                                            <option value="Índice Derecho">☝️ Índice Derecho</option>
+                                            <option value="Medio Derecho">🖕 Medio Derecho</option>
+                                            <option value="Anular Derecho">💍 Anular Derecho</option>
+                                            <option value="Meñique Derecho">🤙 Meñique Derecho</option>
+                                            <option value="Pulgar Izquierdo">👍 Pulgar Izquierdo</option>
+                                            <option value="Índice Izquierdo">☝️ Índice Izquierdo</option>
+                                            <option value="Medio Izquierdo">🖕 Medio Izquierdo</option>
+                                            <option value="Anular Izquierdo">💍 Anular Izquierdo</option>
+                                            <option value="Meñique Izquierdo">🤙 Meñique Izquierdo</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Template / Hash de Huella:</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control" id="form-huella-template" placeholder="Ej: HUELLA_HEX_SAMPLE_XXX o hash del sensor">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="generarHashDemo()" title="Generar hash demo">
+                                                <i class="fa-solid fa-dice"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Ingresa el template enviado por el sensor AS608/R307, o usa el botón para simular.</div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-primary btn-sm rounded-pill px-4 fw-bold" onclick="guardarHuella()">
+                                            <i class="fa-solid fa-save me-1"></i> Guardar Huella
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="cancelarRegistroHuella()">
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: IDENTIFICAR HUELLA -->
+                <div class="tab-pane fade" id="tab-identificar" role="tabpanel">
+                    <div class="row g-4 justify-content-center">
+
+                        <!-- Escáner de identificación -->
+                        <div class="col-lg-5">
+                            <div class="identify-scanner-box mb-4">
+                                <i class="fa-solid fa-fingerprint big-fingerprint-icon" id="id-fp-icon"></i>
+                                <h5 class="text-white fw-bold mt-3 mb-1 position-relative" style="z-index:1;">Terminal de Identificación</h5>
+                                <p class="small mb-0 position-relative" style="z-index:1; color:rgba(255,255,255,0.6);">
+                                    Ingresa la huella capturada por el sensor para identificar al estudiante.
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Template / Hash de Huella a Identificar:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="id-huella-input"
+                                           placeholder="Ej: HUELLA_HEX_SAMPLE_001"
+                                           onkeydown="if(event.key==='Enter') identificarHuella()">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('id-huella-input').value='HUELLA_HEX_SAMPLE_00'+Math.floor(Math.random()*11+1)">
+                                        <i class="fa-solid fa-dice"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm mb-3" id="btn-identificar" onclick="identificarHuella()">
+                                <i class="fa-solid fa-fingerprint me-2"></i> Identificar Huella
+                            </button>
+
+                            <p class="text-center text-muted small">
+                                <i class="fa-solid fa-info-circle me-1"></i>
+                                También puedes usar huellas de prueba: <code>HUELLA_HEX_SAMPLE_001</code> a <code>011</code>
+                            </p>
+                        </div>
+
+                        <!-- Resultado de identificación -->
+                        <div class="col-lg-7">
+                            <!-- Estado inicial -->
+                            <div id="id-resultado-placeholder" class="text-center py-5">
+                                <div style="font-size:4rem; opacity:0.12; color:#0a1128;">
+                                    <i class="fa-solid fa-user-secret"></i>
+                                </div>
+                                <p class="text-muted fw-semibold mt-3">El resultado de la identificación aparecerá aquí.</p>
+                                <p class="small text-muted">El sistema buscará la huella en todos los slots registrados de todos los estudiantes.</p>
+                            </div>
+
+                            <!-- Resultado (oculto hasta búsqueda) -->
+                            <div id="id-resultado-panel" class="d-none">
+                                <!-- Se llena dinámicamente por JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /tab-content -->
+        </div><!-- /card-surface -->
+    </section>
+
     <!-- FOOTER -->
     <footer class="footer-dashboard text-center">
         <div class="container">
@@ -771,6 +1220,389 @@
 
         // Auto-refresco cada 5 segundos
         setInterval(recargarDatosHistorial, 5000);
+    </script>
+
+    <!-- ================================================================
+         JAVASCRIPT: MÓDULO DE GESTIÓN DE HUELLAS DACTILARES
+         ================================================================ -->
+    <script>
+        // Estado global del módulo de huellas
+        const huellasState = {
+            usuarioId: null,
+            usuarioNombre: '',
+            usuarioGrado: '',
+            huellas: [],       // Array de huellas ya registradas
+            slotActivo: null   // Slot actualmente siendo editado
+        };
+
+        // Emojis de dedos por nombre
+        const DEDOS_EMOJI = {
+            'Pulgar Derecho': '👍', 'Índice Derecho': '☝️', 'Medio Derecho': '🖕',
+            'Anular Derecho': '💍', 'Meñique Derecho': '🤙',
+            'Pulgar Izquierdo': '👍', 'Índice Izquierdo': '☝️', 'Medio Izquierdo': '🖕',
+            'Anular Izquierdo': '💍', 'Meñique Izquierdo': '🤙'
+        };
+
+        // ─── FILTRAR LISTA DE ESTUDIANTES ────────────────────────────────────
+        function filtrarEstudiantes() {
+            const q = document.getElementById('buscador-estudiantes').value.toLowerCase();
+            document.querySelectorAll('.estudiante-item').forEach(el => {
+                const txt = (el.dataset.nombre + ' ' + el.dataset.doc + ' ' + el.dataset.grado).toLowerCase();
+                el.style.display = txt.includes(q) ? '' : 'none';
+            });
+        }
+
+        // ─── SELECCIONAR UN ESTUDIANTE ───────────────────────────────────────
+        async function seleccionarEstudiante(id, nombre, grado) {
+            // Highlight selected card
+            document.querySelectorAll('.student-finger-card').forEach(c => c.classList.remove('selected'));
+            const card = document.querySelector(`.student-finger-card[data-id="${id}"]`);
+            if (card) card.classList.add('selected');
+
+            // Actualizar estado
+            huellasState.usuarioId = id;
+            huellasState.usuarioNombre = nombre;
+            huellasState.usuarioGrado = grado;
+
+            // Mostrar panel
+            document.getElementById('panel-sin-seleccion').classList.add('d-none');
+            const panel = document.getElementById('panel-gestion-huellas');
+            panel.classList.remove('d-none');
+
+            // Actualizar header del panel
+            const partes = nombre.trim().split(' ');
+            const iniciales = ((partes[0]?.charAt(0) || '') + (partes[1]?.charAt(0) || '')).toUpperCase();
+            document.getElementById('slot-avatar').textContent = iniciales;
+            document.getElementById('slot-nombre').textContent = nombre;
+            document.getElementById('slot-grado').textContent = grado;
+
+            // Cargar huellas del estudiante
+            await cargarHuellasEstudiante(id);
+        }
+
+        // ─── CARGAR HUELLAS DEL ESTUDIANTE ──────────────────────────────────
+        async function cargarHuellasEstudiante(id) {
+            const grid = document.getElementById('finger-slots-grid');
+            grid.innerHTML = '<div class="col-span-3 text-center py-3 text-muted small"><i class="fa-solid fa-spinner fa-spin me-1"></i> Cargando huellas...</div>';
+
+            try {
+                const resp = await fetch(`index.php?c=acceso&a=obtenerHuellasEstudiante&usuario_id=${id}`);
+                const data = await resp.json();
+
+                if (data.status !== 'ok') throw new Error(data.mensaje);
+
+                huellasState.huellas = data.huellas;
+                renderizarSlotsHuellas(data.huellas, data.total_registradas);
+
+            } catch (err) {
+                grid.innerHTML = `<div class="text-danger small"><i class="fa-solid fa-exclamation-circle me-1"></i> Error al cargar huellas: ${err.message}</div>`;
+            }
+        }
+
+        // ─── RENDERIZAR GRID DE 6 SLOTS ──────────────────────────────────────
+        function renderizarSlotsHuellas(huellas, totalRegistradas) {
+            const grid = document.getElementById('finger-slots-grid');
+            const badge = document.getElementById('slot-conteo-badge');
+            badge.textContent = `${totalRegistradas}/6 slots`;
+            badge.className = `badge fw-bold px-3 py-2 ${totalRegistradas === 6 ? 'bg-success bg-opacity-15 text-success' : 'bg-primary bg-opacity-10 text-primary'}`;
+
+            // Ocultar form de registro si estaba abierto
+            document.getElementById('form-registro-huella').classList.add('d-none');
+            document.getElementById('huellas-alert').classList.add('d-none');
+            huellasState.slotActivo = null;
+
+            // Crear mapa slot→huella
+            const slotMap = {};
+            huellas.forEach(h => { slotMap[h.slot_numero] = h; });
+
+            let html = '';
+            for (let slot = 1; slot <= 6; slot++) {
+                const huella = slotMap[slot];
+                if (huella) {
+                    const emoji = DEDOS_EMOJI[huella.dedo] || '👆';
+                    html += `
+                        <div class="finger-slot registered" onclick="abrirFormHuella(${slot})" data-slot="${slot}">
+                            <span class="slot-badge"><i class="fa-solid fa-check" style="font-size:0.6rem;"></i></span>
+                            <span class="slot-delete" onclick="eliminarSlot(event, ${slot})" title="Eliminar huella">
+                                <i class="fa-solid fa-times" style="font-size:0.55rem;"></i>
+                            </span>
+                            <span class="slot-icon">${emoji}</span>
+                            <div class="slot-label">${huella.dedo}</div>
+                            <div style="font-size:0.65rem; color:#059669; margin-top:2px;">Slot ${slot}</div>
+                        </div>`;
+                } else {
+                    html += `
+                        <div class="finger-slot" onclick="abrirFormHuella(${slot})" data-slot="${slot}">
+                            <span class="slot-icon" style="color:#cbd5e1;">
+                                <i class="fa-regular fa-hand" style="font-size:1.6rem;"></i>
+                            </span>
+                            <div class="slot-label">Slot ${slot}<br><small style="font-size:0.65rem; font-weight:400;">Vacío</small></div>
+                        </div>`;
+                }
+            }
+
+            grid.innerHTML = html;
+        }
+
+        // ─── ABRIR FORMULARIO DE REGISTRO PARA UN SLOT ──────────────────────
+        function abrirFormHuella(slotNumero) {
+            huellasState.slotActivo = slotNumero;
+
+            const form = document.getElementById('form-registro-huella');
+            document.getElementById('form-slot-numero').value = slotNumero;
+            document.getElementById('form-slot-label').textContent = `Slot ${slotNumero}`;
+            document.getElementById('huellas-alert').classList.add('d-none');
+
+            // Pre-cargar si el slot ya tiene datos
+            const slotMap = {};
+            huellasState.huellas.forEach(h => { slotMap[h.slot_numero] = h; });
+            const existente = slotMap[slotNumero];
+
+            if (existente) {
+                document.getElementById('form-dedo').value = existente.dedo;
+                document.getElementById('form-huella-template').value = existente.huella_template;
+            } else {
+                document.getElementById('form-dedo').value = '';
+                document.getElementById('form-huella-template').value = '';
+            }
+
+            // Marcar slot activo visualmente
+            document.querySelectorAll('.finger-slot').forEach(s => s.classList.remove('registering'));
+            const activeSlot = document.querySelector(`.finger-slot[data-slot="${slotNumero}"]`);
+            if (activeSlot) activeSlot.classList.add('registering');
+
+            form.classList.remove('d-none');
+            form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // ─── GENERAR HASH DEMO (PARA PRUEBAS) ────────────────────────────────
+        function generarHashDemo() {
+            const chars = 'ABCDEF0123456789';
+            let hash = 'HEX_';
+            for (let i = 0; i < 16; i++) hash += chars[Math.floor(Math.random() * chars.length)];
+            document.getElementById('form-huella-template').value = hash;
+        }
+
+        // ─── GUARDAR HUELLA EN EL SLOT ────────────────────────────────────────
+        async function guardarHuella() {
+            const slot = document.getElementById('form-slot-numero').value;
+            const dedo = document.getElementById('form-dedo').value;
+            const template = document.getElementById('form-huella-template').value.trim();
+            const alertBox = document.getElementById('huellas-alert');
+
+            if (!dedo || !template) {
+                mostrarAlertaHuellas('warning', '<i class="fa-solid fa-triangle-exclamation me-1"></i> Completa todos los campos: dedo y template de huella.');
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append('usuario_id', huellasState.usuarioId);
+            fd.append('slot_numero', slot);
+            fd.append('dedo', dedo);
+            fd.append('huella_template', template);
+
+            try {
+                const resp = await fetch('index.php?c=acceso&a=guardarHuellaEstudiante', { method: 'POST', body: fd });
+                const data = await resp.json();
+
+                if (data.status === 'ok') {
+                    mostrarAlertaHuellas('success', `<i class="fa-solid fa-circle-check me-1"></i> ${data.mensaje}`);
+                    await cargarHuellasEstudiante(huellasState.usuarioId);
+                    actualizarConteoEnLista(huellasState.usuarioId);
+                } else {
+                    mostrarAlertaHuellas('danger', `<i class="fa-solid fa-xmark-circle me-1"></i> ${data.mensaje}`);
+                }
+            } catch (e) {
+                mostrarAlertaHuellas('danger', '<i class="fa-solid fa-xmark-circle me-1"></i> Error de conexión al guardar la huella.');
+            }
+        }
+
+        // ─── ELIMINAR HUELLA DE UN SLOT ───────────────────────────────────────
+        async function eliminarSlot(event, slotNumero) {
+            event.stopPropagation();
+            if (!confirm(`¿Eliminar la huella del Slot ${slotNumero}?`)) return;
+
+            const fd = new FormData();
+            fd.append('usuario_id', huellasState.usuarioId);
+            fd.append('slot_numero', slotNumero);
+
+            try {
+                const resp = await fetch('index.php?c=acceso&a=eliminarHuellaEstudiante', { method: 'POST', body: fd });
+                const data = await resp.json();
+
+                if (data.status === 'ok') {
+                    mostrarAlertaHuellas('success', `<i class="fa-solid fa-circle-check me-1"></i> ${data.mensaje}`);
+                    await cargarHuellasEstudiante(huellasState.usuarioId);
+                    actualizarConteoEnLista(huellasState.usuarioId);
+                } else {
+                    mostrarAlertaHuellas('danger', `<i class="fa-solid fa-xmark-circle me-1"></i> ${data.mensaje}`);
+                }
+            } catch (e) {
+                mostrarAlertaHuellas('danger', '<i class="fa-solid fa-xmark-circle me-1"></i> Error de conexión al eliminar la huella.');
+            }
+        }
+
+        // ─── CANCELAR REGISTRO ────────────────────────────────────────────────
+        function cancelarRegistroHuella() {
+            document.getElementById('form-registro-huella').classList.add('d-none');
+            document.querySelectorAll('.finger-slot').forEach(s => s.classList.remove('registering'));
+            huellasState.slotActivo = null;
+        }
+
+        // ─── ACTUALIZAR CONTEO EN LA LISTA DE ESTUDIANTES ────────────────────
+        async function actualizarConteoEnLista(usuarioId) {
+            try {
+                const resp = await fetch(`index.php?c=acceso&a=obtenerHuellasEstudiante&usuario_id=${usuarioId}`);
+                const data = await resp.json();
+                if (data.status !== 'ok') return;
+
+                const total = data.total_registradas;
+                const pct = Math.round((total / 6) * 100);
+                const card = document.querySelector(`.student-finger-card[data-id="${usuarioId}"]`);
+                if (card) {
+                    const bar = card.querySelector('.huella-progress-bar');
+                    const count = card.querySelector('.small.fw-bold');
+                    if (bar) bar.style.width = `${pct}%`;
+                    if (count) {
+                        count.textContent = `${total}/6`;
+                        count.className = `small fw-bold ${total === 6 ? 'text-success' : 'text-muted'}`;
+                    }
+                }
+            } catch (e) { /* silencioso */ }
+        }
+
+        // ─── MOSTRAR ALERTA EN EL PANEL DE HUELLAS ────────────────────────────
+        function mostrarAlertaHuellas(tipo, html) {
+            const box = document.getElementById('huellas-alert');
+            box.className = `alert alert-${tipo} py-2 px-3 small rounded-3 mb-3`;
+            box.innerHTML = html;
+            setTimeout(() => box.classList.add('d-none'), 5000);
+        }
+
+        // ─── IDENTIFICAR HUELLA (TAB 2) ──────────────────────────────────────
+        async function identificarHuella() {
+            const template = document.getElementById('id-huella-input').value.trim();
+            if (!template) {
+                alert('Ingresa el template de huella a identificar.');
+                return;
+            }
+
+            const icon = document.getElementById('id-fp-icon');
+            const btn = document.getElementById('btn-identificar');
+            const placeholder = document.getElementById('id-resultado-placeholder');
+            const panel = document.getElementById('id-resultado-panel');
+
+            // Animación de escaneo
+            icon.className = 'fa-solid fa-fingerprint big-fingerprint-icon scanning';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Buscando...';
+            placeholder.classList.add('d-none');
+            panel.classList.add('d-none');
+
+            try {
+                const fd = new FormData();
+                fd.append('huella', template);
+                fd.append('tipo_evento', '');
+
+                const resp = await fetch('index.php?c=acceso&a=simularManual', { method: 'POST', body: fd });
+                const data = await resp.json();
+
+                let html = '';
+                if (data.status === 'exito' && data.usuario) {
+                    const u = data.usuario;
+                    const partes = (u.nombre || 'X').split(' ');
+                    const iniciales = ((partes[0]?.charAt(0) || '') + (partes[1]?.charAt(0) || '')).toUpperCase();
+                    icon.className = 'fa-solid fa-fingerprint big-fingerprint-icon identified';
+                    html = `
+                        <div class="id-result-card result-success mb-3">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="avatar-initials" style="width:56px;height:56px;font-size:1.1rem;background:linear-gradient(135deg,#059669,#10b981);">${iniciales}</span>
+                                <div>
+                                    <div class="badge bg-success bg-opacity-20 text-success fw-bold mb-1 px-2 py-1">
+                                        <i class="fa-solid fa-circle-check me-1"></i> Identificado exitosamente
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-0">${u.nombre}</h5>
+                                    <small class="text-muted">${u.grado} &bull; ${u.rol}</small>
+                                </div>
+                            </div>
+                            <div class="row g-2 small">
+                                <div class="col-6">
+                                    <div class="p-2 rounded-2" style="background:rgba(5,150,105,0.08);">
+                                        <div class="text-muted fw-bold text-uppercase" style="font-size:0.7rem;">Dedo detectado</div>
+                                        <div class="fw-bold text-success">${u.dedo_identificado || 'Huella Principal'}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2 rounded-2" style="background:rgba(5,150,105,0.08);">
+                                        <div class="text-muted fw-bold text-uppercase" style="font-size:0.7rem;">Slot biométrico</div>
+                                        <div class="fw-bold text-success">Slot ${u.slot_identificado || '—'}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2 rounded-2" style="background:rgba(5,150,105,0.08);">
+                                        <div class="text-muted fw-bold text-uppercase" style="font-size:0.7rem;">Estado</div>
+                                        <div class="fw-bold text-success">${u.estado}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2 rounded-2" style="background:rgba(5,150,105,0.08);">
+                                        <div class="text-muted fw-bold text-uppercase" style="font-size:0.7rem;">Evento registrado</div>
+                                        <div class="fw-bold text-success">${data.tipo_evento}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="small text-muted text-center">
+                            <i class="fa-solid fa-check-circle text-success me-1"></i>
+                            El evento <strong>${data.tipo_evento}</strong> fue registrado automáticamente en el historial.
+                        </p>`;
+                } else {
+                    icon.className = 'fa-solid fa-fingerprint big-fingerprint-icon unknown';
+                    const esInactivo = data.codigo === 'ESTADO_INACTIVO';
+                    const u = data.usuario;
+                    html = `
+                        <div class="id-result-card result-error mb-3">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ef4444,#f87171);display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa-solid fa-${esInactivo ? 'user-slash' : 'user-secret'} text-white fs-4"></i>
+                                </div>
+                                <div>
+                                    <div class="badge bg-danger bg-opacity-20 text-danger fw-bold mb-1 px-2 py-1">
+                                        <i class="fa-solid fa-xmark-circle me-1"></i> ${esInactivo ? 'Usuario Inactivo' : 'Huella No Reconocida'}
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-0">${esInactivo && u ? u.nombre : 'Persona no registrada'}</h6>
+                                    <small class="text-muted">${data.mensaje}</small>
+                                </div>
+                            </div>
+                            ${esInactivo && u ? `
+                            <div class="p-2 rounded-2 small" style="background:rgba(239,68,68,0.08);">
+                                <strong>Estado:</strong> ${u.estado} &bull; <strong>Grado:</strong> ${u.grado}
+                            </div>` : `
+                            <p class="small text-danger mb-0">
+                                <i class="fa-solid fa-info-circle me-1"></i>
+                                La huella <code>${template}</code> no existe en la base de datos del sistema.
+                            </p>`}
+                        </div>`;
+                }
+
+                panel.innerHTML = html;
+                panel.classList.remove('d-none');
+
+            } catch (e) {
+                icon.className = 'fa-solid fa-fingerprint big-fingerprint-icon unknown';
+                panel.innerHTML = `<div class="id-result-card result-error"><i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> Error de conexión al procesar la identificación.</div>`;
+                panel.classList.remove('d-none');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-fingerprint me-2"></i> Identificar Huella';
+                // Restaurar ícono después de 4 segundos
+                setTimeout(() => {
+                    if (icon.classList.contains('identified') || icon.classList.contains('unknown')) {
+                        icon.className = 'fa-solid fa-fingerprint big-fingerprint-icon';
+                    }
+                }, 4000);
+            }
+        }
     </script>
 </body>
 </html>

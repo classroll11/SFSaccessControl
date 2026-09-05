@@ -17,6 +17,7 @@ DROP TABLE IF EXISTS `registros_acceso`;
 DROP TABLE IF EXISTS `sesiones_admin`;
 DROP TABLE IF EXISTS `blog_articulos`;
 DROP TABLE IF EXISTS `dispositivos_sensores`;
+DROP TABLE IF EXISTS `huellas_dactilares`;
 DROP TABLE IF EXISTS `usuarios`;
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -40,6 +41,28 @@ CREATE TABLE `usuarios` (
     INDEX `idx_usuarios_correo` (`correo`),
     INDEX `idx_usuarios_rol` (`rol`),
     INDEX `idx_usuarios_estado` (`estado`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- 3.1. TABLA: huellas_dactilares
+-- Almacena hasta 6 huellas dactilares por usuario (1 por dedo / slot)
+-- ============================================================================
+CREATE TABLE `huellas_dactilares` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `usuario_id` INT NOT NULL COMMENT 'ID del usuario propietario de la huella',
+    `slot_numero` TINYINT NOT NULL COMMENT 'Número de slot: 1 al 6 (máximo 6 huellas por usuario)',
+    `dedo` VARCHAR(50) NOT NULL COMMENT 'Nombre del dedo (Ej: Pulgar Derecho, Índice Izquierdo)',
+    `huella_template` TEXT NOT NULL COMMENT 'Hash SHA-256 o template biométrico de la huella',
+    `creado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `actualizado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_usuario_slot` (`usuario_id`, `slot_numero`),
+    UNIQUE KEY `uk_huella_template` (`huella_template`(255)),
+    INDEX `idx_huella_usuario` (`usuario_id`),
+    CONSTRAINT `fk_huella_usuario`
+        FOREIGN KEY (`usuario_id`)
+        REFERENCES `usuarios` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================
