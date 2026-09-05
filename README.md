@@ -1,6 +1,6 @@
 # 🏫 SFS ACCESS CONTROL - I.E. JORGE ROBLEDO
 
-Sistema web de control de acceso estudiantil y gestión de aforo en tiempo real para la **I.E. Jorge Robledo**. Diseñado para reemplazar los registros manuales en cuadernos mediante la integración con lectores biométricos de huella dactilar y cálculo automático de raciones para el restaurante escolar.
+Sistema web de control de acceso estudiantil y gestión de asistencia a clases en tiempo real para la **I.E. Jorge Robledo**. Diseñado para reemplazar los registros manuales en cuadernos mediante la integración con lectores biométricos de huella dactilar y consolidación automática de asistencia por grado y aula.
 
 ---
 
@@ -36,7 +36,7 @@ SFS Access/
 ├── controllers/
 │   ├── AccesoController.php        # Lógica de validación biométrica y control de acceso
 │   ├── AuthController.php          # Lógica de autenticación, login y registro
-│   └── ReporteController.php       # Consolidación de datos para el restaurante escolar
+│   └── ReporteController.php       # Consolidación de datos y reportes de asistencia escolar
 │
 ├── database/
 │   ├── sfs_access_control.sql      # Script DDL/DML principal para phpMyAdmin
@@ -79,7 +79,7 @@ SFS Access/
 
 3. **Importar Base de Datos:**
    - Ingresa a [http://localhost/phpmyadmin](http://localhost/phpmyadmin).
-   - Ve a la pestaña **Importar** y selecciona el archivo [`database/sfs_access_control.sql`](file:///c:/Users/valen/OneDrive/SOFIA/SFS%20Access/database/sfs_access_control.sql).
+   - Ve a la pestaña **Importar** y selecciona el archivo [`database/sfs_access_control.sql`](file:///c:/xampp/htdocs/SFS%20Access/database/sfs_access_control.sql).
    - Haz clic en **Continuar**. Se creará la base de datos `sfs_access_control` con sus tablas y datos de prueba.
 
 4. **Abrir el Sistema:**
@@ -90,12 +90,12 @@ SFS Access/
 
 ## 🧪 Casos de Prueba Incluidos
 
-El script SQL incluye 4 usuarios precargados para verificar todas las reglas de negocio:
+El script SQL incluye usuarios precargados para verificar todas las reglas de negocio:
 
 | Documento | Nombre | Grado | Rol | Estado | Huella Template | Resultado Esperado |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `10359001` | Alejandra Martínez | 11°A | ESTUDIANTE | **ACTIVO** | `HUELLA_HEX_SAMPLE_001` | ✅ **APROBADO** (Registra Entrada / Salida) |
-| `10359002` | Carlos Rodríguez | 10°B | ESTUDIANTE | **ACTIVO** | `HUELLA_HEX_SAMPLE_002` | ✅ **APROBADO** (Suma a ración restaurante) |
+| `10359002` | Carlos Rodríguez | 10°B | ESTUDIANTE | **ACTIVO** | `HUELLA_HEX_SAMPLE_002` | ✅ **APROBADO** (Registra Asistencia a Clases) |
 | `10359003` | Lucía Gómez | 11°A | ESTUDIANTE | **INACTIVO** | `HUELLA_HEX_SAMPLE_003` | 🚫 **RECHAZADO** (Permiso denegado) |
 | `99999999` | No Registrado | N/A | N/A | N/A | `HUELLA_DESCONOCIDA` | 🚫 **RECHAZADO** (Persona ajena) |
 
@@ -137,9 +137,9 @@ El script SQL incluye 4 usuarios precargados para verificar todas las reglas de 
 
 ---
 
-## 🍲 Módulo para el Restaurante Escolar
+## 📚 Módulo de Control de Asistencia a Clases
 
 El sistema calcula en tiempo real:
 1. **Total de Estudiantes Presentes:** Conteo de estudiantes cuyo último registro hoy fue `ENTRADA` con estado `APROBADO`.
-2. **Desglose por Grado:** Cantidad de alumnos por salón (ej. 10°A, 11°B) para planificar porciones exactas.
-3. **Descarga en CSV:** Exportación directa para auditoría y entrega de raciones con un solo clic.
+2. **Desglose de Asistencia por Grado:** Cantidad de alumnos presentes por salón (ej. 10°A, 11°B) para control docente y académico.
+3. **Descarga en CSV:** Exportación directa para auditoría y planillas de asistencia escolar con un solo clic.

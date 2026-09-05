@@ -4,7 +4,7 @@
  * PROYECTO: SFS ACCESS CONTROL - I.E. JORGE ROBLEDO
  * ARCHIVO: controllers/ReporteController.php
  * DESCRIPCIÓN: Controlador para la generación de reportes y métricas directivas,
- *              con foco especial en el restaurante escolar (raciones requeridas).
+ *              con foco en el control y consolidación de asistencia a clases.
  * ============================================================================
  */
 
@@ -21,9 +21,9 @@ class ReporteController {
     }
 
     /**
-     * Muestra la vista o datos consolidados para el personal del restaurante escolar.
+     * Muestra la vista o datos consolidados de asistencia escolar.
      */
-    public function restaurante(): void {
+    public function asistencia(): void {
         $totalEstudiantes = $this->accesoModel->contarEstudiantesDentro();
         $estudiantesPorGrado = $this->accesoModel->obtenerEstudiantesDentroPorGrado();
         $listadoEstudiantes = $this->accesoModel->obtenerEstudiantesDentroDetalle();
@@ -34,7 +34,7 @@ class ReporteController {
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'institucion' => 'I.E. Jorge Robledo',
-                'modulo' => 'Control de Raciones - Restaurante Escolar',
+                'modulo' => 'Control de Asistencia a Clases',
                 'fecha' => date('Y-m-d'),
                 'total_estudiantes_dentro' => $totalEstudiantes,
                 'desglose_por_grado' => $estudiantesPorGrado,
@@ -48,15 +48,22 @@ class ReporteController {
     }
 
     /**
+     * Alias de retrocompatibilidad
+     */
+    public function restaurante(): void {
+        $this->asistencia();
+    }
+
+    /**
      * Exporta el listado de estudiantes presentes en formato CSV descargable.
-     * Ideal para el personal del restaurante escolar y reportes de rectoría.
+     * Ideal para directivas, docentes y control de asistencia a clases.
      */
     public function exportarCsv(): void {
         $listado = $this->accesoModel->obtenerEstudiantesDentroDetalle();
         $fecha = date('Y-m-d_His');
 
         header('Content-Type: text/csv; charset=utf-8');
-        header("Content-Disposition: attachment; filename=reporte_restaurante_escolar_{$fecha}.csv");
+        header("Content-Disposition: attachment; filename=reporte_asistencia_clases_{$fecha}.csv");
 
         $salida = fopen('php://output', 'w');
         // Agregar BOM para compatibilidad con caracteres especiales (tildes, eñes) en Excel

@@ -80,7 +80,7 @@ INSERT INTO `usuarios` (`id`, `documento`, `correo`, `nombre`, `grado`, `huella_
 (1, '10000001', 'rectoria@jorgerobledo.edu.co', 'Prof. Carlos Andrés Restrepo', 'RECTORÍA', 'FINGERPRINT_HASH_ADMIN_001', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'ADMINISTRADOR', 'ACTIVO'),
 (2, '10000002', 'sistemas@jorgerobledo.edu.co', 'Ing. Valeria Zapata', 'SISTEMAS', 'FINGERPRINT_HASH_ADMIN_002', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'ADMINISTRADOR', 'ACTIVO'),
 (3, '10000003', 'docente.arango@jorgerobledo.edu.co', 'Lic. Fernando Arango', 'DOCENTE', 'FINGERPRINT_HASH_DOC_001', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'DOCENTE', 'ACTIVO'),
-(4, '10000004', 'restaurante@jorgerobledo.edu.co', 'Martha Lucía Pérez', 'RESTAURANTE', 'FINGERPRINT_HASH_REST_001', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'ADMINISTRADOR', 'ACTIVO'),
+(4, '10000004', 'coordinacion@jorgerobledo.edu.co', 'Lic. Martha Lucía Pérez', 'COORDINACIÓN', 'FINGERPRINT_HASH_COORD_001', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'ADMINISTRADOR', 'ACTIVO'),
 
 -- Estudiantes Grado 11°A
 (5, '10359001', 'alejandra.martinez@estudiante.edu.co', 'Alejandra Martínez', '11°A', 'HUELLA_HEX_SAMPLE_001', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'ESTUDIANTE', 'ACTIVO'),
@@ -107,7 +107,7 @@ INSERT INTO `usuarios` (`id`, `documento`, `correo`, `nombre`, `grado`, `huella_
 INSERT INTO `registros_acceso` (`usuario_id`, `tipo_evento`, `fecha_hora`, `estado_acceso`, `observaciones`) VALUES
 (1, 'ENTRADA', NOW() - INTERVAL 240 MINUTE, 'APROBADO', 'Ingreso Directivo - Portería Principal'),
 (3, 'ENTRADA', NOW() - INTERVAL 230 MINUTE, 'APROBADO', 'Ingreso Docente - Portería Principal'),
-(4, 'ENTRADA', NOW() - INTERVAL 220 MINUTE, 'APROBADO', 'Ingreso Personal Restaurante'),
+(4, 'ENTRADA', NOW() - INTERVAL 220 MINUTE, 'APROBADO', 'Ingreso Coordinación Académica'),
 (5, 'ENTRADA', NOW() - INTERVAL 210 MINUTE, 'APROBADO', 'Acceso biométrico concedido (ENTRADA)'),
 (6, 'ENTRADA', NOW() - INTERVAL 205 MINUTE, 'APROBADO', 'Acceso biométrico concedido (ENTRADA)'),
 (8, 'ENTRADA', NOW() - INTERVAL 200 MINUTE, 'APROBADO', 'Acceso biométrico concedido (ENTRADA)'),
@@ -130,7 +130,7 @@ CREATE TABLE `dispositivos_sensores` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `codigo` VARCHAR(50) NOT NULL UNIQUE COMMENT 'Código único del dispositivo (ej. SENSOR-PORTERIA-01)',
     `nombre` VARCHAR(100) NOT NULL COMMENT 'Nombre descriptivo del lector biométrico',
-    `ubicacion` VARCHAR(150) NOT NULL COMMENT 'Ubicación física (ej. Portería Principal, Entrada Restaurante)',
+    `ubicacion` VARCHAR(150) NOT NULL COMMENT 'Ubicación física (ej. Portería Principal, Portería Secundaria, Bloque Aulas)',
     `tipo` ENUM('ENTRADA', 'SALIDA', 'BIDIRECCIONAL') NOT NULL DEFAULT 'BIDIRECCIONAL' COMMENT 'Función del sensor',
     `modelo` VARCHAR(80) NULL COMMENT 'Modelo del hardware (ej. ESP32-CAM + AS608)',
     `ip_local` VARCHAR(45) NULL COMMENT 'IP local del dispositivo en la red del colegio',
@@ -194,7 +194,7 @@ CREATE TABLE `sesiones_admin` (
 INSERT INTO `dispositivos_sensores` (`codigo`, `nombre`, `ubicacion`, `tipo`, `modelo`, `ip_local`, `estado`, `ultimo_ping`) VALUES
 ('SENSOR-PORT-01', 'Lector Portería Principal', 'Portería Principal - Acceso Calle', 'BIDIRECCIONAL', 'ESP32 + AS608', '192.168.1.101', 'ACTIVO', NOW() - INTERVAL 5 MINUTE),
 ('SENSOR-PORT-02', 'Lector Portería Trasera', 'Portería Trasera - Patio Central', 'BIDIRECCIONAL', 'ESP32 + R307', '192.168.1.102', 'ACTIVO', NOW() - INTERVAL 12 MINUTE),
-('SENSOR-REST-01', 'Lector Restaurante Escolar', 'Entrada Restaurante Escolar - Bloque B', 'ENTRADA', 'Arduino Mega + GT-511C3', '192.168.1.103', 'ACTIVO', NOW() - INTERVAL 3 MINUTE),
+('SENSOR-AULA-01', 'Lector Bloque Aulas', 'Entrada Bloque Académico - Bloque B', 'BIDIRECCIONAL', 'ESP32 + AS608', '192.168.1.103', 'ACTIVO', NOW() - INTERVAL 3 MINUTE),
 ('SENSOR-SALA-01', 'Lector Sala de Sistemas', 'Sala de Sistemas - Tercer Piso', 'BIDIRECCIONAL', 'ESP32 + AS608', '192.168.1.104', 'MANTENIMIENTO', NOW() - INTERVAL 60 MINUTE);
 
 -- ============================================================================
@@ -211,10 +211,10 @@ INSERT INTO `blog_articulos` (`titulo`, `resumen`, `contenido`, `icono_fa`, `col
  '<p>El módulo de verificación biométrica del sistema SFS Access opera con tiempos de respuesta inferiores a 400 milisegundos por validación. Esto permite procesar un flujo continuo de hasta 800 estudiantes por hora sin generar colas en la portería.</p><p>Los sensores ESP32 conectados vía WiFi transmiten el resultado de cada lectura en tiempo real al servidor central, que actualiza el aforo y el panel de control de forma instantánea.</p>',
  'fa-solid fa-bolt', 'icon-blue', 2, 1),
 
-('Control de Raciones PAE con Aforo en Vivo',
- 'El personal del restaurante escolar conoce el aforo exacto de estudiantes en el colegio, optimizando porciones y reduciendo desperdicios.',
- '<p>El módulo de restaurante escolar del sistema SFS Access calcula automáticamente el número de raciones necesarias basándose en los registros biométricos de entrada del día. Esto elimina el desperdicio de alimentos y garantiza que cada estudiante presente reciba su ración del Programa de Alimentación Escolar (PAE).</p><p>El personal del restaurante puede descargar un reporte CSV en cualquier momento con el desglose exacto por grado y salón.</p>',
- 'fa-solid fa-utensils', 'icon-purple', 1, 1),
+('Control de Asistencia a Clases en Tiempo Real',
+ 'Monitoreo automático de asistencia por aula y grado en tiempo real, optimizando el seguimiento académico docente.',
+ '<p>El módulo de asistencia a clases del sistema SFS Access registra automáticamente el ingreso de cada estudiante al plantel y genera el consolidado por aula. Esto permite a los profesores y directivas validar la permanencia en clases sin perder tiempo llamando a lista manualmente.</p><p>Los docentes y directivas pueden descargar un reporte CSV en cualquier momento con el desglose exacto de asistencia por grado y grupo.</p>',
+ 'fa-solid fa-chalkboard-user', 'icon-purple', 1, 1),
 
 ('Reportes Directivos y Auditoría CSV',
  'Generación de auditorías en tiempo real y descarga de reportes en Excel/CSV para rectoría y coordinaciones académicas.',

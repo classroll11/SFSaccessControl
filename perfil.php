@@ -148,7 +148,7 @@ $movimientos = $accesoModel->obtenerAccesosRecientes(5);
                     <i class="fa-solid fa-desktop" style="font-size: 1.3rem; color: var(--accent-blue);"></i>
                     <div>
                         <strong style="display: block; font-size: 0.92rem;">Monitor en Tiempo Real</strong>
-                        <span style="font-size: 0.78rem; color: var(--text-muted);">Ver aforo y raciones del restaurante</span>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">Ver aforo y asistencia a clases</span>
                     </div>
                 </a>
 

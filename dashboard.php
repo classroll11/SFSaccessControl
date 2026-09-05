@@ -3,7 +3,7 @@
  * ============================================================================
  * PROYECTO: SFS ACCESS CONTROL - I.E. JORGE ROBLEDO
  * ARCHIVO: dashboard.php
- * DESCRIPCIÓN: Panel de Control de Accesos y Restaurante Escolar.
+ * DESCRIPCIÓN: Panel de Control de Accesos y Asistencia a Clases.
  *              ACCESO RESTRINGIDO: Solo usuarios con sesión activa.
  * ============================================================================
  */

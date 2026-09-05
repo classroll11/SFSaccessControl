@@ -23,7 +23,7 @@ INSERT INTO `usuarios` (`id`, `documento`, `correo`, `nombre`, `grado`, `huella_
 (1, '10000001', 'rectoria@jorgerobledo.edu.co', 'Prof. Carlos Andrés Restrepo', 'RECTORÍA', 'FINGERPRINT_HASH_ADMIN_001', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'ADMINISTRADOR', 'ACTIVO'),
 (2, '10000002', 'sistemas@jorgerobledo.edu.co', 'Ing. Valeria Zapata', 'SISTEMAS', 'FINGERPRINT_HASH_ADMIN_002', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'ADMINISTRADOR', 'ACTIVO'),
 (3, '10000003', 'docente.arango@jorgerobledo.edu.co', 'Lic. Fernando Arango', 'DOCENTE', 'FINGERPRINT_HASH_DOC_001', NULL, 'DOCENTE', 'ACTIVO'),
-(4, '10000004', 'restaurante@jorgerobledo.edu.co', 'Martha Lucía Pérez', 'RESTAURANTE', 'FINGERPRINT_HASH_REST_001', NULL, 'ADMINISTRADOR', 'ACTIVO'),
+(4, '10000004', 'coordinacion@jorgerobledo.edu.co', 'Lic. Martha Lucía Pérez', 'COORDINACIÓN', 'FINGERPRINT_HASH_COORD_001', NULL, 'ADMINISTRADOR', 'ACTIVO'),
 
 -- Estudiantes Grado 11°A
 (5, '10359001', 'alejandra.martinez@estudiante.edu.co', 'Alejandra Martínez', '11°A', 'HUELLA_HEX_SAMPLE_001', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'ESTUDIANTE', 'ACTIVO'),
@@ -54,7 +54,7 @@ INSERT INTO `registros_acceso` (`usuario_id`, `tipo_evento`, `fecha_hora`, `esta
 -- Ingresos de personal directivo y docentes temprano en la mañana
 (1, 'ENTRADA', NOW() - INTERVAL 240 MINUTE, 'APROBADO', 'Ingreso Directivo - Portería Principal'),
 (3, 'ENTRADA', NOW() - INTERVAL 230 MINUTE, 'APROBADO', 'Ingreso Docente - Portería Principal'),
-(4, 'ENTRADA', NOW() - INTERVAL 220 MINUTE, 'APROBADO', 'Ingreso Personal Restaurante - Portería Servicios'),
+(4, 'ENTRADA', NOW() - INTERVAL 220 MINUTE, 'APROBADO', 'Ingreso Coordinación Académica - Portería Principal'),
 
 -- Ingresos de Estudiantes (Grado 11°A)
 (5, 'ENTRADA', NOW() - INTERVAL 210 MINUTE, 'APROBADO', 'Acceso biométrico concedido (ENTRADA)'),

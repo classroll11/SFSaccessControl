@@ -299,7 +299,7 @@
                 </div>
 
                 <a href="index.php?c=reporte&a=exportarCsv" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">
-                    <i class="fa-solid fa-file-excel me-1"></i> Raciones CSV
+                    <i class="fa-solid fa-file-excel me-1"></i> Asistencia CSV
                 </a>
 
                 <a href="logout.php" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('¿Deseas cerrar sesión?')">
@@ -319,7 +319,7 @@
                     </div>
                     <h1 class="h2 fw-bold text-white mb-2">Panel de Control de Acceso Estudiantil</h1>
                     <p class="text-light text-opacity-75 mb-0 small">
-                        Supervisión en tiempo real del ingreso y salida de estudiantes, auditoría de seguridad y cálculo automático de raciones para el restaurante escolar.
+                        Supervisión en tiempo real del ingreso y salida de estudiantes, auditoría de seguridad y control automatizado de asistencia a clases.
                     </p>
                 </div>
                 <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
@@ -336,14 +336,14 @@
 
         <!-- 1. TARJETAS DE ESTADÍSTICAS / KPIS GLOBALES -->
         <div class="row g-3 mb-4">
-            <!-- Restaurante Escolar / Estudiantes en Plantel -->
+            <!-- Asistencia a Clases / Estudiantes en Plantel -->
             <div class="col-12 col-sm-6 col-lg-3">
                 <div class="kpi-card h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <span class="text-muted small fw-bold text-uppercase">Estudiantes en Plantel</span>
                             <h2 class="fw-bold my-1 text-success" id="kpi-estudiantes-dentro"><?= $estudiantesDentro ?? 0 ?></h2>
-                            <span class="small text-muted"><i class="fa-solid fa-utensils text-success me-1"></i> Raciones a Servir</span>
+                            <span class="small text-muted"><i class="fa-solid fa-graduation-cap text-success me-1"></i> Presentes en Clase</span>
                         </div>
                         <div class="kpi-icon-wrapper kpi-green">
                             <i class="fa-solid fa-users"></i>
@@ -495,7 +495,7 @@
                 </div>
             </div>
 
-            <!-- 3. SIMULADOR BIOMÉTRICO & RESTAURANTE ESCOLAR -->
+            <!-- 3. SIMULADOR BIOMÉTRICO & ASISTENCIA POR GRADO -->
             <div class="col-lg-4">
                 
                 <!-- SIMULADOR BIOMÉTRICO DE PORTERÍA -->
@@ -569,16 +569,16 @@
                     </form>
                 </div>
 
-                <!-- CARD DESGLOSE RESTAURANTE ESCOLAR -->
+                <!-- CARD DESGLOSE ASISTENCIA POR GRADO -->
                 <div class="card-surface">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold text-dark mb-0">
-                            <i class="fa-solid fa-utensils text-success me-2"></i>Raciones por Grado
+                            <i class="fa-solid fa-graduation-cap text-primary me-2"></i>Asistencia por Grado
                         </h6>
-                        <span class="badge bg-success bg-opacity-10 text-success fw-bold px-2 py-1">Restaurante</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-1">Académico</span>
                     </div>
                     <p class="small text-muted mb-3">
-                        Distribución de porciones a preparar hoy para los estudiantes presentes en el colegio:
+                        Distribución de estudiantes presentes en clases hoy según el registro biométrico:
                     </p>
 
                     <div id="lista-desglose-grados">
@@ -600,7 +600,7 @@
 
                     <hr class="my-3">
                     <a href="index.php?c=reporte&a=exportarCsv" class="btn btn-outline-dark btn-sm w-100 rounded-pill">
-                        <i class="fa-solid fa-download me-1"></i> Descargar Planilla de Restaurante
+                        <i class="fa-solid fa-download me-1"></i> Descargar Planilla de Asistencia
                     </a>
                 </div>
 
@@ -614,7 +614,7 @@
     <footer class="footer-dashboard text-center">
         <div class="container">
             <p class="mb-1"><strong>SFS Access Control</strong> &copy; <?= date('Y') ?> - Institución Educativa Jorge Robledo</p>
-            <p class="mb-0 text-muted small">Sistema Integral de Control de Asistencia Biométrica y Gestión del Restaurante Escolar</p>
+            <p class="mb-0 text-muted small">Sistema Integral de Control de Asistencia Biométrica y Gestión Académica</p>
         </div>
     </footer>
 
@@ -745,7 +745,7 @@
                         }).join('');
                     }
 
-                    // Actualizar desglose del restaurante escolar
+                    // Actualizar desglose de asistencia por grado
                     const listaGrados = document.getElementById('lista-desglose-grados');
                     if (data.por_grado && data.por_grado.length > 0) {
                         listaGrados.innerHTML = '<ul class="list-group list-group-flush small">' + 

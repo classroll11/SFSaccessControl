@@ -74,7 +74,7 @@
                 <div class="team-info">
                     <h3 class="team-name">Fernanda Sánchez Colina</h3>
                     <p class="team-role"><i class="fa-solid fa-diagram-project"></i> Product Manager</p>
-                    <p class="team-desc">Estrategia de producto, requerimientos del restaurante escolar y coordinación con el personal directivo.</p>
+                    <p class="team-desc">Estrategia de producto, requerimientos de control de asistencia a clases y coordinación con el personal directivo.</p>
                 </div>
             </div>
         </div>

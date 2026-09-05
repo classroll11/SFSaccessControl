@@ -95,7 +95,7 @@ if (isset($_GET['c'])) {
                     </div>
                     <h1 class="hero-title">Gestiona el ingreso, simplifica el aforo y protege tu comunidad.</h1>
                     <p class="hero-desc">
-                        Optimizamos el control de acceso en la <strong>I.E. Jorge Robledo</strong> con tecnología biométrica dactilar de vanguardia, reemplazando registros manuales en cuadernos y calculando raciones para el restaurante escolar en tiempo real.
+                        Optimizamos el control de acceso en la <strong>I.E. Jorge Robledo</strong> con tecnología biométrica dactilar de vanguardia, reemplazando registros manuales en cuadernos y controlando la asistencia a clases en tiempo real.
                     </p>
                     <div class="hero-btn-group">
                         <a href="login.php" class="btn-primary">
@@ -114,9 +114,9 @@ if (isset($_GET['c'])) {
                         <p>Lectura dactilar instantánea que elimina la suplantación de identidad y agiliza el flujo en portería.</p>
                     </div>
                     <div class="feature-card">
-                        <i class="fa-solid fa-utensils"></i>
-                        <h3>Restaurante Escolar</h3>
-                        <p>Cálculo y auditoría automática de raciones de comida según los alumnos presentes en el plantel.</p>
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                        <h3>Asistencia a Clases</h3>
+                        <p>Registro y consolidación automática de asistencia por grado y aula para docentes y directivas.</p>
                     </div>
                     <div class="feature-card">
                         <i class="fa-solid fa-chart-pie"></i>
@@ -143,7 +143,7 @@ if (isset($_GET['c'])) {
                 </div>
                 <div class="stat-item">
                     <div class="stat-number">100%</div>
-                    <div class="stat-label">Precisión de Aforo PAE</div>
+                    <div class="stat-label">Precisión de Asistencia</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-number">0</div>

@@ -154,7 +154,7 @@ class AccesoModel {
 
     /**
      * Obtiene el listado detallado de estudiantes actualmente presentes dentro de la institución.
-     * Muy útil para la logística y control de raciones en el restaurante escolar.
+     * Muy útil para la auditoría, control de asistencia a clases y seguimiento académico.
      *
      * @return array Lista de estudiantes en el plantel.
      */
@@ -184,7 +184,7 @@ class AccesoModel {
 
     /**
      * Agrupa los estudiantes actualmente dentro por cada grado escolar.
-     * Permite al restaurante escolar planificar porciones por aula.
+     * Permite a los docentes y coordinadores conocer la asistencia por aula en tiempo real.
      *
      * @return array Conteo agrupado por grado (ej: ['10°A' => 24, '11°B' => 19]).
      */

@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <i class="fa-solid fa-id-card"></i>
                     </div>
                     <h4>Identificación Única</h4>
-                    <p>Tu documento garantiza el cálculo exacto de raciones en el restaurante escolar y tus asistencias.</p>
+                    <p>Tu documento garantiza el registro exacto de asistencia a clases y el control de acceso seguro.</p>
                 </div>
             </div>
 
