@@ -8,6 +8,7 @@
  * ============================================================================
  */
 
+require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../models/UsuarioModel.php';
 require_once __DIR__ . '/../models/AccesoModel.php';
 
@@ -24,6 +25,7 @@ class AccesoController {
      * Muestra la vista principal del Dashboard con estadísticas e historial.
      */
     public function index(): void {
+        requireLogin();
         $estadisticas = $this->accesoModel->obtenerEstadisticasHoy();
         $accesosRecientes = $this->accesoModel->obtenerAccesosRecientes(15);
         $estudiantesDentro = $this->accesoModel->contarEstudiantesDentro();

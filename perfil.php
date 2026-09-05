@@ -12,6 +12,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/config/auth.php';
+requireLogin();
 require_once __DIR__ . '/models/AccesoModel.php';
 
 // Obtener datos del usuario logueado o usar datos predeterminados
@@ -52,8 +54,12 @@ $movimientos = $accesoModel->obtenerAccesosRecientes(5);
             <li><a href="index.php"><i class="fa-solid fa-house-chimney"></i> INICIO</a></li>
             <li><a href="nosotros.php"><i class="fa-solid fa-users"></i> NOSOTROS</a></li>
             <li><a href="blog.php"><i class="fa-solid fa-newspaper"></i> BLOG</a></li>
-            <li><a href="login.php"><i class="fa-solid fa-arrow-right-to-bracket"></i> LOGIN</a></li>
-            <li><a href="dashboard.php" class="btn-perfil"><i class="fa-solid fa-gauge-high"></i> PANEL EN VIVO</a></li>
+            <?php if (isLoggedIn()): ?>
+                <li><a href="dashboard.php" class="btn-perfil"><i class="fa-solid fa-gauge-high"></i> PANEL EN VIVO</a></li>
+                <li><a href="logout.php"><i class="fa-solid fa-right-from-bracket"></i> SALIR</a></li>
+            <?php else: ?>
+                <li><a href="login.php"><i class="fa-solid fa-arrow-right-to-bracket"></i> LOGIN</a></li>
+            <?php endif; ?>
         </ul>
     </nav>
 

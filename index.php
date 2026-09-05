@@ -12,8 +12,9 @@ date_default_timezone_set('America/Bogota');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Cargar configuración de base de datos
+// Cargar configuración de base de datos y autenticación
 require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/config/auth.php';
 
 // Si se recibe el parámetro de controlador por URL (?c=acceso, ?c=reporte, ?c=auth), despachar al controlador correspondiente
 if (isset($_GET['c'])) {
@@ -79,8 +80,12 @@ if (isset($_GET['c'])) {
             <li><a href="index.php" class="active"><i class="fa-solid fa-house-chimney"></i> INICIO</a></li>
             <li><a href="nosotros.php"><i class="fa-solid fa-users"></i> NOSOTROS</a></li>
             <li><a href="blog.php"><i class="fa-solid fa-newspaper"></i> BLOG</a></li>
-            <li><a href="login.php"><i class="fa-solid fa-arrow-right-to-bracket"></i> LOGIN</a></li>
-            <li><a href="dashboard.php" class="btn-perfil"><i class="fa-solid fa-gauge-high"></i> PANEL EN VIVO</a></li>
+            <?php if (isLoggedIn()): ?>
+                <li><a href="dashboard.php" class="btn-perfil"><i class="fa-solid fa-gauge-high"></i> PANEL EN VIVO</a></li>
+                <li><a href="logout.php"><i class="fa-solid fa-right-from-bracket"></i> SALIR</a></li>
+            <?php else: ?>
+                <li><a href="login.php"><i class="fa-solid fa-arrow-right-to-bracket"></i> LOGIN</a></li>
+            <?php endif; ?>
         </ul>
     </nav>
 
@@ -97,12 +102,21 @@ if (isset($_GET['c'])) {
                         Optimizamos el control de acceso en la <strong>I.E. Jorge Robledo</strong> con tecnología biométrica dactilar de vanguardia, reemplazando registros manuales en cuadernos y controlando la asistencia a clases en tiempo real.
                     </p>
                     <div class="hero-btn-group">
-                        <a href="login.php" class="btn-primary">
-                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
-                        </a>
-                        <a href="dashboard.php" class="btn-secondary-dark">
-                            <i class="fa-solid fa-desktop"></i> Ver Terminal en Vivo
-                        </a>
+                        <?php if (isLoggedIn()): ?>
+                            <a href="dashboard.php" class="btn-primary">
+                                <i class="fa-solid fa-gauge-high"></i> Ir al Panel en Vivo
+                            </a>
+                            <a href="logout.php" class="btn-secondary-dark">
+                                <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                            </a>
+                        <?php else: ?>
+                            <a href="login.php" class="btn-primary">
+                                <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión Institucional
+                            </a>
+                            <a href="nosotros.php" class="btn-secondary-dark">
+                                <i class="fa-solid fa-users"></i> Conocer el Proyecto
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
 

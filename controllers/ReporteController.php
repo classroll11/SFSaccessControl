@@ -8,6 +8,7 @@
  * ============================================================================
  */
 
+require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../models/AccesoModel.php';
 require_once __DIR__ . '/../models/UsuarioModel.php';
 
@@ -24,6 +25,7 @@ class ReporteController {
      * Muestra la vista o datos consolidados de asistencia escolar.
      */
     public function asistencia(): void {
+        requireLogin();
         $totalEstudiantes = $this->accesoModel->contarEstudiantesDentro();
         $estudiantesPorGrado = $this->accesoModel->obtenerEstudiantesDentroPorGrado();
         $listadoEstudiantes = $this->accesoModel->obtenerEstudiantesDentroDetalle();
@@ -59,6 +61,7 @@ class ReporteController {
      * Ideal para directivas, docentes y control de asistencia a clases.
      */
     public function exportarCsv(): void {
+        requireLogin();
         $listado = $this->accesoModel->obtenerEstudiantesDentroDetalle();
         $fecha = date('Y-m-d_His');
 

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * ============================================================================
  * PROYECTO: SFS ACCESS CONTROL - I.E. JORGE ROBLEDO
@@ -11,6 +11,13 @@
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+/**
+ * Retorna true si hay una sesión de usuario activa.
+ */
+function isLoggedIn(): bool {
+    return !empty($_SESSION['usuario_id']);
 }
 
 /**

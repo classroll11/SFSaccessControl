@@ -90,7 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <li><a href="nosotros.php"><i class="fa-solid fa-users"></i> NOSOTROS</a></li>
             <li><a href="blog.php"><i class="fa-solid fa-newspaper"></i> BLOG</a></li>
             <li><a href="login.php" class="active"><i class="fa-solid fa-arrow-right-to-bracket"></i> LOGIN</a></li>
-            <li><a href="dashboard.php" class="btn-perfil"><i class="fa-solid fa-gauge-high"></i> PANEL EN VIVO</a></li>
         </ul>
     </nav>
 
