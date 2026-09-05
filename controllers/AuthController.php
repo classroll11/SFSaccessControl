@@ -72,70 +72,11 @@ class AuthController {
     }
 
     /**
-     * Procesa el registro de nuevos usuarios / estudiantes con sus datos completos.
+     * El registro público está deshabilitado. Redirige a login.
      */
     public function registro(): void {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $nombre = trim($_POST['nombre'] ?? '');
-            $documento = trim($_POST['documento'] ?? '');
-            $correo = trim($_POST['correo'] ?? '');
-            $grado = trim($_POST['grado'] ?? '');
-            $password = $_POST['password'] ?? '';
-            $confirmPassword = $_POST['confirm_password'] ?? '';
-
-            // Validaciones básicas
-            if (empty($nombre) || empty($documento) || empty($correo) || empty($password)) {
-                $mensajeError = 'Todos los campos obligatorios deben ser diligenciados.';
-                require_once __DIR__ . '/../registro.php';
-                return;
-            }
-
-            if ($password !== $confirmPassword) {
-                $mensajeError = 'Las contraseñas no coinciden. Por favor verifíquelas.';
-                require_once __DIR__ . '/../registro.php';
-                return;
-            }
-
-            // Verificar si el documento o correo ya existen
-            if ($this->usuarioModel->obtenerPorDocumento($documento)) {
-                $mensajeError = 'El documento ingresado ya se encuentra registrado en el sistema.';
-                require_once __DIR__ . '/../registro.php';
-                return;
-            }
-
-            if ($this->usuarioModel->obtenerPorCorreo($correo)) {
-                $mensajeError = 'El correo electrónico ya se encuentra registrado.';
-                require_once __DIR__ . '/../registro.php';
-                return;
-            }
-
-            // Determinar rol acorde a la selección
-            $rol = in_array($grado, ['DOCENTE', 'ADMINISTRATIVO']) ? $grado : 'ESTUDIANTE';
-
-            // Insertar el nuevo usuario en base de datos
-            $nuevoId = $this->usuarioModel->crearUsuario([
-                'documento' => $documento,
-                'correo' => $correo,
-                'nombre' => $nombre,
-                'grado' => $grado,
-                'password' => $password,
-                'rol' => $rol,
-                'estado' => 'ACTIVO'
-            ]);
-
-            if ($nuevoId) {
-                // Redirigir al login con mensaje de éxito
-                header('Location: login.php?registro=exitoso');
-                exit;
-            } else {
-                $mensajeError = 'Ocurrió un error al registrar el usuario. Inténtelo de nuevo.';
-                require_once __DIR__ . '/../registro.php';
-                return;
-            }
-        }
-
-        // Si es GET, mostrar vista de registro
-        require_once __DIR__ . '/../registro.php';
+        header('Location: login.php');
+        exit;
     }
 
     /**

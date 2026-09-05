@@ -90,7 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <li><a href="nosotros.php"><i class="fa-solid fa-users"></i> NOSOTROS</a></li>
             <li><a href="blog.php"><i class="fa-solid fa-newspaper"></i> BLOG</a></li>
             <li><a href="login.php" class="active"><i class="fa-solid fa-arrow-right-to-bracket"></i> LOGIN</a></li>
-            <li><a href="registro.php"><i class="fa-solid fa-user-plus"></i> REGISTRO</a></li>
             <li><a href="dashboard.php" class="btn-perfil"><i class="fa-solid fa-gauge-high"></i> PANEL EN VIVO</a></li>
         </ul>
     </nav>
@@ -175,9 +174,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </button>
                 </form>
 
-                <!-- Enlace para Registrarse -->
-                <div class="auth-footer">
-                    ¿No tienes una cuenta aún? <a href="registro.php">Regístrate aquí</a>
+                <!-- Nota Institucional de Acceso -->
+                <div class="auth-footer" style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
+                    <i class="fa-solid fa-shield-halved text-info me-1"></i> Acceso institucional restringido. La asignación de credenciales es gestionada por la administración de la I.E. Jorge Robledo.
                 </div>
             </div>
 
@@ -229,7 +228,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <li><a href="nosotros.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Nosotros</a></li>
                     <li><a href="blog.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Blog</a></li>
                     <li><a href="login.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Iniciar Sesión</a></li>
-                    <li><a href="registro.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Registro</a></li>
                 </ul>
             </div>
             <div class="footer-col">

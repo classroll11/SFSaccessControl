@@ -7,14 +7,9 @@
  * ============================================================================
  */
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/models/UsuarioModel.php';
-
-$mensajeError = '';
+// El registro público está deshabilitado. La administración gestiona las cuentas autorizadas.
+header('Location: login.php');
+exit;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = trim($_POST['nombre'] ?? '');

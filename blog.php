@@ -36,7 +36,6 @@
             <li><a href="nosotros.php"><i class="fa-solid fa-users"></i> NOSOTROS</a></li>
             <li><a href="blog.php" class="active"><i class="fa-solid fa-newspaper"></i> BLOG</a></li>
             <li><a href="login.php"><i class="fa-solid fa-arrow-right-to-bracket"></i> LOGIN</a></li>
-            <li><a href="registro.php"><i class="fa-solid fa-user-plus"></i> REGISTRO</a></li>
             <li><a href="dashboard.php" class="btn-perfil"><i class="fa-solid fa-gauge-high"></i> PANEL EN VIVO</a></li>
         </ul>
     </nav>
@@ -111,7 +110,6 @@
                     <li><a href="nosotros.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Nosotros</a></li>
                     <li><a href="blog.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Blog</a></li>
                     <li><a href="login.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Iniciar Sesión</a></li>
-                    <li><a href="registro.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Registro</a></li>
                 </ul>
             </div>
             <div class="footer-col">
