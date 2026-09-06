@@ -244,10 +244,14 @@ class AccesoModel {
      * @return array
      */
     public function obtenerSensores(): array {
-        $sql = "SELECT id, codigo_dispositivo, ubicacion, tipo_dispositivo, ip_dispositivo, estado, ultimo_ping 
-                FROM dispositivos_sensores 
-                ORDER BY id ASC";
-        $stmt = $this->db->query($sql);
-        return $stmt ? $stmt->fetchAll() : [];
+        try {
+            $sql = "SELECT id, codigo, nombre, ubicacion, tipo, modelo, ip_local, estado, ultimo_ping 
+                    FROM dispositivos_sensores 
+                    ORDER BY id ASC";
+            $stmt = $this->db->query($sql);
+            return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        } catch (Exception $e) {
+            return [];
+        }
     }
 }

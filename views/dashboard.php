@@ -1530,13 +1530,14 @@
                                 <div class="col-md-6">
                                     <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
                                         <div class="d-flex align-items-center justify-content-between mb-2">
-                                            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-1"><?= htmlspecialchars($sensor['codigo_dispositivo']) ?></span>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-1"><?= htmlspecialchars($sensor['codigo'] ?? $sensor['codigo_dispositivo'] ?? 'SENSOR') ?></span>
                                             <span class="badge bg-success bg-opacity-15 text-success d-inline-flex align-items-center gap-1">
                                                 <span class="live-dot" style="width:6px;height:6px;"></span> <?= htmlspecialchars($sensor['estado']) ?>
                                             </span>
                                         </div>
-                                        <h6 class="fw-bold text-dark mb-1"><?= htmlspecialchars($sensor['ubicacion']) ?></h6>
-                                        <p class="small text-muted mb-2">Tipo: <?= htmlspecialchars($sensor['tipo_dispositivo']) ?> &bull; IP: <code><?= htmlspecialchars($sensor['ip_dispositivo'] ?? '127.0.0.1') ?></code></p>
+                                        <h6 class="fw-bold text-dark mb-1"><?= htmlspecialchars($sensor['nombre'] ?? $sensor['ubicacion']) ?></h6>
+                                        <p class="small text-muted mb-1"><?= htmlspecialchars($sensor['ubicacion']) ?></p>
+                                        <p class="small text-muted mb-2">Tipo: <?= htmlspecialchars($sensor['tipo'] ?? 'BIOMÉTRICO') ?><?= !empty($sensor['modelo']) ? ' &bull; Mod: ' . htmlspecialchars($sensor['modelo']) : '' ?> &bull; IP: <code><?= htmlspecialchars($sensor['ip_local'] ?? $sensor['ip_dispositivo'] ?? '192.168.1.10x') ?></code></p>
                                         <div class="d-flex align-items-center justify-content-between small text-secondary mt-auto pt-2 border-top">
                                             <span>Último Ping:</span>
                                             <span class="text-success fw-semibold"><i class="fa-solid fa-check-double me-1"></i><?= date('h:i:s A', strtotime($sensor['ultimo_ping'] ?? 'now')) ?></span>

@@ -73,10 +73,12 @@ CREATE TABLE `huellas_dactilares` (
 -- ============================================================================
 CREATE TABLE `dispositivos_sensores` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `codigo_dispositivo` VARCHAR(50) NOT NULL UNIQUE COMMENT 'Identificador único del sensor (ej. SENSOR-PORT-01)',
-    `ubicacion` VARCHAR(100) NOT NULL COMMENT 'Lugar físico donde opera (ej. Portería Principal)',
-    `tipo_dispositivo` VARCHAR(50) NOT NULL DEFAULT 'HUELLERO_OPTICO',
-    `ip_dispositivo` VARCHAR(45) NULL,
+    `codigo` VARCHAR(50) NOT NULL UNIQUE COMMENT 'Identificador único del sensor (ej. SENSOR-PORT-01)',
+    `nombre` VARCHAR(100) NOT NULL,
+    `ubicacion` VARCHAR(150) NOT NULL COMMENT 'Lugar físico donde opera',
+    `tipo` ENUM('ENTRADA','SALIDA','BIDIRECCIONAL') NOT NULL DEFAULT 'BIDIRECCIONAL',
+    `modelo` VARCHAR(80) NULL,
+    `ip_local` VARCHAR(45) NULL,
     `estado` ENUM('ACTIVO', 'INACTIVO', 'MANTENIMIENTO') NOT NULL DEFAULT 'ACTIVO',
     `ultimo_ping` TIMESTAMP NULL DEFAULT NULL,
     `creado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -687,10 +689,10 @@ INSERT INTO `usuarios` (`documento`, `matricula`, `correo`, `nombre`, `grado`, `
 ('215207', '215207', NULL, 'ZEA BETANCOURT JUAN DANIEL', '11°02', 'HUELLA_HEX_SAMPLE_004', NULL, 'ESTUDIANTE', 'ACTIVO');
 
 -- Dispositivos Sensores
-INSERT INTO `dispositivos_sensores` (`id`, `codigo_dispositivo`, `ubicacion`, `tipo_dispositivo`, `ip_dispositivo`, `estado`, `ultimo_ping`) VALUES
-(1, 'SENSOR-PORT-01', 'Portería Principal - Entrada Estudiantes', 'HUELLERO_OPTICO', '192.168.1.101', 'ACTIVO', NOW()),
-(2, 'SENSOR-PORT-02', 'Portería Secundaria - Salida General', 'HUELLERO_OPTICO', '192.168.1.102', 'ACTIVO', NOW()),
-(3, 'SENSOR-BIBLIO-01', 'Entrada Biblioteca y Sala Digital', 'HUELLERO_OPTICO', '192.168.1.105', 'ACTIVO', NOW());
+INSERT INTO `dispositivos_sensores` (`id`, `codigo`, `nombre`, `ubicacion`, `tipo`, `modelo`, `ip_local`, `estado`, `ultimo_ping`) VALUES
+(1, 'SENSOR-PORT-01', 'Lector Portería Principal', 'Portería Principal - Acceso Calle', 'BIDIRECCIONAL', 'ESP32 + AS608', '192.168.1.101', 'ACTIVO', NOW()),
+(2, 'SENSOR-PORT-02', 'Lector Portería Trasera', 'Portería Trasera - Patio Central', 'BIDIRECCIONAL', 'ESP32 + R307', '192.168.1.102', 'ACTIVO', NOW()),
+(3, 'SENSOR-BIBLIO-01', 'Lector Biblioteca y Sala Digital', 'Biblioteca y Sala Digital - Bloque B', 'BIDIRECCIONAL', 'Arduino Mega + GT-511C3', '192.168.1.103', 'ACTIVO', NOW());
 
 -- Huellas Dactilares Iniciales de Prueba
 INSERT INTO `huellas_dactilares` (`usuario_id`, `slot_numero`, `dedo`, `huella_template`) VALUES
