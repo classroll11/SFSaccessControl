@@ -479,44 +479,370 @@
         @media (max-width: 576px) {
             .finger-slots-grid { grid-template-columns: repeat(2, 1fr); }
         }
+
+        /* ─── DASHBOARD SIDEBAR & LAYOUT ─────────────────────────────── */
+        .dashboard-app-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+            background-color: var(--bg-body);
+        }
+
+        .dashboard-sidebar {
+            width: 275px;
+            min-width: 275px;
+            background: radial-gradient(circle at 15% 15%, #0f2042 0%, #060b18 95%);
+            color: #f1f5f9;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 1040;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .dashboard-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        .dashboard-main-content {
+            flex-grow: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Sidebar Brand Header */
+        .sidebar-brand {
+            padding: 1.4rem 1.4rem 1.2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-brand a {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Sidebar User Profile Card */
+        .sidebar-user-card {
+            margin: 1.1rem 1rem 0.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .sidebar-user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #2563eb 0%, #00f2fe 100%);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Sidebar Navigation Menu */
+        .sidebar-menu {
+            padding: 0.8rem 0.9rem 2rem;
+            flex-grow: 1;
+        }
+
+        .sidebar-heading {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #64748b;
+            margin: 1.2rem 0.6rem 0.4rem;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 0.68rem 0.9rem;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: var(--transition);
+            margin-bottom: 0.2rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .sidebar-nav-item:hover {
+            color: #ffffff;
+            background: rgba(56, 189, 248, 0.08);
+            border-color: rgba(56, 189, 248, 0.15);
+            transform: translateX(3px);
+        }
+
+        .sidebar-nav-item.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.28), rgba(56, 189, 248, 0.16));
+            border-color: rgba(56, 189, 248, 0.35);
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.12);
+        }
+
+        .sidebar-nav-item .icon-slot {
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            color: #38bdf8;
+            flex-shrink: 0;
+            border-radius: 8px;
+            background: rgba(56, 189, 248, 0.08);
+            transition: var(--transition);
+        }
+
+        .sidebar-nav-item:hover .icon-slot,
+        .sidebar-nav-item.active .icon-slot {
+            color: #ffffff;
+            background: #2563eb;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        .sidebar-nav-item .badge-count {
+            margin-left: auto;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 20px;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-bottom {
+            padding: 1rem 1.2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Mobile Backdrop */
+        .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 11, 24, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1035;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-backdrop.show {
+            display: block;
+            opacity: 1;
+        }
+
+        @media (max-width: 991.98px) {
+            .dashboard-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+            }
+            .dashboard-sidebar.sidebar-open {
+                transform: translateX(0);
+            }
+        }
     </style>
-</head>
 <body>
 
-    <!-- NAVBAR DE NAVEGACIÓN -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container-fluid">
-            <a class="brand-logo" href="index.php">
-                <div class="brand-logo-emblem">
-                    <img src="assets/img/sfs-logo-emblem.png" alt="SFS Emblem" onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-fingerprint text-info\'></i>'">
-                </div>
-                <span>SFS ACCESS CONTROL</span>
-            </a>
+    <div class="dashboard-app-container">
+        <!-- BACKDROP PARA MÓVIL -->
+        <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+        <!-- SIDEBAR DE NAVEGACIÓN INSTITUCIONAL -->
+        <aside class="dashboard-sidebar" id="dashboard-sidebar">
             
-            <div class="d-flex align-items-center gap-3">
-                <div class="d-none d-md-flex align-items-center gap-2 bg-light px-3 py-1 rounded-pill border">
-                    <img src="assets/img/jorge-robledo-logo.png" alt="Escudo Jorge Robledo" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'">
-                    <span class="small fw-semibold text-secondary">I.E. Jorge Robledo - Medellín</span>
-                </div>
-                
-                <div class="bg-dark text-light px-3 py-1 rounded-pill small fw-semibold d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-clock text-info"></i>
-                    <span id="live-clock"><?= date('h:i:s A') ?></span>
-                </div>
-
-                <a href="index.php?c=reporte&a=exportarCsv" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">
-                    <i class="fa-solid fa-file-excel me-1"></i> Asistencia CSV
+            <!-- 1. Cabecera Institucional -->
+            <div class="sidebar-brand">
+                <a href="index.php" class="d-flex align-items-center gap-2">
+                    <div class="brand-logo-emblem" style="width:34px; height:34px;">
+                        <img src="assets/img/sfs-logo-emblem.png" alt="SFS Emblem" onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-fingerprint text-info\'></i>'">
+                    </div>
+                    <div>
+                        <span class="d-block text-white fw-bold" style="font-family:'Outfit',sans-serif; font-size:1.05rem; letter-spacing:-0.3px;">SFS ACCESS</span>
+                        <small class="d-block text-info fw-semibold" style="font-size:0.68rem; margin-top:-3px;">CONTROL BIOMÉTRICO</small>
+                    </div>
                 </a>
-
-                <a href="logout.php" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('¿Deseas cerrar sesión?')">
-                    <i class="fa-solid fa-right-from-bracket me-1"></i> Cerrar Sesión
-                </a>
+                <button class="btn btn-sm text-white-50 d-lg-none p-1" onclick="toggleSidebar()" title="Cerrar menú">
+                    <i class="fa-solid fa-xmark fs-5"></i>
+                </button>
             </div>
-        </div>
-    </nav>
 
-    <!-- DASHBOARD HERO BANNER -->
-    <section class="dashboard-hero">
+            <!-- 2. Perfil de Usuario en Sesión -->
+            <?php
+                $nombreSesion = $_SESSION['usuario_nombre'] ?? 'Administrador Institucional';
+                $rolSesion = $_SESSION['usuario_rol'] ?? 'DIRECTIVO';
+                $gradoSesion = $_SESSION['usuario_grado'] ?? 'RECTORÍA';
+                $partesU = explode(' ', trim($nombreSesion));
+                $iniU = strtoupper(substr($partesU[0] ?? 'A', 0, 1) . (isset($partesU[1]) ? substr($partesU[1], 0, 1) : ''));
+            ?>
+            <div class="sidebar-user-card">
+                <div class="sidebar-user-avatar"><?= $iniU ?></div>
+                <div class="min-w-0 flex-grow-1">
+                    <strong class="d-block text-white text-truncate" style="font-size:0.88rem;"><?= htmlspecialchars($nombreSesion) ?></strong>
+                    <div class="d-flex align-items-center gap-2 mt-1">
+                        <span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25" style="font-size:0.65rem; padding: 2px 6px;">
+                            <?= htmlspecialchars($rolSesion) ?>
+                        </span>
+                        <span class="d-inline-flex align-items-center gap-1 text-success small" style="font-size:0.7rem;">
+                            <span class="live-dot" style="width:6px; height:6px;"></span> Activo
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Menú de Funciones y Módulos -->
+            <nav class="sidebar-menu">
+                
+                <div class="sidebar-heading">Supervisión y Control</div>
+                
+                <a class="sidebar-nav-item active" href="#seccion-hero-kpis" onclick="irASeccion('seccion-hero-kpis')">
+                    <span class="icon-slot"><i class="fa-solid fa-gauge-high"></i></span>
+                    <span>Panel General</span>
+                    <span class="badge-count bg-success bg-opacity-20 text-success">En Vivo</span>
+                </a>
+
+                <a class="sidebar-nav-item" href="#seccion-historial" onclick="irASeccion('seccion-historial')">
+                    <span class="icon-slot"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                    <span>Historial de Accesos</span>
+                    <span class="badge-count bg-primary bg-opacity-25 text-info" id="badge-total-accesos"><?= $estadisticas['total_eventos'] ?? 0 ?></span>
+                </a>
+
+                <a class="sidebar-nav-item" href="#seccion-grados" onclick="irASeccion('seccion-grados')">
+                    <span class="icon-slot"><i class="fa-solid fa-chart-pie"></i></span>
+                    <span>Asistencia por Grados</span>
+                    <span class="badge-count bg-light bg-opacity-10 text-white-50">16 Grupos</span>
+                </a>
+
+                <div class="sidebar-heading">Módulo Biométrico</div>
+
+                <a class="sidebar-nav-item" href="#seccion-huellas" onclick="irAHuellasTab('tab-registrar')">
+                    <span class="icon-slot"><i class="fa-solid fa-fingerprint"></i></span>
+                    <span>Registrar Huellas</span>
+                    <span class="badge-count bg-warning bg-opacity-20 text-warning">6 Slots</span>
+                </a>
+
+                <a class="sidebar-nav-item" href="#seccion-huellas" onclick="irAHuellasTab('tab-identificar')">
+                    <span class="icon-slot"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <span>Identificar Huella</span>
+                    <span class="badge-count bg-info bg-opacity-20 text-info">Escáner</span>
+                </a>
+
+                <a class="sidebar-nav-item" href="#seccion-simulador" onclick="irASeccion('seccion-simulador')">
+                    <span class="icon-slot"><i class="fa-solid fa-microchip"></i></span>
+                    <span>Simulador de Portería</span>
+                    <span class="badge-count bg-primary bg-opacity-20 text-primary">Prueba</span>
+                </a>
+
+                <div class="sidebar-heading">Gestión Escolar</div>
+
+                <a class="sidebar-nav-item" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#modalDirectorioEstudiantes">
+                    <span class="icon-slot"><i class="fa-solid fa-users-viewfinder"></i></span>
+                    <span>Directorio Estudiantil</span>
+                    <span class="badge-count bg-info bg-opacity-20 text-info">515</span>
+                </a>
+
+                <a class="sidebar-nav-item" href="index.php?c=reporte&a=exportarCsv">
+                    <span class="icon-slot"><i class="fa-solid fa-file-excel"></i></span>
+                    <span>Exportar Asistencia</span>
+                    <span class="badge-count bg-success bg-opacity-20 text-success">CSV</span>
+                </a>
+
+                <div class="sidebar-heading">Infraestructura y Sistema</div>
+
+                <a class="sidebar-nav-item" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#modalSensores">
+                    <span class="icon-slot"><i class="fa-solid fa-satellite-dish"></i></span>
+                    <span>Sensores de Portería</span>
+                    <span class="badge-count bg-success bg-opacity-20 text-success"><?= count($sensores ?? []) ?> Activos</span>
+                </a>
+
+                <a class="sidebar-nav-item text-danger mt-3" href="logout.php" onclick="return confirm('¿Deseas cerrar sesión en SFS Access Control?')">
+                    <span class="icon-slot" style="background:rgba(239,68,68,0.1); color:#ef4444;"><i class="fa-solid fa-right-from-bracket"></i></span>
+                    <span>Cerrar Sesión</span>
+                </a>
+
+            </nav>
+
+            <!-- 4. Footer del Sidebar -->
+            <div class="sidebar-bottom">
+                <div class="d-flex align-items-center justify-content-between text-muted small mb-1">
+                    <span><i class="fa-solid fa-clock text-info me-1"></i> <span id="sidebar-live-clock"><?= date('h:i:s A') ?></span></span>
+                    <span class="badge bg-light bg-opacity-10 text-light border border-light border-opacity-10" style="font-size:0.65rem;">v2.5</span>
+                </div>
+                <small class="text-white-50 d-block text-truncate" style="font-size:0.68rem;">
+                    I.E. Jorge Robledo &bull; Robledo, Medellín
+                </small>
+            </div>
+
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="dashboard-main-content">
+            
+            <!-- TOP NAVBAR -->
+            <nav class="navbar navbar-expand-lg navbar-custom">
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="btn btn-outline-primary btn-sm d-lg-none rounded-pill px-3" onclick="toggleSidebar()" title="Abrir menú lateral">
+                            <i class="fa-solid fa-bars me-1"></i> Menú
+                        </button>
+                        <div class="d-none d-sm-flex align-items-center gap-2">
+                            <img src="assets/img/jorge-robledo-logo.png" alt="Escudo Jorge Robledo" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'">
+                            <span class="fw-bold text-dark" style="font-family:'Outfit',sans-serif;">I.E. JORGE ROBLEDO</span>
+                            <span class="text-muted small d-none d-md-inline">&bull; SFS Access Control</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-outline-info text-dark btn-sm rounded-pill px-3 d-none d-md-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalDirectorioEstudiantes">
+                            <i class="fa-solid fa-users text-primary me-1"></i> 515 Estudiantes
+                        </button>
+
+                        <a href="index.php?c=reporte&a=exportarCsv" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">
+                            <i class="fa-solid fa-file-excel me-1"></i> Asistencia CSV
+                        </a>
+
+                        <a href="logout.php" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('¿Deseas cerrar sesión?')">
+                            <i class="fa-solid fa-right-from-bracket me-1"></i> Salir
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- DASHBOARD HERO BANNER -->
+            <section class="dashboard-hero" id="seccion-hero-kpis">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-8">
@@ -611,7 +937,7 @@
             
             <!-- 2. TABLA DE HISTORIAL DE ACCESOS EN TIEMPO REAL -->
             <div class="col-lg-8">
-                <div class="card-surface h-100">
+                <div class="card-surface h-100" id="seccion-historial">
                     
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
                         <div class="d-flex align-items-center gap-2">
@@ -705,7 +1031,7 @@
             <div class="col-lg-4">
                 
                 <!-- SIMULADOR BIOMÉTRICO DE PORTERÍA -->
-                <div class="card-surface border-top border-primary border-3 mb-4">
+                <div class="card-surface border-top border-primary border-3 mb-4" id="seccion-simulador">
                     <h5 class="fw-bold text-primary mb-2">
                         <i class="fa-solid fa-fingerprint me-2 text-info"></i>Simulador de Huella / Portería
                     </h5>
@@ -768,7 +1094,7 @@
                 </div>
 
                 <!-- CARD DESGLOSE ASISTENCIA POR GRADO -->
-                <div class="card-surface">
+                <div class="card-surface" id="seccion-grados">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold text-dark mb-0">
                             <i class="fa-solid fa-graduation-cap text-primary me-2"></i>Asistencia por Grado
@@ -1060,6 +1386,178 @@
         </div>
     </footer>
 
+    </div><!-- /dashboard-main-content -->
+    </div><!-- /dashboard-app-container -->
+
+    <!-- ================================================================
+         MODAL: DIRECTORIO INSTITUCIONAL DE ESTUDIANTES (515)
+         ================================================================ -->
+    <div class="modal fade" id="modalDirectorioEstudiantes" tabindex="-1" aria-labelledby="modalDirectorioLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg" style="border-radius:20px; overflow:hidden;">
+                <div class="modal-header text-white" style="background: radial-gradient(circle at 10% 20%, #0d1b3e 0%, #060b18 100%); padding: 1.25rem 1.75rem;">
+                    <div>
+                        <div class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 px-2 py-1 mb-1">
+                            <i class="fa-solid fa-users-line me-1"></i> Base de Datos Escolar Oficial
+                        </div>
+                        <h5 class="modal-title fw-bold" id="modalDirectorioLabel">Directorio de Estudiantes (515 Alumnos)</h5>
+                        <p class="small text-white-50 mb-0">Institución Educativa Jorge Robledo &bull; Listado completo con número de matrícula</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    
+                    <!-- Barra de Búsqueda y Filtros de Grado -->
+                    <div class="row g-3 mb-3 align-items-center">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                <input type="text" class="form-control border-start-0" id="buscador-modal-estudiantes" placeholder="Buscar por nombre o matrícula..." oninput="filtrarModalEstudiantes()">
+                            </div>
+                        </div>
+                        <div class="col-md-7 text-md-end">
+                            <span class="small text-muted fw-bold me-2">Filtrar Grado:</span>
+                            <select class="form-select form-select-sm d-inline-block w-auto" id="filtro-grado-modal" onchange="filtrarModalEstudiantes()">
+                                <option value="">Todos los Grados (515)</option>
+                                <option value="6°01">6°01 (41)</option>
+                                <option value="6°02">6°02 (41)</option>
+                                <option value="6°03">6°03 (39)</option>
+                                <option value="7°01">7°01 (31)</option>
+                                <option value="7°02">7°02 (29)</option>
+                                <option value="7°03">7°03 (32)</option>
+                                <option value="8°01">8°01 (34)</option>
+                                <option value="8°02">8°02 (34)</option>
+                                <option value="8°03">8°03 (25)</option>
+                                <option value="9°01">9°01 (20)</option>
+                                <option value="9°02">9°02 (21)</option>
+                                <option value="9°03">9°03 (22)</option>
+                                <option value="10°01">10°01 (40)</option>
+                                <option value="10°02">10°02 (39)</option>
+                                <option value="11°01">11°01 (33)</option>
+                                <option value="11°02">11°02 (34)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Estudiantes -->
+                    <div class="table-responsive bg-white rounded-3 shadow-sm border" style="max-height: 480px;">
+                        <table class="table table-hover align-middle mb-0" id="tabla-modal-estudiantes">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>N° Matrícula</th>
+                                    <th>Estudiante</th>
+                                    <th>Grado</th>
+                                    <th>Huellas Registradas</th>
+                                    <th>Estado</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($estudiantesHuellas)): ?>
+                                    <?php $nIdx = 1; foreach ($estudiantesHuellas as $st): ?>
+                                        <tr class="fila-estudiante-modal" 
+                                            data-nombre="<?= strtolower(htmlspecialchars($st['nombre'])) ?>" 
+                                            data-mat="<?= htmlspecialchars($st['matricula'] ?? $st['documento']) ?>" 
+                                            data-grado="<?= htmlspecialchars($st['grado']) ?>">
+                                            <td class="text-muted small"><?= $nIdx++ ?></td>
+                                            <td>
+                                                <span class="badge bg-light text-dark border fw-bold px-2 py-1">
+                                                    <i class="fa-solid fa-id-card text-primary me-1"></i><?= htmlspecialchars($st['matricula'] ?? $st['documento']) ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong class="text-dark"><?= htmlspecialchars($st['nombre']) ?></strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold"><?= htmlspecialchars($st['grado']) ?></span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="huella-progress" style="width: 80px; height: 6px;">
+                                                        <div class="huella-progress-bar" style="width: <?= round(($st['total_huellas']/6)*100) ?>%"></div>
+                                                    </div>
+                                                    <span class="small fw-bold <?= $st['total_huellas'] == 6 ? 'text-success' : 'text-muted' ?>">
+                                                        <?= $st['total_huellas'] ?>/6
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success bg-opacity-15 text-success">Activo</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <button class="btn btn-outline-primary btn-sm rounded-pill px-3" 
+                                                        onclick="seleccionarDesdeModal(<?= $st['id'] ?>, '<?= htmlspecialchars(addslashes($st['nombre'])) ?>', '<?= htmlspecialchars($st['grado']) ?>', '<?= htmlspecialchars($st['matricula'] ?? $st['documento']) ?>')">
+                                                    <i class="fa-solid fa-fingerprint me-1"></i> Huellas
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-white border-top">
+                    <span class="small text-muted me-auto"><i class="fa-solid fa-circle-info text-primary me-1"></i> Total en base de datos: <strong>515 estudiantes activos</strong></span>
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         MODAL: DISPOSITIVOS Y SENSORES BIOMÉTRICOS
+         ================================================================ -->
+    <div class="modal fade" id="modalSensores" tabindex="-1" aria-labelledby="modalSensoresLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius:20px; overflow:hidden;">
+                <div class="modal-header text-white" style="background: radial-gradient(circle at 10% 20%, #0d1b3e 0%, #060b18 100%); padding: 1.25rem 1.75rem;">
+                    <div>
+                        <div class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 px-2 py-1 mb-1">
+                            <i class="fa-solid fa-network-wired me-1"></i> Red de Dispositivos Institucional
+                        </div>
+                        <h5 class="modal-title fw-bold" id="modalSensoresLabel">Sensores Biométricos y Porterías</h5>
+                        <p class="small text-white-50 mb-0">Estado de conectividad y hardware de captura en los accesos</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <div class="row g-3">
+                        <?php if (!empty($sensores)): ?>
+                            <?php foreach ($sensores as $sensor): ?>
+                                <div class="col-md-6">
+                                    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-1"><?= htmlspecialchars($sensor['codigo_dispositivo']) ?></span>
+                                            <span class="badge bg-success bg-opacity-15 text-success d-inline-flex align-items-center gap-1">
+                                                <span class="live-dot" style="width:6px;height:6px;"></span> <?= htmlspecialchars($sensor['estado']) ?>
+                                            </span>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-1"><?= htmlspecialchars($sensor['ubicacion']) ?></h6>
+                                        <p class="small text-muted mb-2">Tipo: <?= htmlspecialchars($sensor['tipo_dispositivo']) ?> &bull; IP: <code><?= htmlspecialchars($sensor['ip_dispositivo'] ?? '127.0.0.1') ?></code></p>
+                                        <div class="d-flex align-items-center justify-content-between small text-secondary mt-auto pt-2 border-top">
+                                            <span>Último Ping:</span>
+                                            <span class="text-success fw-semibold"><i class="fa-solid fa-check-double me-1"></i><?= date('h:i:s A', strtotime($sensor['ultimo_ping'] ?? 'now')) ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="col-12 text-center py-4 text-muted">
+                                No se encontraron dispositivos configurados.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white border-top">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap 5.3 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -1068,7 +1566,11 @@
         // Actualizar reloj digital en vivo
         setInterval(() => {
             const ahora = new Date();
-            document.getElementById('live-clock').textContent = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            const timeStr = ahora.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            const clk1 = document.getElementById('live-clock');
+            if (clk1) clk1.textContent = timeStr;
+            const clk2 = document.getElementById('sidebar-live-clock');
+            if (clk2) clk2.textContent = timeStr;
         }, 1000);
 
         // Helper para llenar el formulario de simulación
@@ -1595,6 +2097,74 @@
                     }
                 }, 4000);
             }
+        }
+
+        // ─── FUNCIONES DEL SIDEBAR & NAVEGACIÓN ──────────────────────────────
+        function toggleSidebar() {
+            const sidebar = document.getElementById('dashboard-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            sidebar.classList.toggle('sidebar-open');
+            backdrop.classList.toggle('show');
+        }
+
+        function irASeccion(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            // Actualizar item activo en el sidebar
+            document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+                if (item.getAttribute('href') === `#${id}`) {
+                    item.classList.add('active');
+                } else if (item.getAttribute('href')?.startsWith('#')) {
+                    item.classList.remove('active');
+                }
+            });
+            // En móvil, cerrar sidebar al hacer clic
+            if (window.innerWidth < 992) {
+                const sidebar = document.getElementById('dashboard-sidebar');
+                const backdrop = document.getElementById('sidebar-backdrop');
+                sidebar.classList.remove('sidebar-open');
+                backdrop.classList.remove('show');
+            }
+        }
+
+        function irAHuellasTab(tabTargetId) {
+            irASeccion('seccion-huellas');
+            const tabBtn = document.getElementById(`${tabTargetId}-btn`);
+            if (tabBtn) {
+                const tabInstance = bootstrap.Tab.getOrCreateInstance(tabBtn);
+                tabInstance.show();
+            }
+        }
+
+        // ─── FILTRO DEL MODAL DE ESTUDIANTES (515) ───────────────────────────
+        function filtrarModalEstudiantes() {
+            const q = document.getElementById('buscador-modal-estudiantes').value.toLowerCase().trim();
+            const grado = document.getElementById('filtro-grado-modal').value.toLowerCase().trim();
+            document.querySelectorAll('.fila-estudiante-modal').forEach(fila => {
+                const nombre = fila.dataset.nombre;
+                const mat = fila.dataset.mat.toLowerCase();
+                const filaGrado = fila.dataset.grado.toLowerCase();
+                
+                const coincideTexto = !q || nombre.includes(q) || mat.includes(q);
+                const coincideGrado = !grado || filaGrado === grado;
+
+                fila.style.display = (coincideTexto && coincideGrado) ? '' : 'none';
+            });
+        }
+
+        // Seleccionar estudiante desde el modal y saltar al panel de huellas
+        function seleccionarDesdeModal(id, nombre, grado, matricula) {
+            const modalEl = document.getElementById('modalDirectorioEstudiantes');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+
+            irAHuellasTab('tab-registrar');
+
+            setTimeout(() => {
+                seleccionarEstudiante(id, nombre, grado, matricula);
+            }, 300);
         }
     </script>
 </body>

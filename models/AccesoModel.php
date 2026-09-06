@@ -237,4 +237,17 @@ class AccesoModel {
             'estudiantes_dentro' => $this->contarEstudiantesDentro()
         ];
     }
+
+    /**
+     * Obtiene el listado de dispositivos y sensores biométricos instalados.
+     *
+     * @return array
+     */
+    public function obtenerSensores(): array {
+        $sql = "SELECT id, codigo_dispositivo, ubicacion, tipo_dispositivo, ip_dispositivo, estado, ultimo_ping 
+                FROM dispositivos_sensores 
+                ORDER BY id ASC";
+        $stmt = $this->db->query($sql);
+        return $stmt ? $stmt->fetchAll() : [];
+    }
 }

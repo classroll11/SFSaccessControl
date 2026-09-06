@@ -32,6 +32,7 @@ class AccesoController {
         $estudiantesPorGrado = $this->accesoModel->obtenerEstudiantesDentroPorGrado();
         $usuariosDisponibles = $this->usuarioModel->obtenerTodos();
         $estudiantesHuellas = $this->usuarioModel->obtenerEstudiantesConConteoHuellas();
+        $sensores = $this->accesoModel->obtenerSensores();
 
         // Renderizar la vista pasando las variables
         require_once __DIR__ . '/../views/dashboard.php';
