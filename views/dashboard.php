@@ -725,27 +725,19 @@
                             <label class="form-label small fw-bold text-uppercase">Caso Rápido de Prueba:</label>
                             <select class="form-select form-select-sm" id="select-usuario-demo" onchange="seleccionarUsuarioDemo(this.value)">
                                 <option value="">-- Seleccionar caso de prueba --</option>
-                                <optgroup label="✅ Estudiantes Activos (Grado 11)">
-                                    <option value="HUELLA_HEX_SAMPLE_001|10359001">Alejandra Martínez (11°A - ACTIVA)</option>
-                                    <option value="HUELLA_HEX_SAMPLE_004|10359002">Santiago Morales (11°A - ACTIVO)</option>
-                                    <option value="HUELLA_HEX_SAMPLE_005|10359004">Valentina Henao (11°B - ACTIVA)</option>
-                                    <option value="HUELLA_HEX_SAMPLE_006|10359005">Mateo Quintero (11°B - ACTIVO)</option>
+                                <optgroup label="✅ Estudiantes Reales Con Huella Registrada">
+                                    <option value="HUELLA_HEX_SAMPLE_001|222281">Valery Acevedo (6°01 - Mat: 222281 - Pulgar Der.)</option>
+                                    <option value="HUELLA_HEX_SAMPLE_002|222150">Brianna Acuña (6°01 - Mat: 222150 - Índice Der.)</option>
+                                    <option value="HUELLA_HEX_SAMPLE_003|260072">Sara Cristina Toro (11°02 - Mat: 260072 - Pulgar Der.)</option>
+                                    <option value="HUELLA_HEX_SAMPLE_004|215207">Juan Daniel Zea (11°02 - Mat: 215207 - Índice Der.)</option>
                                 </optgroup>
-                                <optgroup label="✅ Estudiantes Activos (Grados 10 y 9)">
-                                    <option value="HUELLA_HEX_SAMPLE_007|10359006">Manuela Correa (10°A - ACTIVA)</option>
-                                    <option value="HUELLA_HEX_SAMPLE_008|10359007">Daniel Jaramillo (10°A - ACTIVO)</option>
-                                    <option value="HUELLA_HEX_SAMPLE_002|10359008">Carlos Rodríguez (10°B - ACTIVO)</option>
-                                    <option value="HUELLA_HEX_SAMPLE_010|10359010">Juan José Estrada (9°A - ACTIVO)</option>
-                                    <option value="HUELLA_HEX_SAMPLE_011|10359011">Isabella Rincón (9°A - ACTIVA)</option>
-                                </optgroup>
-                                <optgroup label="🚫 Casos de Denegación (Inactivos / Intrusos)">
-                                    <option value="HUELLA_HEX_SAMPLE_003|10359003">Lucía Gómez (11°A - INACTIVA / RECHAZAR)</option>
-                                    <option value="HUELLA_HEX_SAMPLE_009|10359009">Mariana Osorio (10°B - SUSPENDIDA / RECHAZAR)</option>
+                                <optgroup label="🚫 Casos de Denegación (Intrusos / No Registrados)">
                                     <option value="HUELLA_DESCONOCIDA|99999999">Persona No Registrada (INTRUSO / RECHAZAR)</option>
                                 </optgroup>
                                 <optgroup label="👔 Directivos y Docentes">
                                     <option value="FINGERPRINT_HASH_ADMIN_001|10000001">Prof. Carlos Restrepo (RECTORÍA)</option>
                                     <option value="FINGERPRINT_HASH_DOC_001|10000003">Lic. Fernando Arango (DOCENTE)</option>
+                                    <option value="FINGERPRINT_HASH_COORD_001|10000004">Lic. Martha Lucía Pérez (COORDINACIÓN)</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -875,7 +867,7 @@
                             <div class="search-student-wrap mb-3">
                                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
                                 <input type="text" class="form-control form-control-sm" id="buscador-estudiantes"
-                                       placeholder="Buscar por nombre o documento..." oninput="filtrarEstudiantes()">
+                                       placeholder="Buscar por nombre, matrícula o grado..." oninput="filtrarEstudiantes()">
                             </div>
 
                             <!-- Lista de estudiantes -->
@@ -891,13 +883,14 @@
                                              data-id="<?= $est['id'] ?>"
                                              data-nombre="<?= htmlspecialchars($est['nombre']) ?>"
                                              data-doc="<?= htmlspecialchars($est['documento']) ?>"
+                                             data-matricula="<?= htmlspecialchars($est['matricula'] ?? $est['documento']) ?>"
                                              data-grado="<?= htmlspecialchars($est['grado']) ?>"
-                                             onclick="seleccionarEstudiante(<?= $est['id'] ?>, '<?= htmlspecialchars(addslashes($est['nombre'])) ?>', '<?= htmlspecialchars($est['grado']) ?>')">
+                                             onclick="seleccionarEstudiante(<?= $est['id'] ?>, '<?= htmlspecialchars(addslashes($est['nombre'])) ?>', '<?= htmlspecialchars($est['grado']) ?>', '<?= htmlspecialchars($est['matricula'] ?? $est['documento']) ?>')">
                                             <div class="d-flex align-items-center gap-3">
                                                 <span class="avatar-initials" style="flex-shrink:0;"><?= $iniciales ?></span>
                                                 <div class="flex-grow-1 min-w-0">
                                                     <strong class="d-block text-dark text-truncate" style="font-size:0.9rem;"><?= htmlspecialchars($est['nombre']) ?></strong>
-                                                    <small class="text-muted">Doc: <?= htmlspecialchars($est['documento']) ?> &bull; <?= htmlspecialchars($est['grado']) ?></small>
+                                                    <small class="text-muted"><i class="fa-solid fa-id-card text-primary me-1"></i>Matrícula: <strong class="text-dark"><?= htmlspecialchars($est['matricula'] ?? $est['documento']) ?></strong> &bull; <?= htmlspecialchars($est['grado']) ?></small>
                                                     <div class="d-flex align-items-center gap-2 mt-1">
                                                         <div class="huella-progress flex-grow-1">
                                                             <div class="huella-progress-bar" style="width:<?= $pct ?>%"></div>
@@ -1245,15 +1238,15 @@
 
         // ─── FILTRAR LISTA DE ESTUDIANTES ────────────────────────────────────
         function filtrarEstudiantes() {
-            const q = document.getElementById('buscador-estudiantes').value.toLowerCase();
+            const q = document.getElementById('buscador-estudiantes').value.toLowerCase().trim();
             document.querySelectorAll('.estudiante-item').forEach(el => {
-                const txt = (el.dataset.nombre + ' ' + el.dataset.doc + ' ' + el.dataset.grado).toLowerCase();
+                const txt = (el.dataset.nombre + ' ' + el.dataset.doc + ' ' + (el.dataset.matricula || '') + ' ' + el.dataset.grado).toLowerCase();
                 el.style.display = txt.includes(q) ? '' : 'none';
             });
         }
 
         // ─── SELECCIONAR UN ESTUDIANTE ───────────────────────────────────────
-        async function seleccionarEstudiante(id, nombre, grado) {
+        async function seleccionarEstudiante(id, nombre, grado, matricula = '') {
             // Highlight selected card
             document.querySelectorAll('.student-finger-card').forEach(c => c.classList.remove('selected'));
             const card = document.querySelector(`.student-finger-card[data-id="${id}"]`);
@@ -1274,7 +1267,7 @@
             const iniciales = ((partes[0]?.charAt(0) || '') + (partes[1]?.charAt(0) || '')).toUpperCase();
             document.getElementById('slot-avatar').textContent = iniciales;
             document.getElementById('slot-nombre').textContent = nombre;
-            document.getElementById('slot-grado').textContent = grado;
+            document.getElementById('slot-grado').innerHTML = `${grado} &bull; <span class="badge bg-light text-dark border"><i class="fa-solid fa-id-card text-primary me-1"></i>Matrícula: ${matricula || '—'}</span>`;
 
             // Cargar huellas del estudiante
             await cargarHuellasEstudiante(id);

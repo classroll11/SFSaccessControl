@@ -23,7 +23,7 @@ class UsuarioModel {
      * @return array|null Datos del usuario o null si no se encuentra.
      */
     public function obtenerPorId(int $id): ?array {
-        $sql = "SELECT id, documento, correo, nombre, grado, rol, estado, creado_en 
+        $sql = "SELECT id, documento, matricula, correo, nombre, grado, rol, estado, creado_en 
                 FROM usuarios 
                 WHERE id = :id 
                 LIMIT 1";
@@ -43,7 +43,7 @@ class UsuarioModel {
      * @return array|null Datos del usuario o null.
      */
     public function obtenerPorCorreo(string $correo): ?array {
-        $sql = "SELECT id, documento, correo, nombre, grado, huella_template, password, rol, estado, creado_en 
+        $sql = "SELECT id, documento, matricula, correo, nombre, grado, huella_template, password, rol, estado, creado_en 
                 FROM usuarios 
                 WHERE correo = :correo 
                 LIMIT 1";
@@ -63,13 +63,33 @@ class UsuarioModel {
      * @return array|null Datos del usuario o null.
      */
     public function obtenerPorDocumento(string $documento): ?array {
-        $sql = "SELECT id, documento, correo, nombre, grado, huella_template, password, rol, estado, creado_en 
+        $sql = "SELECT id, documento, matricula, correo, nombre, grado, huella_template, password, rol, estado, creado_en 
                 FROM usuarios 
                 WHERE documento = :documento 
                 LIMIT 1";
         
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':documento', trim($documento), PDO::PARAM_STR);
+        $stmt->execute();
+        
+        $resultado = $stmt->fetch();
+        return $resultado ?: null;
+    }
+
+    /**
+     * Busca un estudiante mediante su número de matrícula escolar.
+     *
+     * @param string $matricula Código o número de matrícula.
+     * @return array|null Datos del usuario o null.
+     */
+    public function obtenerPorMatricula(string $matricula): ?array {
+        $sql = "SELECT id, documento, matricula, correo, nombre, grado, huella_template, password, rol, estado, creado_en 
+                FROM usuarios 
+                WHERE matricula = :matricula 
+                LIMIT 1";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':matricula', trim($matricula), PDO::PARAM_STR);
         $stmt->execute();
         
         $resultado = $stmt->fetch();
@@ -87,7 +107,7 @@ class UsuarioModel {
         $huellaTemplate = trim($huellaTemplate);
 
         // 1. Buscar en tabla de huellas múltiples
-        $sql = "SELECT u.id, u.documento, u.correo, u.nombre, u.grado, u.rol, u.estado, u.creado_en,
+        $sql = "SELECT u.id, u.documento, u.matricula, u.correo, u.nombre, u.grado, u.rol, u.estado, u.creado_en,
                        h.dedo AS dedo_identificado, h.slot_numero AS slot_identificado, h.huella_template
                 FROM huellas_dactilares h
                 INNER JOIN usuarios u ON h.usuario_id = u.id
@@ -104,7 +124,7 @@ class UsuarioModel {
         }
 
         // 2. Respaldo: Buscar en la columna huella_template de la tabla usuarios
-        $sqlUsuarios = "SELECT id, documento, correo, nombre, grado, rol, estado, creado_en,
+        $sqlUsuarios = "SELECT id, documento, matricula, correo, nombre, grado, rol, estado, creado_en,
                                'Huella Principal' AS dedo_identificado, 1 AS slot_identificado, huella_template
                         FROM usuarios 
                         WHERE huella_template = :huella 
@@ -194,12 +214,12 @@ class UsuarioModel {
      * @return array
      */
     public function obtenerEstudiantesConConteoHuellas(): array {
-        $sql = "SELECT u.id, u.documento, u.nombre, u.grado, u.rol, u.estado,
+        $sql = "SELECT u.id, u.documento, u.matricula, u.nombre, u.grado, u.rol, u.estado,
                        COUNT(h.id) AS total_huellas
                 FROM usuarios u
                 LEFT JOIN huellas_dactilares h ON u.id = h.usuario_id
                 WHERE u.rol = 'ESTUDIANTE'
-                GROUP BY u.id, u.documento, u.nombre, u.grado, u.rol, u.estado
+                GROUP BY u.id, u.documento, u.matricula, u.nombre, u.grado, u.rol, u.estado
                 ORDER BY u.grado ASC, u.nombre ASC";
         
         $stmt = $this->db->query($sql);
@@ -212,11 +232,11 @@ class UsuarioModel {
      * @return array Lista de usuarios.
      */
     public function obtenerTodos(): array {
-        $sql = "SELECT u.id, u.documento, u.correo, u.nombre, u.grado, u.rol, u.estado, u.creado_en,
+        $sql = "SELECT u.id, u.documento, u.matricula, u.correo, u.nombre, u.grado, u.rol, u.estado, u.creado_en,
                        COUNT(h.id) AS total_huellas
                 FROM usuarios u
                 LEFT JOIN huellas_dactilares h ON u.id = h.usuario_id
-                GROUP BY u.id, u.documento, u.correo, u.nombre, u.grado, u.rol, u.estado, u.creado_en
+                GROUP BY u.id, u.documento, u.matricula, u.correo, u.nombre, u.grado, u.rol, u.estado, u.creado_en
                 ORDER BY u.nombre ASC";
         
         $stmt = $this->db->query($sql);
