@@ -25,7 +25,7 @@ require_once __DIR__ . '/config/auth.php';
     <nav class="navbar">
         <a href="index.php" class="logo">
             <div class="logo-icon-emblem">
-                <img src="assets/img/sfs-logo-emblem.png" alt="SFS Logo" onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-fingerprint\'></i>'">
+                <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
             </div>
             <div class="logo-title-group">
                 <span class="logo-brand-text">SFS <span>ACCESS</span></span>
@@ -90,7 +90,7 @@ require_once __DIR__ . '/config/auth.php';
             <div class="footer-col">
                 <a href="index.php" class="logo" style="margin-bottom: 1.2rem; display: inline-flex;">
                     <div class="logo-icon-emblem" style="width: 32px; height: 32px;">
-                        <img src="assets/img/sfs-logo-emblem.png" alt="SFS Logo">
+                        <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
                     </div>
                     <div class="logo-title-group">
                         <span class="logo-brand-text">SFS <span>ACCESS</span></span>

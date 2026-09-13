@@ -3,7 +3,8 @@
  * ============================================================================
  * PROYECTO: SFS ACCESS CONTROL - I.E. JORGE ROBLEDO
  * ARCHIVO: models/AccesoModel.php
- * DESCRIPCIÓN: Modelo para el registro, consulta y métricas de accesos biométricos.
+ * DESCRIPCIÓN: Modelo para el registro, consulta y métricas de accesos biométricos,
+ *              auditoría de ausentismo y toma de asistencia a clases.
  * ============================================================================
  */
 
@@ -18,12 +19,6 @@ class AccesoModel {
 
     /**
      * Inserta un nuevo registro de acceso (entrada/salida) en la base de datos.
-     *
-     * @param int|null $usuarioId ID del usuario (o null si no fue reconocido).
-     * @param string $tipoEvento 'ENTRADA' o 'SALIDA'.
-     * @param string $estadoAcceso 'APROBADO' o 'RECHAZADO'.
-     * @param string|null $observaciones Detalle o motivo del resultado.
-     * @return int ID del registro insertado.
      */
     public function registrarAcceso(?int $usuarioId, string $tipoEvento, string $estadoAcceso, ?string $observaciones = null): int {
         $sql = "INSERT INTO registros_acceso (usuario_id, tipo_evento, estado_acceso, observaciones) 
@@ -41,10 +36,6 @@ class AccesoModel {
 
     /**
      * Obtiene el último registro de acceso exitoso de un usuario hoy.
-     * Permite alternar automáticamente entre ENTRADA y SALIDA.
-     *
-     * @param int $usuarioId ID del usuario.
-     * @return array|null Último registro de acceso o null.
      */
     public function obtenerUltimoEventoUsuario(int $usuarioId): ?array {
         $sql = "SELECT id, usuario_id, tipo_evento, fecha_hora, estado_acceso 
@@ -65,9 +56,6 @@ class AccesoModel {
 
     /**
      * Obtiene los accesos más recientes con información del usuario.
-     *
-     * @param int $limite Cantidad máxima de registros a retornar.
-     * @return array Lista de registros de acceso con datos de usuario.
      */
     public function obtenerAccesosRecientes(int $limite = 20): array {
         $sql = "SELECT 
@@ -95,9 +83,6 @@ class AccesoModel {
 
     /**
      * Consulta el historial de accesos para una fecha específica (YYYY-MM-DD).
-     *
-     * @param string $fecha Fecha en formato 'YYYY-MM-DD'.
-     * @return array Registros de esa jornada.
      */
     public function obtenerAccesosPorFecha(string $fecha): array {
         $sql = "SELECT 
@@ -125,9 +110,6 @@ class AccesoModel {
 
     /**
      * Calcula el número total de estudiantes presentes actualmente dentro del colegio.
-     * Un estudiante está dentro si su último evento aprobado en el día de hoy fue una 'ENTRADA'.
-     * 
-     * @return int Cantidad de estudiantes dentro de la institución.
      */
     public function contarEstudiantesDentro(): int {
         $sql = "SELECT COUNT(*) as total_dentro
@@ -136,7 +118,6 @@ class AccesoModel {
                     FROM registros_acceso r
                     INNER JOIN usuarios u ON r.usuario_id = u.id
                     INNER JOIN (
-                        -- Obtener el ID del último registro aprobado de cada usuario hoy
                         SELECT usuario_id, MAX(id) as max_id
                         FROM registros_acceso
                         WHERE DATE(fecha_hora) = CURDATE()
@@ -153,40 +134,7 @@ class AccesoModel {
     }
 
     /**
-     * Obtiene el listado detallado de estudiantes actualmente presentes dentro de la institución.
-     * Muy útil para la auditoría, control de asistencia a clases y seguimiento académico.
-     *
-     * @return array Lista de estudiantes en el plantel.
-     */
-    public function obtenerEstudiantesDentroDetalle(): array {
-        $sql = "SELECT 
-                    u.id AS usuario_id,
-                    u.documento,
-                    u.nombre,
-                    u.grado,
-                    r.fecha_hora AS hora_ingreso
-                FROM registros_acceso r
-                INNER JOIN usuarios u ON r.usuario_id = u.id
-                INNER JOIN (
-                    SELECT usuario_id, MAX(id) as max_id
-                    FROM registros_acceso
-                    WHERE DATE(fecha_hora) = CURDATE()
-                      AND estado_acceso = 'APROBADO'
-                    GROUP BY usuario_id
-                ) ultimos ON r.id = ultimos.max_id
-                WHERE u.rol = 'ESTUDIANTE'
-                  AND r.tipo_evento = 'ENTRADA'
-                ORDER BY u.grado ASC, u.nombre ASC";
-        
-        $stmt = $this->db->query($sql);
-        return $stmt->fetchAll();
-    }
-
-    /**
      * Agrupa los estudiantes actualmente dentro por cada grado escolar.
-     * Permite a los docentes y coordinadores conocer la asistencia por aula en tiempo real.
-     *
-     * @return array Conteo agrupado por grado (ej: ['10°A' => 24, '11°B' => 19]).
      */
     public function obtenerEstudiantesDentroPorGrado(): array {
         $sql = "SELECT 
@@ -212,8 +160,6 @@ class AccesoModel {
 
     /**
      * Obtiene métricas estadísticas globales del día de hoy.
-     *
-     * @return array Estadísticas con totales de aprobados, rechazados, entradas y salidas.
      */
     public function obtenerEstadisticasHoy(): array {
         $sql = "SELECT 
@@ -239,9 +185,151 @@ class AccesoModel {
     }
 
     /**
+     * Guarda la toma de asistencia en el aula realizada por un Docente.
+     * $asistencias es un array de [ estudiante_id => 'PRESENTE'|'FALTA_INJUSTIFICADA'|'RETARDO'|'FALTA_JUSTIFICADA' ]
+     */
+    public function guardarTomaAsistencia(int $docenteId, string $grado, string $fecha, string $materia, array $asistencias, ?string $observacionGeneral = null): bool {
+        try {
+            $this->db->beginTransaction();
+
+            $sql = "INSERT INTO asistencias_clase (estudiante_id, docente_id, grado, fecha, estado_asistencia, materia, observaciones)
+                    VALUES (:estudiante_id, :docente_id, :grado, :fecha, :estado, :materia, :observaciones)
+                    ON DUPLICATE KEY UPDATE
+                        docente_id = VALUES(docente_id),
+                        estado_asistencia = VALUES(estado_asistencia),
+                        observaciones = VALUES(observaciones),
+                        actualizado_en = CURRENT_TIMESTAMP";
+
+            $stmt = $this->db->prepare($sql);
+
+            foreach ($asistencias as $estId => $estado) {
+                $stmt->bindValue(':estudiante_id', (int)$estId, PDO::PARAM_INT);
+                $stmt->bindValue(':docente_id', $docenteId, PDO::PARAM_INT);
+                $stmt->bindValue(':grado', $grado, PDO::PARAM_STR);
+                $stmt->bindValue(':fecha', $fecha, PDO::PARAM_STR);
+                $stmt->bindValue(':estado', $estado, PDO::PARAM_STR);
+                $stmt->bindValue(':materia', $materia ?: 'GENERAL', PDO::PARAM_STR);
+                $stmt->bindValue(':observaciones', $observacionGeneral, $observacionGeneral ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                $stmt->execute();
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error en guardarTomaAsistencia: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtiene el listado de asistencia de clase por grado, fecha y materia.
+     */
+    public function obtenerAsistenciaClase(string $grado, string $fecha, string $materia = 'GENERAL'): array {
+        $sql = "SELECT u.id AS estudiante_id, u.documento, u.matricula, u.nombre, u.grado,
+                       COALESCE(a.id, NULL) AS asistencia_id,
+                       COALESCE(a.estado_asistencia, 'SIN_REGISTRO') AS estado_asistencia,
+                       a.observaciones,
+                       d.nombre AS nombre_docente,
+                       a.actualizado_en
+                FROM usuarios u
+                LEFT JOIN asistencias_clase a 
+                       ON u.id = a.estudiante_id 
+                      AND a.fecha = :fecha 
+                      AND a.materia = :materia
+                LEFT JOIN usuarios d ON a.docente_id = d.id
+                WHERE u.rol = 'ESTUDIANTE' AND u.grado = :grado
+                ORDER BY u.nombre ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':grado', trim($grado), PDO::PARAM_STR);
+        $stmt->bindValue(':fecha', $fecha, PDO::PARAM_STR);
+        $stmt->bindValue(':materia', $materia, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Obtiene todas las inasistencias / faltas del día para supervisión del Coordinador y Rector.
+     */
+    public function obtenerFaltasSupervision(?string $grado = null, ?string $fecha = null): array {
+        $fecha = $fecha ?: date('Y-m-d');
+        $whereGrado = $grado ? " AND u.grado = :grado " : "";
+
+        $sql = "SELECT a.id, a.estudiante_id, a.docente_id, a.grado, a.fecha, a.estado_asistencia, a.materia, a.observaciones,
+                       u.nombre AS nombre_estudiante, u.documento AS documento_estudiante, u.matricula,
+                       d.nombre AS nombre_docente
+                FROM asistencias_clase a
+                INNER JOIN usuarios u ON a.estudiante_id = u.id
+                LEFT JOIN usuarios d ON a.docente_id = d.id
+                WHERE a.fecha = :fecha 
+                  AND a.estado_asistencia IN ('FALTA_INJUSTIFICADA', 'FALTA_JUSTIFICADA', 'RETARDO')
+                  {$whereGrado}
+                ORDER BY a.grado ASC, u.nombre ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':fecha', $fecha, PDO::PARAM_STR);
+        if ($grado) {
+            $stmt->bindValue(':grado', $grado, PDO::PARAM_STR);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Justifica una falta de estudiante (Función de Coordinación).
+     */
+    public function justificarFalta(int $asistenciaId, string $motivoJustificacion): bool {
+        $sql = "UPDATE asistencias_clase 
+                SET estado_asistencia = 'FALTA_JUSTIFICADA',
+                    observaciones = CONCAT(COALESCE(observaciones, ''), ' [JUSTIFICADA: ', :motivo, ']')
+                WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':motivo', trim($motivoJustificacion), PDO::PARAM_STR);
+        $stmt->bindValue(':id', $asistenciaId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    /**
+     * Resumen consolidado para Rectoría y Coordinación.
+     */
+    public function obtenerResumenConsolidado(?string $fecha = null): array {
+        $fecha = $fecha ?: date('Y-m-d');
+
+        // Total estudiantes registrados
+        $totalEstudiantes = (int)$this->db->query("SELECT COUNT(*) FROM usuarios WHERE rol = 'ESTUDIANTE' AND estado = 'ACTIVO'")->fetchColumn();
+
+        // Conteo de asistencias en aula hoy
+        $sqlAula = "SELECT 
+                        SUM(CASE WHEN estado_asistencia = 'PRESENTE' THEN 1 ELSE 0 END) AS presentes_aula,
+                        SUM(CASE WHEN estado_asistencia = 'FALTA_INJUSTIFICADA' THEN 1 ELSE 0 END) AS faltas_injustificadas,
+                        SUM(CASE WHEN estado_asistencia = 'FALTA_JUSTIFICADA' THEN 1 ELSE 0 END) AS faltas_justificadas,
+                        SUM(CASE WHEN estado_asistencia = 'RETARDO' THEN 1 ELSE 0 END) AS retardos
+                    FROM asistencias_clase 
+                    WHERE fecha = :fecha";
+        $stmtAula = $this->db->prepare($sqlAula);
+        $stmtAula->bindValue(':fecha', $fecha, PDO::PARAM_STR);
+        $stmtAula->execute();
+        $aula = $stmtAula->fetch();
+
+        // Estadísticas de portería
+        $statsPorteria = $this->obtenerEstadisticasHoy();
+
+        return [
+            'total_matriculados' => $totalEstudiantes,
+            'estudiantes_en_plantel' => $statsPorteria['estudiantes_dentro'],
+            'ingresos_porteria' => $statsPorteria['total_entradas'],
+            'salidas_porteria' => $statsPorteria['total_salidas'],
+            'accesos_rechazados' => $statsPorteria['rechazados'],
+            'presentes_aula' => (int)($aula['presentes_aula'] ?? 0),
+            'faltas_injustificadas' => (int)($aula['faltas_injustificadas'] ?? 0),
+            'faltas_justificadas' => (int)($aula['faltas_justificadas'] ?? 0),
+            'retardos' => (int)($aula['retardos'] ?? 0),
+        ];
+    }
+
+    /**
      * Obtiene el listado de dispositivos y sensores biométricos instalados.
-     *
-     * @return array
      */
     public function obtenerSensores(): array {
         try {

@@ -34,7 +34,8 @@ CREATE TABLE `usuarios` (
     `grado` VARCHAR(20) NULL DEFAULT NULL COMMENT 'Grado escolar (Ej. 6°01, 11°02) o Cargo',
     `huella_template` TEXT NULL COMMENT 'Hash o template biométrico de la huella dactilar',
     `password` VARCHAR(255) NULL COMMENT 'Hash bcrypt para inicio de sesión en panel administrativo',
-    `rol` ENUM('ADMINISTRADOR', 'ESTUDIANTE', 'DOCENTE', 'SENSOR') NOT NULL DEFAULT 'ESTUDIANTE',
+    `rol` ENUM('ADMINISTRADOR', 'DOCENTE', 'CELADOR', 'COORDINADOR', 'RECTOR', 'ESTUDIANTE', 'SENSOR') NOT NULL DEFAULT 'ESTUDIANTE',
+    `debe_cambiar_password` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 si el usuario debe cambiar su contraseña por defecto en el primer ingreso',
     `estado` ENUM('ACTIVO', 'INACTIVO', 'SUSPENDIDO') NOT NULL DEFAULT 'ACTIVO' COMMENT 'Permiso de acceso a la institución',
     `creado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `actualizado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -42,7 +43,41 @@ CREATE TABLE `usuarios` (
     INDEX `idx_usuarios_matricula` (`matricula`),
     INDEX `idx_usuarios_correo` (`correo`),
     INDEX `idx_usuarios_rol` (`rol`),
-    INDEX `idx_usuarios_estado` (`estado`)
+    INDEX `idx_usuarios_estado` (`estado`),
+    INDEX `idx_usuarios_debe_cambiar` (`debe_cambiar_password`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- 3.0. TABLA: asistencias_clase
+-- Registro de toma de asistencia en el aula por parte de los Docentes
+-- ============================================================================
+CREATE TABLE `asistencias_clase` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `estudiante_id` INT NOT NULL COMMENT 'ID del estudiante',
+    `docente_id` INT NOT NULL COMMENT 'ID del docente que registra la asistencia',
+    `grado` VARCHAR(20) NOT NULL COMMENT 'Grado del grupo (Ej. 6°01)',
+    `fecha` DATE NOT NULL COMMENT 'Fecha de la clase',
+    `estado_asistencia` ENUM('PRESENTE', 'FALTA_INJUSTIFICADA', 'FALTA_JUSTIFICADA', 'RETARDO') NOT NULL DEFAULT 'PRESENTE',
+    `materia` VARCHAR(100) NULL DEFAULT 'GENERAL',
+    `observaciones` VARCHAR(255) NULL DEFAULT NULL,
+    `creado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `actualizado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_estudiante_fecha_materia` (`estudiante_id`, `fecha`, `materia`),
+    INDEX `idx_asist_estudiante` (`estudiante_id`),
+    INDEX `idx_asist_docente` (`docente_id`),
+    INDEX `idx_asist_fecha` (`fecha`),
+    INDEX `idx_asist_grado` (`grado`),
+    INDEX `idx_asist_estado` (`estado_asistencia`),
+    CONSTRAINT `fk_asist_estudiante`
+        FOREIGN KEY (`estudiante_id`)
+        REFERENCES `usuarios` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT `fk_asist_docente`
+        FOREIGN KEY (`docente_id`)
+        REFERENCES `usuarios` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================
@@ -163,12 +198,21 @@ CREATE TABLE `blog_articulos` (
 -- 5. DATOS INSTITUCIONALES (DML)
 -- ============================================================================
 
-INSERT INTO `usuarios` (`id`, `documento`, `matricula`, `correo`, `nombre`, `grado`, `huella_template`, `password`, `rol`, `estado`) VALUES
--- Directivos y Docentes (Contraseña por defecto: admin123)
-(1, '10000001', 'DOC-ADMIN-01', 'rectoria@jorgerobledo.edu.co', 'Prof. Carlos Andrés Restrepo', 'RECTORÍA', 'FINGERPRINT_HASH_ADMIN_001', '$2y$10$uowo3GisUraIhhOYoXfhoOM0qjB0mfTxrioUF0jjCn4zp0Zy.Dj9i', 'ADMINISTRADOR', 'ACTIVO'),
-(2, '10000002', 'DOC-ADMIN-02', 'sistemas@jorgerobledo.edu.co', 'Ing. Valeria Zapata', 'SISTEMAS', 'FINGERPRINT_HASH_ADMIN_002', '$2y$10$uowo3GisUraIhhOYoXfhoOM0qjB0mfTxrioUF0jjCn4zp0Zy.Dj9i', 'ADMINISTRADOR', 'ACTIVO'),
-(3, '10000003', 'DOC-ADMIN-03', 'docente.arango@jorgerobledo.edu.co', 'Lic. Fernando Arango', 'DOCENTE', 'FINGERPRINT_HASH_DOC_001', '$2y$10$uowo3GisUraIhhOYoXfhoOM0qjB0mfTxrioUF0jjCn4zp0Zy.Dj9i', 'DOCENTE', 'ACTIVO'),
-(4, '10000004', 'DOC-ADMIN-04', 'coordinacion@jorgerobledo.edu.co', 'Lic. Martha Lucía Pérez', 'COORDINACIÓN', 'FINGERPRINT_HASH_COORD_001', '$2y$10$uowo3GisUraIhhOYoXfhoOM0qjB0mfTxrioUF0jjCn4zp0Zy.Dj9i', 'ADMINISTRADOR', 'ACTIVO');
+INSERT INTO `usuarios` (`id`, `documento`, `matricula`, `correo`, `nombre`, `grado`, `huella_template`, `password`, `rol`, `debe_cambiar_password`, `estado`) VALUES
+-- 1. ADMINISTRADOR DEL SISTEMA (Control total, usuarios, estudiantes y claves)
+(1, '10000001', 'DOC-ADMIN-01', 'admin@jorgerobledo.edu.co', 'Ing. Valeria Zapata (Administrador)', 'SISTEMAS', 'FINGERPRINT_HASH_ADMIN_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'ADMINISTRADOR', 0, 'ACTIVO'),
+
+-- 2. RECTOR (Supervisión estratégica institucional y verificación de métricas)
+(2, '10000002', 'DOC-RECT-01', 'rectoria@jorgerobledo.edu.co', 'Prof. Carlos Andrés Restrepo (Rector)', 'RECTORÍA', 'FINGERPRINT_HASH_ADMIN_002', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'RECTOR', 0, 'ACTIVO'),
+
+-- 3. COORDINADOR (Supervisión de faltas, ausentismo y justificaciones)
+(3, '10000003', 'DOC-COORD-01', 'coordinacion@jorgerobledo.edu.co', 'Lic. Martha Lucía Pérez (Coordinadora)', 'COORDINACIÓN', 'FINGERPRINT_HASH_COORD_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'COORDINADOR', 0, 'ACTIVO'),
+
+-- 4. DOCENTE / PROFESOR (Toma de asistencia en salón / materia)
+(4, '10000004', 'DOC-PROF-01', 'docente.arango@jorgerobledo.edu.co', 'Lic. Fernando Arango (Profesor)', 'DOCENCIA', 'FINGERPRINT_HASH_DOC_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'DOCENTE', 0, 'ACTIVO'),
+
+-- 5. CELADOR / PORTERÍA (Registro biométrico de ingreso y salida en puerta)
+(5, '10000005', 'PER-CEL-01', 'porteria@jorgerobledo.edu.co', 'Don Jaime Alberto Gómez (Celador)', 'PORTERÍA', 'FINGERPRINT_HASH_CEL_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'CELADOR', 0, 'ACTIVO');
 
 -- ESTUDIANTES REALES DE LA INSTITUCIÓN EDUCATIVA JORGE ROBLEDO (515 Estudiantes por Grados)
 INSERT INTO `usuarios` (`documento`, `matricula`, `correo`, `nombre`, `grado`, `huella_template`, `password`, `rol`, `estado`) VALUES

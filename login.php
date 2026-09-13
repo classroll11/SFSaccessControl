@@ -52,6 +52,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['usuario_rol'] = $usuario['rol'];
                 $_SESSION['usuario_grado'] = $usuario['grado'];
 
+                // Verificar si tiene contraseña por defecto (123456) o flag de cambio obligatorio
+                $esPasswordPorDefecto = password_verify('123456', $usuario['password']);
+                $debeCambiar = !empty($usuario['debe_cambiar_password']) || $esPasswordPorDefecto;
+                $_SESSION['usuario_debe_cambiar_password'] = $debeCambiar ? 1 : 0;
+
+                if ($debeCambiar) {
+                    header('Location: cambiar_password.php');
+                    exit;
+                }
+
                 header('Location: dashboard.php');
                 exit;
             }
@@ -78,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <nav class="navbar">
         <a href="index.php" class="logo">
             <div class="logo-icon-emblem">
-                <img src="assets/img/sfs-logo-emblem.png" alt="SFS Logo" onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-fingerprint\'></i>'">
+                <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
             </div>
             <div class="logo-title-group">
                 <span class="logo-brand-text">SFS <span>ACCESS</span></span>
@@ -118,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Tarjeta Central: Formulario de Iniciar Sesión -->
             <div class="login-card">
                 <div class="login-icon-box">
-                    <img src="assets/img/sfs-logo-emblem.png" alt="Logo SFS Access" onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-lock\'></i>'">
+                    <img src="assets/img/logo.jpeg" alt="Logo SFS Access" onerror="this.src='logo.jpeg'">
                 </div>
                 <h2>Iniciar Sesión</h2>
                 <p class="subtitle">Ingresa tus credenciales para acceder a la plataforma</p>
@@ -206,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="footer-col">
                 <a href="index.php" class="logo" style="margin-bottom: 1.2rem; display: inline-flex;">
                     <div class="logo-icon-emblem" style="width: 32px; height: 32px;">
-                        <img src="assets/img/sfs-logo-emblem.png" alt="SFS Logo">
+                        <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
                     </div>
                     <div class="logo-title-group">
                         <span class="logo-brand-text">SFS <span>ACCESS</span></span>

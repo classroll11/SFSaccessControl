@@ -53,9 +53,20 @@ class AuthController {
                 // Guardar datos del usuario en sesión
                 $_SESSION['usuario_id'] = $usuario['id'];
                 $_SESSION['usuario_nombre'] = $usuario['nombre'];
+                $_SESSION['usuario_documento'] = $usuario['documento'] ?? '';
                 $_SESSION['usuario_rol'] = $usuario['rol'];
                 $_SESSION['usuario_grado'] = $usuario['grado'];
                 $_SESSION['usuario_correo'] = $usuario['correo'] ?? $correo;
+
+                // Verificar si tiene contraseña por defecto o debe cambiarla
+                $esPasswordPorDefecto = password_verify('123456', $usuario['password']);
+                $debeCambiar = !empty($usuario['debe_cambiar_password']) || $esPasswordPorDefecto;
+                $_SESSION['usuario_debe_cambiar_password'] = $debeCambiar ? 1 : 0;
+
+                if ($debeCambiar) {
+                    header('Location: ' . getBaseUrl() . 'cambiar_password.php');
+                    exit;
+                }
 
                 // Redirigir al Dashboard principal (acceso protegido)
                 header('Location: ' . getBaseUrl() . 'dashboard.php');
@@ -69,6 +80,61 @@ class AuthController {
 
         // Si es petición GET, mostrar página de login
         require_once __DIR__ . '/../login.php';
+    }
+
+    /**
+     * Procesa el cambio de contraseña obligatorio o voluntario.
+     */
+    public function cambiarPassword(): void {
+        if (empty($_SESSION['usuario_id'])) {
+            header('Location: ' . getBaseUrl() . 'login.php');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $passwordActual = $_POST['password_actual'] ?? '';
+            $passwordNueva = $_POST['password_nueva'] ?? '';
+            $passwordConfirmar = $_POST['password_confirmar'] ?? '';
+
+            if (empty($passwordNueva) || empty($passwordConfirmar)) {
+                $mensajeError = 'Por favor complete todos los campos de contraseña nueva.';
+                require_once __DIR__ . '/../cambiar_password.php';
+                return;
+            }
+
+            if (strlen($passwordNueva) < 6) {
+                $mensajeError = 'La nueva contraseña debe tener al menos 6 caracteres.';
+                require_once __DIR__ . '/../cambiar_password.php';
+                return;
+            }
+
+            if ($passwordNueva !== $passwordConfirmar) {
+                $mensajeError = 'Las contraseñas nuevas no coinciden.';
+                require_once __DIR__ . '/../cambiar_password.php';
+                return;
+            }
+
+            if ($passwordNueva === '123456') {
+                $mensajeError = 'No puedes usar la contraseña por defecto (123456). Elige una clave personalizada.';
+                require_once __DIR__ . '/../cambiar_password.php';
+                return;
+            }
+
+            $usuarioId = (int)$_SESSION['usuario_id'];
+            $exito = $this->usuarioModel->cambiarPassword($usuarioId, $passwordNueva);
+
+            if ($exito) {
+                $_SESSION['usuario_debe_cambiar_password'] = 0;
+                header('Location: ' . getBaseUrl() . 'dashboard.php?clave=actualizada');
+                exit;
+            } else {
+                $mensajeError = 'Error al actualizar la contraseña en el servidor.';
+                require_once __DIR__ . '/../cambiar_password.php';
+                return;
+            }
+        }
+
+        require_once __DIR__ . '/../cambiar_password.php';
     }
 
     /**

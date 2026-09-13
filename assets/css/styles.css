@@ -155,25 +155,26 @@ main {
 }
 
 .logo-icon-emblem {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: var(--radius-sm);
-    background: var(--grad-primary);
-    border: 1px solid rgba(56, 189, 248, 0.4);
+    background: #ffffff;
+    border: 1.5px solid rgba(56, 189, 248, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
     color: var(--accent-cyan);
     font-size: 1.25rem;
     transition: var(--transition);
     overflow: hidden;
+    padding: 3px;
 }
 
 .logo-icon-emblem img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .logo:hover .logo-icon-emblem {
@@ -640,26 +641,27 @@ main {
 }
 
 .login-icon-box {
-    width: 68px;
-    height: 68px;
+    width: 72px;
+    height: 72px;
     border-radius: 20px;
-    background: var(--grad-primary);
-    border: 2px solid rgba(56, 189, 248, 0.35);
+    background: #ffffff;
+    border: 2px solid rgba(56, 189, 248, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.2rem auto;
     color: var(--accent-cyan);
     font-size: 1.8rem;
-    box-shadow: 0 10px 25px rgba(10, 17, 40, 0.25);
+    box-shadow: 0 10px 25px rgba(10, 17, 40, 0.15);
     overflow: hidden;
     position: relative;
+    padding: 8px;
 }
 
 .login-icon-box img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .login-card h2 {

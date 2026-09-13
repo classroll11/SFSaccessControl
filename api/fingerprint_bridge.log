@@ -1,0 +1,33 @@
+﻿=== INICIO LOG ===
+[2026-09-06 21:57:46] INFO: WinBioAPI compilado OK.
+[2026-09-06 21:57:46] INFO: Sesion abierta handle=1
+[2026-09-06 21:58:31] INFO: WinBioAPI compilado OK.
+[2026-09-06 21:58:31] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 21:58:31] INFO: Sesion abierta handle=1
+[2026-09-06 21:58:31] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 21:59:28] INFO: WinBioAPI compilado OK.
+[2026-09-06 21:59:28] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 21:59:29] INFO: Sesion abierta handle=1
+[2026-09-06 21:59:29] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:01:37] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:01:37] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 22:01:37] INFO: Sesion abierta handle=1
+[2026-09-06 22:01:37] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:01:49] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:01:49] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 22:01:49] INFO: Sesion abierta handle=1
+[2026-09-06 22:01:49] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:02:03] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:02:03] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-09-06 22:02:04] INFO: Sesion abierta handle=1
+[2026-09-06 22:02:04] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:05:40] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:05:41] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 22:05:41] INFO: Sesion abierta handle=1
+[2026-09-06 22:05:41] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:05:55] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:05:55] INFO: Modo identify - esperando dedo...
+[2026-09-06 22:05:55] INFO: Sesion abierta handle=1
+[2026-09-06 22:06:24] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:06:24] INFO: Modo identify - esperando dedo...
+[2026-09-06 22:06:24] INFO: Sesion abierta handle=1

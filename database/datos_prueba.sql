@@ -163,12 +163,21 @@ CREATE TABLE `blog_articulos` (
 -- 5. DATOS INSTITUCIONALES (DML)
 -- ============================================================================
 
-INSERT INTO `usuarios` (`id`, `documento`, `matricula`, `correo`, `nombre`, `grado`, `huella_template`, `password`, `rol`, `estado`) VALUES
--- Directivos y Docentes (Contraseña por defecto: admin123)
-(1, '10000001', 'DOC-ADMIN-01', 'rectoria@jorgerobledo.edu.co', 'Prof. Carlos Andrés Restrepo', 'RECTORÍA', 'FINGERPRINT_HASH_ADMIN_001', '$2y$10$uowo3GisUraIhhOYoXfhoOM0qjB0mfTxrioUF0jjCn4zp0Zy.Dj9i', 'ADMINISTRADOR', 'ACTIVO'),
-(2, '10000002', 'DOC-ADMIN-02', 'sistemas@jorgerobledo.edu.co', 'Ing. Valeria Zapata', 'SISTEMAS', 'FINGERPRINT_HASH_ADMIN_002', '$2y$10$uowo3GisUraIhhOYoXfhoOM0qjB0mfTxrioUF0jjCn4zp0Zy.Dj9i', 'ADMINISTRADOR', 'ACTIVO'),
-(3, '10000003', 'DOC-ADMIN-03', 'docente.arango@jorgerobledo.edu.co', 'Lic. Fernando Arango', 'DOCENTE', 'FINGERPRINT_HASH_DOC_001', '$2y$10$uowo3GisUraIhhOYoXfhoOM0qjB0mfTxrioUF0jjCn4zp0Zy.Dj9i', 'DOCENTE', 'ACTIVO'),
-(4, '10000004', 'DOC-ADMIN-04', 'coordinacion@jorgerobledo.edu.co', 'Lic. Martha Lucía Pérez', 'COORDINACIÓN', 'FINGERPRINT_HASH_COORD_001', '$2y$10$uowo3GisUraIhhOYoXfhoOM0qjB0mfTxrioUF0jjCn4zp0Zy.Dj9i', 'ADMINISTRADOR', 'ACTIVO');
+INSERT INTO `usuarios` (`id`, `documento`, `matricula`, `correo`, `nombre`, `grado`, `huella_template`, `password`, `rol`, `debe_cambiar_password`, `estado`) VALUES
+-- 1. ADMINISTRADOR DEL SISTEMA (Control total, usuarios, estudiantes y claves)
+(1, '10000001', 'DOC-ADMIN-01', 'admin@jorgerobledo.edu.co', 'Ing. Valeria Zapata (Administrador)', 'SISTEMAS', 'FINGERPRINT_HASH_ADMIN_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'ADMINISTRADOR', 0, 'ACTIVO'),
+
+-- 2. RECTOR (Supervisión estratégica institucional y verificación de métricas)
+(2, '10000002', 'DOC-RECT-01', 'rectoria@jorgerobledo.edu.co', 'Prof. Carlos Andrés Restrepo (Rector)', 'RECTORÍA', 'FINGERPRINT_HASH_ADMIN_002', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'RECTOR', 0, 'ACTIVO'),
+
+-- 3. COORDINADOR (Supervisión de faltas, ausentismo y justificaciones)
+(3, '10000003', 'DOC-COORD-01', 'coordinacion@jorgerobledo.edu.co', 'Lic. Martha Lucía Pérez (Coordinadora)', 'COORDINACIÓN', 'FINGERPRINT_HASH_COORD_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'COORDINADOR', 0, 'ACTIVO'),
+
+-- 4. DOCENTE / PROFESOR (Toma de asistencia en salón / materia)
+(4, '10000004', 'DOC-PROF-01', 'docente.arango@jorgerobledo.edu.co', 'Lic. Fernando Arango (Profesor)', 'DOCENCIA', 'FINGERPRINT_HASH_DOC_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'DOCENTE', 0, 'ACTIVO'),
+
+-- 5. CELADOR / PORTERÍA (Registro biométrico de ingreso y salida en puerta)
+(5, '10000005', 'PER-CEL-01', 'porteria@jorgerobledo.edu.co', 'Don Jaime Alberto Gómez (Celador)', 'PORTERÍA', 'FINGERPRINT_HASH_CEL_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'CELADOR', 0, 'ACTIVO');
 
 -- ESTUDIANTES REALES DE LA INSTITUCIÓN EDUCATIVA JORGE ROBLEDO (515 Estudiantes por Grados)
 INSERT INTO `usuarios` (`documento`, `matricula`, `correo`, `nombre`, `grado`, `huella_template`, `password`, `rol`, `estado`) VALUES

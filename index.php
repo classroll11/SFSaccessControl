@@ -22,9 +22,16 @@ if (isset($_GET['c'])) {
     $accion = isset($_GET['a']) ? trim($_GET['a']) : 'index';
 
     $controladoresDisponibles = [
-        'AccesoController'  => __DIR__ . '/controllers/AccesoController.php',
-        'ReporteController' => __DIR__ . '/controllers/ReporteController.php',
-        'AuthController'    => __DIR__ . '/controllers/AuthController.php'
+        'AccesoController'       => __DIR__ . '/controllers/AccesoController.php',
+        'DashboardController'    => __DIR__ . '/controllers/DashboardController.php',
+        'AsistenciaController'   => __DIR__ . '/controllers/AsistenciaController.php',
+        'PorteriaController'     => __DIR__ . '/controllers/PorteriaController.php',
+        'HuellaController'       => __DIR__ . '/controllers/HuellaController.php',
+        'SupervisionController'  => __DIR__ . '/controllers/SupervisionController.php',
+        'HistorialController'    => __DIR__ . '/controllers/HistorialController.php',
+        'AdminController'        => __DIR__ . '/controllers/AdminController.php',
+        'ReporteController'      => __DIR__ . '/controllers/ReporteController.php',
+        'AuthController'         => __DIR__ . '/controllers/AuthController.php'
     ];
 
     if (!array_key_exists($controladorNombre, $controladoresDisponibles)) {
@@ -69,7 +76,7 @@ if (isset($_GET['c'])) {
     <nav class="navbar">
         <a href="index.php" class="logo">
             <div class="logo-icon-emblem">
-                <img src="assets/img/sfs-logo-emblem.png" alt="SFS Logo" onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-fingerprint\'></i>'">
+                <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
             </div>
             <div class="logo-title-group">
                 <span class="logo-brand-text">SFS <span>ACCESS</span></span>
@@ -172,7 +179,7 @@ if (isset($_GET['c'])) {
             <div class="footer-col">
                 <a href="index.php" class="logo" style="margin-bottom: 1.2rem; display: inline-flex;">
                     <div class="logo-icon-emblem" style="width: 32px; height: 32px;">
-                        <img src="assets/img/sfs-logo-emblem.png" alt="SFS Logo">
+                        <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
                     </div>
                     <div class="logo-title-group">
                         <span class="logo-brand-text">SFS <span>ACCESS</span></span>

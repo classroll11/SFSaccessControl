@@ -44,6 +44,8 @@ class Database {
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     // Desactivar la emulación de sentencias preparadas (máxima protección contra SQL Injection)
                     PDO::ATTR_EMULATE_PREPARES => false,
+                    // Asegurar juego de caracteres UTF-8 en cada conexión
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
                     // Mantener la conexión persistente si es requerido (opcional)
                     PDO::ATTR_PERSISTENT => false
                 ];

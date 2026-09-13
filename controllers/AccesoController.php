@@ -4,7 +4,8 @@
  * PROYECTO: SFS ACCESS CONTROL - I.E. JORGE ROBLEDO
  * ARCHIVO: controllers/AccesoController.php
  * DESCRIPCIÓN: Controlador para la lógica de validación biométrica, registro de
- *              eventos de entrada/salida y renderizado del panel principal.
+ *              eventos de entrada/salida, toma de asistencias en aula,
+ *              administración de usuarios, reinicio de claves y directivos.
  * ============================================================================
  */
 
@@ -22,36 +23,53 @@ class AccesoController {
     }
 
     /**
-     * Muestra la vista principal del Dashboard con estadísticas e historial.
+     * Muestra la vista principal del Dashboard adaptada según el rol del usuario conectado.
      */
     public function index(): void {
         requireLogin();
+
+        $rolActual = getRolActual();
         $estadisticas = $this->accesoModel->obtenerEstadisticasHoy();
         $accesosRecientes = $this->accesoModel->obtenerAccesosRecientes(15);
         $estudiantesDentro = $this->accesoModel->contarEstudiantesDentro();
         $estudiantesPorGrado = $this->accesoModel->obtenerEstudiantesDentroPorGrado();
-        $usuariosDisponibles = $this->usuarioModel->obtenerTodos();
         $estudiantesHuellas = $this->usuarioModel->obtenerEstudiantesConConteoHuellas();
         $sensores = $this->accesoModel->obtenerSensores();
 
-        // Renderizar la vista pasando las variables
+        // Datos específicos para Administrador
+        $personalUsuarios = esAdmin() ? $this->usuarioModel->obtenerPersonal() : [];
+
+        // Datos específicos para Coordinador y Rector
+        $faltasSupervision = ($rolActual === 'COORDINADOR' || $rolActual === 'RECTOR' || esAdmin()) 
+            ? $this->accesoModel->obtenerFaltasSupervision() 
+            : [];
+
+        // Resumen institucional para Rector y Coordinación
+        $resumenConsolidado = ($rolActual === 'RECTOR' || $rolActual === 'COORDINADOR' || esAdmin())
+            ? $this->accesoModel->obtenerResumenConsolidado()
+            : [];
+
+        // Lista de grados disponibles para docentes y directivos
+        $gradosDisponibles = [
+            '6°01', '6°02', '6°03',
+            '7°01', '7°02', '7°03',
+            '8°01', '8°02', '8°03',
+            '9°01', '9°02', '9°03',
+            '10°01', '10°02',
+            '11°01', '11°02'
+        ];
+
+        // Renderizar la vista pasando todas las variables
         require_once __DIR__ . '/../views/dashboard.php';
     }
 
     /**
      * Procesa la lectura biométrica (huella o documento), valida el permiso y registra el acceso.
-     * Identifica automáticamente a qué estudiante y a cuál de sus 6 dedos pertenece la huella.
-     *
-     * @param string|null $huella Hash/template de la huella dactilar capturada.
-     * @param string|null $documento Número de documento (opcional o de respaldo).
-     * @param string|null $tipoForzado 'ENTRADA', 'SALIDA' o null para autodetección.
-     * @return array Resultado estructurado del procesamiento.
      */
     public function procesarLectura(?string $huella = null, ?string $documento = null, ?string $tipoForzado = null): array {
         $huella = !empty($huella) ? trim($huella) : null;
         $documento = !empty($documento) ? trim($documento) : null;
 
-        // 1. Validar que al menos uno de los identificadores fue provisto
         if (empty($huella) && empty($documento)) {
             return [
                 'status' => 'error',
@@ -61,23 +79,18 @@ class AccesoController {
             ];
         }
 
-        // 2. Buscar al usuario en la base de datos (detecta automáticamente quién es y qué dedo usó)
         $usuario = null;
         if (!empty($huella)) {
             $usuario = $this->usuarioModel->obtenerPorHuella($huella);
         }
 
-        // Si no se encontró por huella y se envió documento, intentar por documento
         if (!$usuario && !empty($documento)) {
             $usuario = $this->usuarioModel->obtenerPorDocumento($documento);
         }
 
-        // 3. Caso: Usuario no encontrado en el sistema
         if (!$usuario) {
             $tipoEvento = $tipoForzado ? strtoupper($tipoForzado) : 'ENTRADA';
             $obs = 'Huella o documento no registrado en el sistema SFS.';
-
-            // Registrar intento fallido para auditoría de seguridad
             $registroId = $this->accesoModel->registrarAcceso(null, $tipoEvento, 'RECHAZADO', $obs);
 
             return [
@@ -90,80 +103,115 @@ class AccesoController {
             ];
         }
 
-        // Extraer dedo y slot detectados (si aplica)
         $dedoIdentificado = $usuario['dedo_identificado'] ?? 'Huella Registrada';
         $slotIdentificado = $usuario['slot_identificado'] ?? null;
 
-        // 4. Caso: Usuario encontrado pero inactivo o suspendido
         if ($usuario['estado'] !== 'ACTIVO') {
             $tipoEvento = $tipoForzado ? strtoupper($tipoForzado) : 'ENTRADA';
             $obs = "Acceso denegado: Usuario en estado '" . $usuario['estado'] . "'. Dedo: {$dedoIdentificado}";
-
             $registroId = $this->accesoModel->registrarAcceso($usuario['id'], $tipoEvento, 'RECHAZADO', $obs);
 
             return [
                 'status' => 'rechazado',
                 'codigo' => 'ESTADO_INACTIVO',
-                'mensaje' => "Acceso denegado: El usuario {$usuario['nombre']} se encuentra {$usuario['estado']}.",
+                'mensaje' => "Acceso denegado: El usuario '{$usuario['nombre']}' se encuentra en estado '{$usuario['estado']}'.",
                 'acceso_permitido' => false,
                 'usuario' => [
                     'id' => $usuario['id'],
                     'nombre' => $usuario['nombre'],
-                    'documento' => $usuario['documento'],
                     'grado' => $usuario['grado'],
-                    'rol' => $usuario['rol'],
-                    'estado' => $usuario['estado'],
-                    'dedo_identificado' => $dedoIdentificado,
-                    'slot_identificado' => $slotIdentificado
+                    'estado' => $usuario['estado']
                 ],
                 'registro_id' => $registroId,
                 'fecha_hora' => date('Y-m-d H:i:s')
             ];
         }
 
-        // 5. Caso: Usuario ACTIVO - Determinar tipo de evento (ENTRADA vs SALIDA)
-        if (!empty($tipoForzado) && in_array(strtoupper($tipoForzado), ['ENTRADA', 'SALIDA'])) {
-            $tipoEvento = strtoupper($tipoForzado);
+        $rolSesion = $_SESSION['usuario_rol'] ?? 'CELADOR';
+        $esDocente = ($rolSesion === 'DOCENTE');
+        $docenteId = (int)($_SESSION['usuario_id'] ?? 1);
+        $fechaHoy = date('Y-m-d');
+        $gradoEstudiante = $usuario['grado'] ?? 'GENERAL';
+
+        // Determinar si es toma de asistencia en aula (Docente) o registro de portería (Celador / Admin)
+        if ($esDocente) {
+            // 1. REGISTRAR ASISTENCIA A CLASE
+            $materiaDocente = $_POST['materia'] ?? ($_SESSION['usuario_grado'] ?? 'GENERAL');
+            $asistenciasMap = [
+                $usuario['id'] => 'PRESENTE'
+            ];
+            $this->accesoModel->guardarTomaAsistencia(
+                $docenteId,
+                $gradoEstudiante,
+                $fechaHoy,
+                $materiaDocente,
+                $asistenciasMap,
+                "Registro biométrico directo en aula (Dedo: {$dedoIdentificado})"
+            );
+
+            // Registrar también en el log de auditoría
+            $obs = "Asistencia en aula validada por Docente. Dedo: {$dedoIdentificado}" . ($slotIdentificado ? " (Slot {$slotIdentificado})" : '');
+            $registroId = $this->accesoModel->registrarAcceso($usuario['id'], 'ENTRADA', 'APROBADO', $obs);
+
+            return [
+                'status' => 'exito',
+                'codigo' => 'ASISTENCIA_CLASE_REGISTRADA',
+                'tipo_registro' => 'CLASE',
+                'tipo_evento' => 'PRESENTE EN CLASE',
+                'mensaje' => "¡Asistencia a clase registrada! {$usuario['nombre']} ({$gradoEstudiante}) marcado como PRESENTE.",
+                'acceso_permitido' => true,
+                'registro_id' => $registroId,
+                'usuario' => [
+                    'id' => $usuario['id'],
+                    'nombre' => $usuario['nombre'],
+                    'documento' => $usuario['documento'],
+                    'matricula' => $usuario['matricula'] ?? $usuario['documento'],
+                    'grado' => $usuario['grado'],
+                    'rol' => $usuario['rol'],
+                    'dedo' => $dedoIdentificado,
+                    'slot' => $slotIdentificado
+                ],
+                'fecha_hora' => date('Y-m-d H:i:s')
+            ];
         } else {
-            // Autodetección: Consultar el último evento aprobado de hoy
-            $ultimoEvento = $this->accesoModel->obtenerUltimoEventoUsuario($usuario['id']);
-            if ($ultimoEvento && $ultimoEvento['tipo_evento'] === 'ENTRADA') {
-                $tipoEvento = 'SALIDA';
+            // 2. REGISTRAR ACCESO EN PORTERÍA (CELADOR / ADMIN / RECTOR)
+            if ($tipoForzado) {
+                $tipoEvento = strtoupper($tipoForzado);
             } else {
-                $tipoEvento = 'ENTRADA';
+                $ultimoEvento = $this->accesoModel->obtenerUltimoEventoUsuario($usuario['id']);
+                $tipoEvento = ($ultimoEvento && $ultimoEvento['tipo_evento'] === 'ENTRADA') ? 'SALIDA' : 'ENTRADA';
             }
+
+            $obs = "Acceso en portería validado por {$rolSesion}. Dedo: {$dedoIdentificado}" . ($slotIdentificado ? " (Slot {$slotIdentificado})" : '');
+            $registroId = $this->accesoModel->registrarAcceso($usuario['id'], $tipoEvento, 'APROBADO', $obs);
+
+            return [
+                'status' => 'exito',
+                'codigo' => 'ACCESO_PORTERIA_REGISTRADO',
+                'tipo_registro' => 'PORTERIA',
+                'tipo_evento' => $tipoEvento,
+                'mensaje' => ($tipoEvento === 'ENTRADA') 
+                    ? "¡Ingreso al colegio registrado! {$usuario['nombre']} ({$gradoEstudiante}) - ENTRADA concedida." 
+                    : "¡Salida del colegio registrada! {$usuario['nombre']} ({$gradoEstudiante}) - SALIDA concedida.",
+                'acceso_permitido' => true,
+                'registro_id' => $registroId,
+                'usuario' => [
+                    'id' => $usuario['id'],
+                    'nombre' => $usuario['nombre'],
+                    'documento' => $usuario['documento'],
+                    'matricula' => $usuario['matricula'] ?? $usuario['documento'],
+                    'grado' => $usuario['grado'],
+                    'rol' => $usuario['rol'],
+                    'dedo' => $dedoIdentificado,
+                    'slot' => $slotIdentificado
+                ],
+                'fecha_hora' => date('Y-m-d H:i:s')
+            ];
         }
-
-        $obs = "Acceso concedido ({$tipoEvento}) - Dedo: {$dedoIdentificado}";
-        if ($slotIdentificado) {
-            $obs .= " (Slot {$slotIdentificado})";
-        }
-
-        // 6. Registrar acceso exitoso
-        $registroId = $this->accesoModel->registrarAcceso($usuario['id'], $tipoEvento, 'APROBADO', $obs);
-
-        return [
-            'status' => 'exito',
-            'codigo' => 'ACCESO_CONCEDIDO',
-            'mensaje' => "¡Identificado! {$usuario['nombre']} ({$usuario['grado']}) - {$dedoIdentificado}. {$tipoEvento} registrada correctamente.",
-            'acceso_permitido' => true,
-            'tipo_evento' => $tipoEvento,
-            'usuario' => [
-                'id' => $usuario['id'],
-                'nombre' => $usuario['nombre'],
-                'documento' => $usuario['documento'],
-                'grado' => $usuario['grado'],
-                'rol' => $usuario['rol'],
-                'dedo_identificado' => $dedoIdentificado,
-                'slot_identificado' => $slotIdentificado
-            ],
-            'registro_id' => $registroId,
-            'fecha_hora' => date('Y-m-d H:i:s')
-        ];
     }
 
     /**
-     * Endpoint AJAX para consultar las huellas registradas de un estudiante (hasta 6 slots).
+     * Endpoint AJAX para consultar las huellas registradas de un estudiante.
      */
     public function obtenerHuellasEstudiante(): void {
         requireLogin();
@@ -185,16 +233,21 @@ class AccesoController {
 
         echo json_encode([
             'status' => 'ok',
-            'usuario' => $usuario,
+            'usuario' => [
+                'id' => $usuario['id'],
+                'nombre' => $usuario['nombre'],
+                'documento' => $usuario['documento'],
+                'matricula' => $usuario['matricula'] ?? $usuario['documento'],
+                'grado' => $usuario['grado']
+            ],
             'huellas' => $huellas,
-            'total_registradas' => count($huellas),
-            'max_huellas' => 6
-        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            'total_registradas' => count($huellas)
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     /**
-     * Endpoint AJAX para guardar o actualizar una huella dactilar en un slot (1 al 6).
+     * Endpoint AJAX para guardar una huella dactilar en un slot específico.
      */
     public function guardarHuellaEstudiante(): void {
         requireLogin();
@@ -257,6 +310,294 @@ class AccesoController {
         exit;
     }
 
+    /* =========================================================================
+       MÓDULO: GESTIÓN DE USUARIOS Y CLAVES (ADMINISTRADOR)
+       ========================================================================= */
+
+    /**
+     * Endpoint AJAX para crear o editar un usuario del personal.
+     */
+    public function guardarUsuarioPersonal(): void {
+        requireLogin();
+        if (!esAdmin()) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Acceso no autorizado. Solo el Administrador puede gestionar usuarios.']);
+            exit;
+        }
+        header('Content-Type: application/json; charset=utf-8');
+
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $documento = trim($_POST['documento'] ?? '');
+        $nombre = trim($_POST['nombre'] ?? '');
+        $correo = trim($_POST['correo'] ?? '');
+        $rol = trim($_POST['rol'] ?? 'DOCENTE');
+        $cargo = trim($_POST['cargo'] ?? $rol);
+        $estado = trim($_POST['estado'] ?? 'ACTIVO');
+
+        if (empty($documento) || empty($nombre) || empty($correo)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Documento, Nombre y Correo son obligatorios.']);
+            exit;
+        }
+
+        $rolesPermitidos = ['ADMINISTRADOR', 'DOCENTE', 'CELADOR', 'COORDINADOR', 'RECTOR'];
+        if (!in_array($rol, $rolesPermitidos)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'El rol seleccionado no es válido.']);
+            exit;
+        }
+
+        try {
+            if ($id > 0) {
+                // Actualizar usuario existente
+                $exito = $this->usuarioModel->actualizarUsuarioPersonal($id, [
+                    'documento' => $documento,
+                    'nombre' => $nombre,
+                    'correo' => $correo,
+                    'rol' => $rol,
+                    'cargo' => $cargo,
+                    'estado' => $estado
+                ]);
+                echo json_encode([
+                    'status' => $exito ? 'ok' : 'error',
+                    'mensaje' => $exito ? 'Usuario actualizado correctamente.' : 'No se pudo actualizar el usuario.'
+                ]);
+            } else {
+                // Crear nuevo usuario (Contraseña por defecto 123456 y debe cambiarla al ingresar)
+                $nuevoId = $this->usuarioModel->crearUsuarioPersonal([
+                    'documento' => $documento,
+                    'nombre' => $nombre,
+                    'correo' => $correo,
+                    'rol' => $rol,
+                    'cargo' => $cargo,
+                    'password' => '123456',
+                    'debe_cambiar_password' => 1,
+                    'estado' => $estado
+                ]);
+                echo json_encode([
+                    'status' => 'ok',
+                    'mensaje' => "Usuario creado con éxito. Contraseña inicial por defecto: 123456 (Deberá cambiarla al ingresar).",
+                    'id' => $nuevoId
+                ]);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Error: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    /**
+     * Endpoint AJAX para reiniciar la contraseña de un usuario a '123456'.
+     */
+    public function reiniciarPassword(): void {
+        requireLogin();
+        if (!esAdmin()) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Acceso denegado.']);
+            exit;
+        }
+        header('Content-Type: application/json; charset=utf-8');
+
+        $usuarioId = isset($_POST['usuario_id']) ? (int)$_POST['usuario_id'] : 0;
+        if ($usuarioId <= 0) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'ID de usuario inválido.']);
+            exit;
+        }
+
+        $exito = $this->usuarioModel->reiniciarPasswordDefecto($usuarioId, '123456');
+
+        if ($exito) {
+            echo json_encode([
+                'status' => 'ok',
+                'mensaje' => 'Contraseña restablecida exitosamente a "123456". El usuario deberá cambiarla obligatoriamente en su próximo inicio de sesión.'
+            ]);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No se pudo restablecer la contraseña.']);
+        }
+        exit;
+    }
+
+    /**
+     * Endpoint AJAX para eliminar un usuario del sistema.
+     */
+    public function eliminarUsuario(): void {
+        requireLogin();
+        if (!esAdmin()) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Acceso denegado.']);
+            exit;
+        }
+        header('Content-Type: application/json; charset=utf-8');
+
+        $usuarioId = isset($_POST['usuario_id']) ? (int)$_POST['usuario_id'] : 0;
+        if ($usuarioId <= 0 || $usuarioId === (int)$_SESSION['usuario_id']) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No puedes eliminar tu propia cuenta en sesión o el ID es inválido.']);
+            exit;
+        }
+
+        $exito = $this->usuarioModel->eliminarUsuario($usuarioId);
+        echo json_encode([
+            'status' => $exito ? 'ok' : 'error',
+            'mensaje' => $exito ? 'Usuario eliminado del sistema.' : 'Error al eliminar el usuario.'
+        ]);
+        exit;
+    }
+
+    /* =========================================================================
+       MÓDULO: GESTIÓN DE ESTUDIANTES (ADMINISTRADOR)
+       ========================================================================= */
+
+    /**
+     * Endpoint AJAX para crear o editar un estudiante.
+     */
+    public function guardarEstudiante(): void {
+        requireLogin();
+        if (!esAdmin()) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Acceso denegado.']);
+            exit;
+        }
+        header('Content-Type: application/json; charset=utf-8');
+
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $documento = trim($_POST['documento'] ?? '');
+        $matricula = trim($_POST['matricula'] ?? $documento);
+        $nombre = trim($_POST['nombre'] ?? '');
+        $grado = trim($_POST['grado'] ?? '');
+        $estado = trim($_POST['estado'] ?? 'ACTIVO');
+
+        if (empty($documento) || empty($nombre) || empty($grado)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Documento, Nombre y Grado son obligatorios.']);
+            exit;
+        }
+
+        try {
+            if ($id > 0) {
+                $exito = $this->usuarioModel->actualizarEstudiante($id, [
+                    'documento' => $documento,
+                    'matricula' => $matricula,
+                    'nombre' => $nombre,
+                    'grado' => $grado,
+                    'estado' => $estado
+                ]);
+                echo json_encode([
+                    'status' => $exito ? 'ok' : 'error',
+                    'mensaje' => $exito ? 'Estudiante actualizado con éxito.' : 'No se pudo actualizar el estudiante.'
+                ]);
+            } else {
+                $nuevoId = $this->usuarioModel->crearEstudiante([
+                    'documento' => $documento,
+                    'matricula' => $matricula,
+                    'nombre' => $nombre,
+                    'grado' => $grado,
+                    'estado' => $estado
+                ]);
+                echo json_encode([
+                    'status' => 'ok',
+                    'mensaje' => 'Estudiante registrado con éxito en la base de datos institucional.',
+                    'id' => $nuevoId
+                ]);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Error: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    /* =========================================================================
+       MÓDULO: ASISTENCIA EN AULA (DOCENTE / PROFESOR)
+       ========================================================================= */
+
+    /**
+     * Endpoint AJAX para consultar la lista de estudiantes de un grado y su asistencia de hoy.
+     */
+    public function obtenerAsistenciaClase(): void {
+        requireLogin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $grado = trim($_GET['grado'] ?? '6°01');
+        $fecha = trim($_GET['fecha'] ?? date('Y-m-d'));
+        $materia = trim($_GET['materia'] ?? 'GENERAL');
+
+        $alumnos = $this->accesoModel->obtenerAsistenciaClase($grado, $fecha, $materia);
+
+        echo json_encode([
+            'status' => 'ok',
+            'grado' => $grado,
+            'fecha' => $fecha,
+            'materia' => $materia,
+            'alumnos' => $alumnos
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    /**
+     * Endpoint AJAX para guardar la toma de asistencia en el aula por parte del Docente.
+     */
+    public function guardarTomaAsistencia(): void {
+        requireLogin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $docenteId = (int)$_SESSION['usuario_id'];
+        $grado = trim($_POST['grado'] ?? '');
+        $fecha = trim($_POST['fecha'] ?? date('Y-m-d'));
+        $materia = trim($_POST['materia'] ?? 'GENERAL');
+        $asistenciasRaw = $_POST['asistencias'] ?? []; // JSON string o array
+
+        if (is_string($asistenciasRaw)) {
+            $asistencias = json_decode($asistenciasRaw, true) ?: [];
+        } else {
+            $asistencias = (array)$asistenciasRaw;
+        }
+
+        if (empty($grado) || empty($asistencias)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Debe seleccionar un grado y enviar las asistencias.']);
+            exit;
+        }
+
+        $exito = $this->accesoModel->guardarTomaAsistencia($docenteId, $grado, $fecha, $materia, $asistencias);
+
+        if ($exito) {
+            echo json_encode([
+                'status' => 'ok',
+                'mensaje' => "¡Asistencia para el grado {$grado} ({$materia}) guardada exitosamente!"
+            ]);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Error al guardar la planilla de asistencia.']);
+        }
+        exit;
+    }
+
+    /* =========================================================================
+       MÓDULO: SUPERVISIÓN Y JUSTIFICACIÓN DE FALTAS (COORDINADOR / RECTOR)
+       ========================================================================= */
+
+    /**
+     * Endpoint AJAX para justificar una falta de un estudiante.
+     */
+    public function justificarFalta(): void {
+        requireLogin();
+        if (!esCoordinador() && !esAdmin() && !esRector()) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Acceso denegado.']);
+            exit;
+        }
+        header('Content-Type: application/json; charset=utf-8');
+
+        $asistenciaId = isset($_POST['asistencia_id']) ? (int)$_POST['asistencia_id'] : 0;
+        $motivo = trim($_POST['motivo'] ?? 'Justificado por Coordinación');
+
+        if ($asistenciaId <= 0) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'ID de registro de asistencia inválido.']);
+            exit;
+        }
+
+        $exito = $this->accesoModel->justificarFalta($asistenciaId, $motivo);
+
+        if ($exito) {
+            echo json_encode([
+                'status' => 'ok',
+                'mensaje' => 'Falta justificada exitosamente con registro en el historial institucional.'
+            ]);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No se pudo registrar la justificación.']);
+        }
+        exit;
+    }
+
     /**
      * Endpoint AJAX para retornar los accesos recientes y estadísticas en JSON (actualización en tiempo real).
      */
@@ -272,7 +613,7 @@ class AccesoController {
             'estadisticas' => $stats,
             'por_grado' => $porGrado,
             'historial' => $historial
-        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
