@@ -157,13 +157,6 @@ $movimientos = $accesoModel->obtenerAccesosRecientes(5);
                     </div>
                 </a>
 
-                <a href="index.php?c=reporte&a=exportarCsv" class="quick-action-item">
-                    <i class="fa-solid fa-file-csv" style="font-size: 1.3rem; color: #10b981;"></i>
-                    <div>
-                        <strong style="display: block; font-size: 0.92rem;">Descargar Reporte Hoy</strong>
-                        <span style="font-size: 0.78rem; color: var(--text-muted);">Exportar listado de asistencia en CSV</span>
-                    </div>
-                </a>
 
                 <a href="index.php?c=auth&a=logout" class="quick-action-item danger">
                     <i class="fa-solid fa-power-off" style="font-size: 1.3rem; color: #dc2626;"></i>

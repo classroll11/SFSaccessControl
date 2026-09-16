@@ -320,9 +320,14 @@ function writeStatus(array $data): void {
 }
 
 function launchBackground(string $cmd): void {
-    // Windows: lanzar proceso desacoplado con popen (no bloqueante)
-    $handle = popen('start /B ' . $cmd . ' > NUL 2>&1', 'r');
+    // Windows: usar wmic para lanzar el proceso en la sesión interactiva del usuario.
+    // Esto es necesario porque Apache corre como servicio y WBF requiere sesión activa.
+    $wmicCmd = 'wmic process call create "' . addslashes($cmd) . '" > NUL 2>&1';
+    $handle = popen($wmicCmd, 'r');
     if ($handle) pclose($handle);
+    // Fallback con start /B si wmic falla
+    // $handle = popen('start /B ' . $cmd . ' > NUL 2>&1', 'r');
+    // if ($handle) pclose($handle);
 }
 
 function respondError(string $code, string $msg, int $http = 400): void {

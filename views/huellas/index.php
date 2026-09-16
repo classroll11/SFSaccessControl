@@ -42,7 +42,7 @@ ob_start();
             <div class="card-surface h-100 p-3">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <h6 class="fw-bold mb-0">Seleccionar Estudiante</h6>
-                    <span class="badge bg-primary bg-opacity-10 text-primary small fw-bold">
+                    <span class="badge bg-primary bg-opacity-10 text-primary small fw-bold" id="contador-estudiantes-badge">
                         <?= count($estudiantesHuellas) ?> Alumnos
                     </span>
                 </div>
@@ -50,13 +50,22 @@ ob_start();
 
                 <!-- Buscador rápido -->
                 <div class="position-relative mb-3">
-                    <input type="text" class="form-control form-control-sm ps-4 rounded-pill" id="buscador-estudiantes"
-                           placeholder="Buscar por nombre, documento o grado..." onkeyup="filtrarEstudiantes()">
+                    <input type="text" class="form-control form-control-sm ps-4 pe-4 rounded-pill" id="buscador-estudiantes"
+                           placeholder="Buscar por nombre, documento o grado..." oninput="filtrarEstudiantes()" onkeyup="filtrarEstudiantes()">
                     <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left:12px; top:50%; transform:translateY(-50%); font-size:0.75rem;"></i>
+                    <button type="button" id="btn-limpiar-busqueda" class="btn btn-link position-absolute text-muted p-0 d-none"
+                            style="right:12px; top:50%; transform:translateY(-50%); font-size:0.75rem; text-decoration:none;"
+                            onclick="limpiarBuscadorEstudiantes()" title="Limpiar búsqueda">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
                 </div>
 
                 <!-- Lista de estudiantes con scroll -->
                 <div class="d-flex flex-column gap-2" id="lista-estudiantes-container" style="max-height: 540px; overflow-y: auto; padding-right: 4px;">
+                    <div id="sin-resultados-busqueda" class="text-center py-4 text-muted small d-none">
+                        <i class="fa-solid fa-magnifying-glass d-block mb-2 text-secondary" style="font-size:1.5rem; opacity:0.4;"></i>
+                        No se encontraron estudiantes que coincidan con la búsqueda.
+                    </div>
                     <?php if (empty($estudiantesHuellas)): ?>
                         <div class="text-center py-4 text-muted small">No hay estudiantes cargados en el sistema.</div>
                     <?php else: ?>
@@ -170,8 +179,8 @@ ob_start();
                             </select>
                         </div>
                         <div class="col-12 col-md-4">
-                            <button type="button" class="btn btn-primary btn-sm w-100 fw-semibold" onclick="asignarHuellaDirecta()">
-                                <i class="fa-solid fa-fingerprint me-1"></i> Capturar y Guardar
+                            <button type="button" class="btn btn-primary btn-sm w-100 fw-semibold" id="btn-capturar-huella" onclick="iniciarCapturaSensor()">
+                                <i class="fa-solid fa-fingerprint me-1"></i> Escanear Huella
                             </button>
                         </div>
                         <div class="col-12 col-md-3">
@@ -179,6 +188,11 @@ ob_start();
                                 Cancelar
                             </button>
                         </div>
+                    </div>
+                    <!-- Estado del sensor durante enrolamiento -->
+                    <div id="sensor-enroll-status" class="d-none mt-2 p-2 rounded-2 text-center" style="background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2);">
+                        <i class="fa-solid fa-fingerprint fa-beat-fade text-primary me-2"></i>
+                        <span id="sensor-enroll-msg" class="small fw-semibold text-primary">Coloca el dedo sobre el lector...</span>
                     </div>
                 </div>
 
@@ -202,12 +216,65 @@ const DEDOS_EMOJI = {
     'Anular Izquierdo': '💍', 'Menique Izquierdo': '🤙'
 };
 
+function normalizarTexto(str) {
+    return (str || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[°º\-]/g, ' ')
+        .trim();
+}
+
 function filtrarEstudiantes() {
-    const q = document.getElementById('buscador-estudiantes').value.toLowerCase().trim();
+    const input = document.getElementById('buscador-estudiantes');
+    if (!input) return;
+    const rawVal = input.value;
+    const q = normalizarTexto(rawVal);
+    const terminos = q.split(/\s+/).filter(t => t.length > 0);
+
+    const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
+    if (btnLimpiar) {
+        btnLimpiar.classList.toggle('d-none', rawVal.trim().length === 0);
+    }
+
+    let visibles = 0;
     document.querySelectorAll('.estudiante-item').forEach(el => {
-        const txt = (el.dataset.nombre + ' ' + el.dataset.doc + ' ' + (el.dataset.matricula || '') + ' ' + el.dataset.grado).toLowerCase();
-        el.style.display = txt.includes(q) ? '' : 'none';
+        const rawTxt = (el.dataset.nombre || '') + ' ' + (el.dataset.doc || '') + ' ' + (el.dataset.matricula || '') + ' ' + (el.dataset.grado || '');
+        const txt = normalizarTexto(rawTxt);
+
+        const match = terminos.length === 0 || terminos.every(term => txt.includes(term));
+
+        if (match) {
+            el.classList.remove('d-none');
+            el.classList.add('d-flex');
+            el.style.removeProperty('display');
+            visibles++;
+        } else {
+            el.classList.remove('d-flex');
+            el.classList.add('d-none');
+            el.style.setProperty('display', 'none', 'important');
+        }
     });
+
+    const contador = document.getElementById('contador-estudiantes-badge');
+    if (contador) {
+        contador.textContent = `\${visibles} \${visibles === 1 ? 'Alumno' : 'Alumnos'}`;
+    }
+
+    const sinResultados = document.getElementById('sin-resultados-busqueda');
+    if (sinResultados) {
+        sinResultados.classList.toggle('d-none', visibles > 0);
+    }
+}
+
+function limpiarBuscadorEstudiantes() {
+    const input = document.getElementById('buscador-estudiantes');
+    if (input) {
+        input.value = '';
+        input.focus();
+        filtrarEstudiantes();
+    }
 }
 
 async function seleccionarEstudiante(id, nombre, grado, matricula = '') {
@@ -263,18 +330,26 @@ function renderizarSlotsHuellas(huellas, totalRegistradas) {
             const emoji = DEDOS_EMOJI[huella.dedo] || '👆';
             html += `
                 <div class="finger-slot registered" onclick="abrirFormHuella(\${slot})" data-slot="\${slot}">
+                    <span class="slot-number-badge">S\${slot}</span>
                     <span class="slot-badge"><i class="fa-solid fa-check"></i></span>
-                    <span class="slot-delete" onclick="eliminarSlot(event, \${slot})" title="Eliminar huella"><i class="fa-solid fa-times"></i></span>
-                    <span class="fs-4 d-block mb-1">\${emoji}</span>
-                    <div class="small fw-bold text-success">\${huella.dedo}</div>
-                    <div style="font-size:0.68rem; color:#059669;">Slot \${slot} &bull; Registrado</div>
+                    <span class="slot-delete" onclick="eliminarSlot(event, \${slot})" title="Eliminar huella"><i class="fa-solid fa-trash-can"></i></span>
+                    <div class="mb-2" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#059669,#10b981);display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 3px 10px rgba(16,185,129,0.3);">
+                        \${emoji}
+                    </div>
+                    <div class="fw-bold text-success" style="font-size:0.78rem;line-height:1.2;">\${huella.dedo}</div>
+                    <div class="mt-1 px-2" style="font-size:0.62rem;background:rgba(16,185,129,0.12);color:#059669;border-radius:20px;font-weight:700;">
+                        \u2713 Registrado
+                    </div>
                 </div>`;
         } else {
             html += `
                 <div class="finger-slot" onclick="abrirFormHuella(\${slot})" data-slot="\${slot}">
-                    <span class="fs-4 d-block mb-1 text-muted opacity-50"><i class="fa-regular fa-hand"></i></span>
-                    <div class="small text-muted fw-bold">Slot \${slot}</div>
-                    <small style="font-size:0.68rem;" class="text-primary fw-semibold">+ Enrolar</small>
+                    <span class="slot-number-badge">S\${slot}</span>
+                    <div class="mb-2" style="width:44px;height:44px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;">
+                        <i class="fa-solid fa-fingerprint" style="font-size:1.2rem;color:#94a3b8;"></i>
+                    </div>
+                    <div class="fw-semibold text-muted" style="font-size:0.78rem;">Vac\u00edo</div>
+                    <div class="mt-1" style="font-size:0.7rem;color:#2563eb;font-weight:700;">+ Enrolar</div>
                 </div>`;
         }
     }
@@ -296,28 +371,94 @@ function abrirFormHuella(slotNumero) {
     form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-async function asignarHuellaDirecta() {
+let enrollPollingInterval = null;
+
+async function iniciarCapturaSensor() {
     const dedo = document.getElementById('form-dedo').value;
     if (!dedo) { alert('Selecciona el dedo a registrar.'); return; }
     const slot = huellasState.slotActivo;
     if (!slot || !huellasState.usuarioId) return;
 
-    const chars = '0123456789abcdef';
-    let hash = 'bio_';
-    for (let i = 0; i < 28; i++) hash += chars[Math.floor(Math.random() * chars.length)];
+    const btnCapturar = document.getElementById('btn-capturar-huella');
+    const statusBox = document.getElementById('sensor-enroll-status');
+    const statusMsg = document.getElementById('sensor-enroll-msg');
 
+    // UI: sensor activo
+    if (btnCapturar) {
+        btnCapturar.disabled = true;
+        btnCapturar.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Esperando sensor...';
+    }
+    if (statusBox) statusBox.classList.remove('d-none');
+    if (statusMsg) statusMsg.textContent = 'Activando sensor... coloca el dedo sobre el lector.';
+
+    // Lanzar enrolamiento en el sensor
     try {
         const fd = new FormData();
         fd.append('usuario_id', huellasState.usuarioId);
-        fd.append('slot_numero', slot);
+        fd.append('slot', slot);
         fd.append('dedo', dedo);
-        fd.append('huella_template', hash);
+        await fetch('api/fingerprint_controller.php?action=launch_enroll', { method: 'POST', body: fd });
+    } catch(e) {}
 
-        const resp = await fetch('index.php?c=acceso&a=guardarHuellaEstudiante', { method: 'POST', body: fd });
-        const data = await resp.json();
-        alert(data.mensaje);
-        await cargarHuellasEstudiante(huellasState.usuarioId);
-    } catch (e) { alert('Error al guardar huella.'); }
+    // Polling del estado del sensor
+    let intentos = 0;
+    if (enrollPollingInterval) clearInterval(enrollPollingInterval);
+    enrollPollingInterval = setInterval(async () => {
+        intentos++;
+        if (intentos > 60) {
+            clearInterval(enrollPollingInterval);
+            if (btnCapturar) {
+                btnCapturar.disabled = false;
+                btnCapturar.innerHTML = '<i class="fa-solid fa-fingerprint me-1"></i> Escanear Huella';
+            }
+            if (statusBox) statusBox.classList.add('d-none');
+            alert('Tiempo de espera agotado. Intenta de nuevo.');
+            return;
+        }
+
+        try {
+            const resp = await fetch('api/fingerprint_controller.php?action=poll');
+            const data = await resp.json();
+
+            if (statusMsg) statusMsg.textContent = data.mensaje || 'Esperando huella...';
+
+            if (data.status === 'enrolado' && data.identity_hex) {
+                clearInterval(enrollPollingInterval);
+
+                // Guardar la huella real capturada por el sensor
+                const sfd = new FormData();
+                sfd.append('usuario_id', huellasState.usuarioId);
+                sfd.append('slot', slot);
+                sfd.append('dedo', dedo);
+                sfd.append('identity_hex', data.identity_hex);
+
+                const saveResp = await fetch('api/fingerprint_controller.php?action=save_enrolled', { method: 'POST', body: sfd });
+                const saveData = await saveResp.json();
+
+                if (btnCapturar) {
+                    btnCapturar.disabled = false;
+                    btnCapturar.innerHTML = '<i class="fa-solid fa-fingerprint me-1"></i> Escanear Huella';
+                }
+                if (statusBox) statusBox.classList.add('d-none');
+
+                if (saveData.status === 'ok') {
+                    alert('✅ ' + saveData.mensaje);
+                    await cargarHuellasEstudiante(huellasState.usuarioId);
+                } else {
+                    alert('⚠️ ' + (saveData.mensaje || 'Error al guardar la huella.'));
+                }
+
+            } else if (data.status === 'error') {
+                clearInterval(enrollPollingInterval);
+                if (btnCapturar) {
+                    btnCapturar.disabled = false;
+                    btnCapturar.innerHTML = '<i class="fa-solid fa-fingerprint me-1"></i> Escanear Huella';
+                }
+                if (statusBox) statusBox.classList.add('d-none');
+                alert('Error del sensor: ' + (data.mensaje || 'Inténtalo de nuevo.'));
+            }
+        } catch(e) {}
+    }, 600);
 }
 
 async function eliminarSlot(event, slotNumero) {
@@ -335,7 +476,15 @@ async function eliminarSlot(event, slotNumero) {
 }
 
 function cancelarRegistroHuella() {
+    if (enrollPollingInterval) clearInterval(enrollPollingInterval);
     document.getElementById('form-registro-huella').classList.add('d-none');
+    const statusBox = document.getElementById('sensor-enroll-status');
+    if (statusBox) statusBox.classList.add('d-none');
+    const btnCapturar = document.getElementById('btn-capturar-huella');
+    if (btnCapturar) {
+        btnCapturar.disabled = false;
+        btnCapturar.innerHTML = '<i class="fa-solid fa-fingerprint me-1"></i> Escanear Huella';
+    }
 }
 JS;
 

@@ -114,28 +114,30 @@ ob_start();
                     </span>
                 </div>
 
-                <div class="p-4 rounded-4 mb-3 text-center" style="background: radial-gradient(circle at center, #0f2347 0%, #060b18 90%); border: 1px solid rgba(56,189,248,0.25);">
-                    <div class="biometric-pulse mx-auto mb-3" style="width:90px;height:90px;cursor:pointer;" onclick="escanearDirectoPorteria()" title="Haz clic para escanear">
-                        <i class="fa-solid fa-fingerprint" style="font-size:3rem; color:#38bdf8;"></i>
-                    </div>
-                    <h6 class="text-white fw-bold mb-1">Coloca el dedo sobre el sensor digital</h6>
-                    <p class="text-white-50 small mb-3">El sistema detectará el estudiante y registrará Entrada o Salida de forma automática.</p>
+                <!-- Visor Interactivo del Lector Biométrico -->
+                <div class="biometric-scanner-box mb-3 text-center position-relative" id="scanner-box" style="cursor:pointer;" onclick="activarHuelleroPorteria()">
+                    <div class="scanner-beam d-none" id="scanner-beam"></div>
                     
-                    <div class="d-flex justify-content-center gap-2 flex-wrap">
-                        <button class="btn btn-primary rounded-pill px-4 fw-semibold" id="btn-escanear-directo" onclick="escanearDirectoPorteria()">
+                    <div class="biometric-pulse mx-auto mb-3" id="scanner-pulse-icon" style="width:90px;height:90px;" title="Haz clic para activar sensor">
+                        <i class="fa-solid fa-fingerprint" id="scanner-icon-img" style="font-size:3.2rem; color:#38bdf8; transition: all 0.3s ease;"></i>
+                    </div>
+
+                    <h5 class="text-white fw-bold mb-1" id="scanner-titulo">Sensor Biométrico Digital</h5>
+                    <p class="text-white-50 small mb-3" id="scanner-subtitulo">Haz clic en el botón o sobre el sensor para iniciar la lectura</p>
+                    
+                    <div class="d-flex justify-content-center gap-2 flex-wrap" onclick="event.stopPropagation()">
+                        <button class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm" id="btn-escanear-directo" onclick="activarHuelleroPorteria()">
                             <i class="fa-solid fa-fingerprint me-2"></i> Escanear Huella Ahora
                         </button>
-                        <button class="btn btn-outline-info rounded-pill px-3 fw-semibold btn-sm" onclick="escanearDemoPorteria('HUELLA_HEX_SAMPLE_001')">
-                            <i class="fa-solid fa-vial me-1"></i> Probar Huella 1
-                        </button>
-                        <button class="btn btn-outline-info rounded-pill px-3 fw-semibold btn-sm" onclick="escanearDemoPorteria('HUELLA_HEX_SAMPLE_002')">
-                            <i class="fa-solid fa-vial me-1"></i> Probar Huella 2
+                        <button class="btn btn-outline-danger rounded-pill px-3 fw-semibold btn-sm d-none" id="btn-cancelar-escaneo" onclick="cancelarEscaneoPorteria()">
+                            <i class="fa-solid fa-xmark me-1"></i> Cancelar
                         </button>
                     </div>
+
                 </div>
 
-                <!-- Alerta de resultado en vivo -->
-                <div id="live-alert" class="alert d-none py-3 px-3 rounded-3" role="alert"></div>
+                <!-- Alerta y tarjeta de resultado en vivo -->
+                <div id="live-alert" class="d-none mb-3"></div>
 
                 <!-- Formulario manual / simulador de contingencia -->
                 <div class="p-3 bg-light rounded-3 border">
@@ -211,7 +213,7 @@ ob_start();
                 <small class="text-muted">Actualización automática cada 5 segundos</small>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <input type="text" class="form-control form-control-sm rounded-pill" id="buscador-porteria" placeholder="Filtrar por nombre o doc..." onkeyup="filtrarTablaPorteria()" style="max-width:240px;">
+                <input type="text" class="form-control form-control-sm rounded-pill" id="buscador-porteria" placeholder="Filtrar por nombre o doc..." oninput="filtrarTablaPorteria()" onkeyup="filtrarTablaPorteria()" style="max-width:240px;">
                 <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="recargarDatosHistorial()">
                     <i class="fa-solid fa-rotate me-1"></i> Actualizar
                 </button>
@@ -290,44 +292,295 @@ $tituloPagina = 'Terminal de Portería';
 $breadcrumb = 'Control de Portería';
 
 $scriptExtra = <<<JS
-async function escanearDirectoPorteria(template = null) {
-    const huella = template || prompt('Ingresa el template o código de huella a escanear (o presiona Aceptar para prueba automática):', 'HUELLA_HEX_SAMPLE_001');
-    if (!huella) return;
+let scannerPollingInterval = null;
+let escanerActivo = false;
 
-    await enviarLecturaPorteria(huella);
-}
-
-function escanearDemoPorteria(template) {
-    enviarLecturaPorteria(template);
-}
-
-async function enviarLecturaPorteria(huella) {
-    const alertBox = document.getElementById('live-alert');
-    const btn = document.getElementById('btn-escanear-directo');
-    if (btn) btn.disabled = true;
-
-    const fd = new FormData();
-    fd.append('huella', huella);
-
+function reproducirSonidoBiometrico(tipo) {
     try {
-        const resp = await fetch('index.php?c=acceso&a=simularManual', { method: 'POST', body: fd });
-        const data = await resp.json();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-        alertBox.classList.remove('d-none', 'alert-success', 'alert-danger');
-        if (data.status === 'exito') {
-            alertBox.classList.add('alert-success');
-            alertBox.innerHTML = `<strong><i class="fa-solid fa-circle-check me-1"></i> \${data.mensaje}</strong><br><small>Estudiante: \${data.usuario ? data.usuario.nombre : ''} (\${data.usuario ? data.usuario.grado : ''}) - Movimiento: \${data.tipo_evento} - Dedo: \${data.usuario ? data.usuario.dedo : ''}</small>`;
-        } else {
-            alertBox.classList.add('alert-danger');
-            alertBox.innerHTML = `<strong><i class="fa-solid fa-triangle-exclamation me-1"></i> \${data.mensaje}</strong>`;
+        if (tipo === 'exito') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+        } else if (tipo === 'rechazado') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(164.81, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        } else if (tipo === 'beep') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(700, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+    } catch(e) {}
+}
+
+async function activarHuelleroPorteria() {
+    if (escanerActivo) {
+        cancelarEscaneoPorteria();
+        return;
+    }
+    
+    escanerActivo = true;
+    reproducirSonidoBiometrico('beep');
+
+    const box = document.getElementById('scanner-box');
+    const beam = document.getElementById('scanner-beam');
+    const icon = document.getElementById('scanner-icon-img');
+    const titulo = document.getElementById('scanner-titulo');
+    const subtitulo = document.getElementById('scanner-subtitulo');
+    const btnEscanear = document.getElementById('btn-escanear-directo');
+    const btnCancelar = document.getElementById('btn-cancelar-escaneo');
+    const quickTest = document.getElementById('scanner-quick-test');
+    const alertBox = document.getElementById('live-alert');
+
+    if (alertBox) alertBox.classList.add('d-none');
+
+    // UI de Huellero Activo
+    if (beam) beam.classList.remove('d-none');
+    if (icon) {
+        icon.className = 'fa-solid fa-fingerprint';
+        icon.style.color = '#38bdf8';
+        icon.classList.add('fa-beat-fade');
+    }
+    if (box) {
+        box.style.borderColor = '#38bdf8';
+        box.style.boxShadow = '0 0 25px rgba(56, 189, 248, 0.35)';
+    }
+    if (titulo) titulo.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2 text-info"></i> Huellero Activo';
+    if (subtitulo) subtitulo.innerHTML = 'Coloca el dedo sobre el lector biométrico para verificar...';
+    if (btnEscanear) {
+        btnEscanear.classList.replace('btn-primary', 'btn-info');
+        btnEscanear.innerHTML = '<i class="fa-solid fa-fingerprint fa-bounce me-2"></i> Esperando huella...';
+    }
+    if (btnCancelar) btnCancelar.classList.remove('d-none');
+    if (quickTest) quickTest.classList.remove('d-none');
+
+    // Iniciar el listener de hardware físico en background
+    try {
+        await fetch('api/fingerprint_controller.php?action=launch_identify');
+    } catch(e) {}
+
+    // Polling del estado del lector físico
+    let intentos = 0;
+    scannerPollingInterval = setInterval(async () => {
+        intentos++;
+        if (intentos > 40) {
+            cancelarEscaneoPorteria('Tiempo de espera finalizado. Presiona Escanear para reactivar.');
+            return;
         }
 
-        recargarDatosHistorial();
-    } catch(e) {
-        alert('Error al validar lectura biométrica.');
-    } finally {
-        if (btn) btn.disabled = false;
+        try {
+            const resp = await fetch('api/fingerprint_controller.php?action=poll');
+            const data = await resp.json();
+
+            if (data.status === 'identificado' && data.identity_hex) {
+                clearInterval(scannerPollingInterval);
+                await procesarHuellaDetectada(data.identity_hex, data.dedo);
+            } else if (data.status === 'no_registrado') {
+                clearInterval(scannerPollingInterval);
+                mostrarResultadoLectura({
+                    status: 'rechazado',
+                    codigo: 'NO_ENCONTRADO',
+                    mensaje: 'Huella no reconocida: No se encontró ningún estudiante con esa huella.'
+                });
+            } else if (data.status === 'error') {
+                clearInterval(scannerPollingInterval);
+                cancelarEscaneoPorteria('Error del sensor: ' + (data.mensaje || 'Inténtalo de nuevo'));
+            }
+        } catch(e) {}
+    }, 600);
+}
+
+function cancelarEscaneoPorteria(mensaje = null) {
+    escanerActivo = false;
+    if (scannerPollingInterval) clearInterval(scannerPollingInterval);
+
+    const box = document.getElementById('scanner-box');
+    const beam = document.getElementById('scanner-beam');
+    const icon = document.getElementById('scanner-icon-img');
+    const titulo = document.getElementById('scanner-titulo');
+    const subtitulo = document.getElementById('scanner-subtitulo');
+    const btnEscanear = document.getElementById('btn-escanear-directo');
+    const btnCancelar = document.getElementById('btn-cancelar-escaneo');
+    const quickTest = document.getElementById('scanner-quick-test');
+
+    if (beam) beam.classList.add('d-none');
+    if (icon) {
+        icon.className = 'fa-solid fa-fingerprint';
+        icon.style.color = '#38bdf8';
+        icon.classList.remove('fa-beat-fade');
     }
+    if (box) {
+        box.style.borderColor = 'rgba(56,189,248,0.25)';
+        box.style.boxShadow = 'none';
+    }
+    if (titulo) titulo.textContent = 'Sensor Biométrico Digital';
+    if (subtitulo) subtitulo.textContent = mensaje || 'Haz clic en el botón o sobre el sensor para iniciar la lectura';
+    if (btnEscanear) {
+        btnEscanear.classList.replace('btn-info', 'btn-primary');
+        btnEscanear.innerHTML = '<i class="fa-solid fa-fingerprint me-2"></i> Escanear Huella Ahora';
+    }
+    if (btnCancelar) btnCancelar.classList.add('d-none');
+    if (quickTest) quickTest.classList.add('d-none');
+}
+
+async function procesarHuellaDetectada(huellaTemplate, dedo) {
+    if (scannerPollingInterval) clearInterval(scannerPollingInterval);
+    escanerActivo = false;
+
+    const beam = document.getElementById('scanner-beam');
+    const titulo = document.getElementById('scanner-titulo');
+    const subtitulo = document.getElementById('scanner-subtitulo');
+    const btnEscanear = document.getElementById('btn-escanear-directo');
+    const btnCancelar = document.getElementById('btn-cancelar-escaneo');
+
+    if (beam) beam.classList.add('d-none');
+    if (btnCancelar) btnCancelar.classList.add('d-none');
+
+    if (titulo) titulo.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2 text-info"></i> Verificando huella...';
+    if (subtitulo) subtitulo.textContent = 'Consultando base de datos institucional...';
+
+    try {
+        const fd = new FormData();
+        fd.append('identity_hex', huellaTemplate);
+        if (dedo) fd.append('dedo', dedo);
+
+        const resp = await fetch('api/fingerprint_controller.php?action=process_identity', { method: 'POST', body: fd });
+        const data = await resp.json();
+        mostrarResultadoLectura(data);
+    } catch(err) {
+        mostrarResultadoLectura({
+            status: 'rechazado',
+            codigo: 'ERROR_CONEXION',
+            mensaje: 'Error de comunicación con el servidor al procesar la huella.'
+        });
+    }
+}
+
+function mostrarResultadoLectura(data) {
+    const box = document.getElementById('scanner-box');
+    const icon = document.getElementById('scanner-icon-img');
+    const titulo = document.getElementById('scanner-titulo');
+    const subtitulo = document.getElementById('scanner-subtitulo');
+    const btnEscanear = document.getElementById('btn-escanear-directo');
+    const alertBox = document.getElementById('live-alert');
+
+    const esExito = (data.status === 'exito' || data.acceso_permitido === true);
+
+    if (esExito) {
+        reproducirSonidoBiometrico('exito');
+
+        if (box) {
+            box.style.borderColor = '#10b981';
+            box.style.boxShadow = '0 0 30px rgba(16, 185, 129, 0.45)';
+        }
+        if (icon) {
+            icon.className = 'fa-solid fa-circle-check';
+            icon.style.color = '#34d399';
+            icon.classList.remove('fa-beat-fade');
+        }
+        if (titulo) titulo.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-circle-check me-2"></i> \${data.tipo_evento === 'ENTRADA' ? '¡ENTRADA REGISTRADA!' : '¡SALIDA REGISTRADA!'}</span>`;
+        if (subtitulo) {
+            const nom = data.usuario ? data.usuario.nombre : 'Estudiante';
+            const gr = data.usuario ? data.usuario.grado : '';
+            subtitulo.innerHTML = `<strong>\${nom}</strong> (\${gr}) &bull; Huella reconocida correctamente`;
+        }
+
+        if (alertBox) {
+            alertBox.classList.remove('d-none');
+            const u = data.usuario || {};
+            const partes = (u.nombre || 'ST').trim().split(' ');
+            const iniciales = ((partes[0]?.[0] || '') + (partes[1]?.[0] || '')).toUpperCase();
+            const ahora = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            
+            alertBox.innerHTML = `
+                <div class="p-3 rounded-3 border border-success bg-white shadow-sm d-flex align-items-center gap-3">
+                    <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm"
+                         style="width:52px;height:52px;font-size:1.15rem;background:linear-gradient(135deg,#059669,#34d399);">
+                        \${iniciales}
+                    </div>
+                    <div class="flex-grow-1" style="min-width:0;">
+                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                            <span class="badge bg-success text-white px-3 py-1 rounded-pill fw-bold">
+                                <i class="fa-solid fa-door-open me-1"></i> ACCESO CONCEDIDO &bull; \${data.tipo_evento}
+                            </span>
+                            <span class="small text-muted fw-semibold">\${ahora}</span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0 mt-1 text-truncate">\${u.nombre || 'Estudiante'}</h5>
+                        <div class="small text-muted d-flex gap-3 flex-wrap mt-1">
+                            <span><i class="fa-solid fa-graduation-cap me-1 text-primary"></i> Grado: <strong class="text-dark">\${u.grado || '—'}</strong></span>
+                            <span><i class="fa-solid fa-id-card me-1 text-primary"></i> Documento: <strong class="text-dark">\${u.documento || '—'}</strong></span>
+                            <span><i class="fa-solid fa-fingerprint me-1 text-success"></i> Dedo: <strong class="text-dark">\${u.dedo || 'Huella principal'}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    } else {
+        reproducirSonidoBiometrico('rechazado');
+
+        if (box) {
+            box.style.borderColor = '#ef4444';
+            box.style.boxShadow = '0 0 30px rgba(239, 68, 68, 0.45)';
+        }
+        if (icon) {
+            icon.className = 'fa-solid fa-triangle-exclamation';
+            icon.style.color = '#f87171';
+            icon.classList.remove('fa-beat-fade');
+        }
+        if (titulo) titulo.innerHTML = '<span class="text-danger fw-bold"><i class="fa-solid fa-ban me-2"></i> HUELLA NO ENCONTRADA</span>';
+        if (subtitulo) subtitulo.textContent = 'No se encontró ningún estudiante con esa huella dactilar';
+
+        if (alertBox) {
+            alertBox.classList.remove('d-none');
+            const ahora = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            
+            alertBox.innerHTML = `
+                <div class="p-3 rounded-3 border border-danger bg-white shadow-sm d-flex align-items-center gap-3">
+                    <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm"
+                         style="width:52px;height:52px;font-size:1.3rem;background:linear-gradient(135deg,#dc2626,#f87171);">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between gap-2">
+                            <span class="badge bg-danger text-white px-3 py-1 rounded-pill fw-bold">
+                                <i class="fa-solid fa-ban me-1"></i> ACCESO DENEGADO
+                            </span>
+                            <span class="small text-muted fw-semibold">\${ahora}</span>
+                        </div>
+                        <h6 class="fw-bold text-danger mb-1 mt-1">Huella dactilar no reconocida</h6>
+                        <p class="small text-muted mb-2">La huella escaneada no coincide con ningún estudiante registrado en la institución.</p>
+                        <a href="huellas.php" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-semibold" style="font-size:0.75rem;">
+                            <i class="fa-solid fa-fingerprint me-1"></i> Ir a Enrolar Huellas
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    if (btnEscanear) {
+        btnEscanear.classList.replace('btn-info', 'btn-primary');
+        btnEscanear.innerHTML = '<i class="fa-solid fa-fingerprint me-2"></i> Escanear Otra Huella';
+    }
+
+    recargarDatosHistorial();
 }
 
 async function enviarSimulacion(event) {
@@ -407,15 +660,32 @@ async function recargarDatosHistorial() {
                         </tr>
                     `;
                 }).join('');
+                filtrarTablaPorteria();
             }
         }
     } catch (err) {}
 }
 
+function normalizarTextoPorteria(str) {
+    return (str || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[°º\-]/g, ' ')
+        .trim();
+}
+
 function filtrarTablaPorteria() {
-    const input = document.getElementById('buscador-porteria').value.toLowerCase();
+    const input = document.getElementById('buscador-porteria');
+    if (!input) return;
+    const q = normalizarTextoPorteria(input.value);
+    const terminos = q.split(/\s+/).filter(t => t.length > 0);
+
     document.querySelectorAll('#tabla-accesos-body tr').forEach(fila => {
-        fila.style.display = fila.textContent.toLowerCase().includes(input) ? '' : 'none';
+        const txt = normalizarTextoPorteria(fila.textContent);
+        const match = terminos.length === 0 || terminos.every(term => txt.includes(term));
+        fila.style.display = match ? '' : 'none';
     });
 }
 

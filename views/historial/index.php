@@ -26,9 +26,6 @@ ob_start();
                 </p>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a href="index.php?c=reporte&a=exportarCsv" class="btn btn-success btn-sm rounded-pill px-3 fw-semibold">
-                    <i class="fa-solid fa-file-excel me-1"></i> Exportar a CSV
-                </a>
                 <a href="dashboard.php" class="btn btn-outline-light btn-sm rounded-pill px-3">
                     <i class="fa-solid fa-arrow-left me-1"></i> Panel Principal
                 </a>
@@ -44,7 +41,7 @@ ob_start();
         <div class="row g-2 align-items-center mb-4 pb-3 border-bottom">
             <div class="col-12 col-md-5">
                 <div class="position-relative">
-                    <input type="text" class="form-control form-control-sm ps-4 rounded-pill" id="buscador-historial" placeholder="Buscar por nombre, documento o grado..." onkeyup="filtrarHistorial()">
+                    <input type="text" class="form-control form-control-sm ps-4 rounded-pill" id="buscador-historial" placeholder="Buscar por nombre, documento o grado..." oninput="filtrarHistorial()" onkeyup="filtrarHistorial()">
                     <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left:12px; top:50%; transform:translateY(-50%); font-size:0.75rem;"></i>
                 </div>
             </div>
@@ -148,18 +145,32 @@ $tituloPagina = 'Historial de Accesos';
 $breadcrumb = 'General &bull; Historial de Accesos';
 
 $scriptExtra = <<<JS
+function normalizarTextoHistorial(str) {
+    return (str || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[°º\-]/g, ' ')
+        .trim();
+}
+
 function filtrarHistorial() {
-    const q = document.getElementById('buscador-historial').value.toLowerCase().trim();
+    const input = document.getElementById('buscador-historial');
+    if (!input) return;
+    const q = normalizarTextoHistorial(input.value);
+    const terminos = q.split(/\s+/).filter(t => t.length > 0);
     const evento = document.getElementById('filtro-evento').value;
     const resultado = document.getElementById('filtro-resultado').value;
 
     let visibles = 0;
     document.querySelectorAll('.fila-historial').forEach(fila => {
-        const texto = fila.dataset.texto;
+        const rawTexto = fila.dataset.texto || fila.textContent;
+        const texto = normalizarTextoHistorial(rawTexto);
         const filaEvento = fila.dataset.evento;
         const filaResultado = fila.dataset.resultado;
 
-        const matchQ = !q || texto.includes(q);
+        const matchQ = terminos.length === 0 || terminos.every(term => texto.includes(term));
         const matchEvento = !evento || filaEvento === evento;
         const matchResultado = !resultado || filaResultado === resultado;
 

@@ -26,6 +26,9 @@ ob_start();
                 </p>
             </div>
             <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 fw-semibold shadow-sm" onclick="abrirModalReiniciarAsistencias()">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reiniciar Asistencias
+                </button>
                 <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" onclick="abrirModalCrearUsuario()">
                     <i class="fa-solid fa-user-plus me-2"></i> + Nuevo Usuario
                 </button>
@@ -58,7 +61,7 @@ ob_start();
                 <small class="text-muted">Directivos, docentes, celadores y administradores autorizados</small>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <input type="text" class="form-control form-control-sm rounded-pill" id="buscador-personal" placeholder="Buscar por nombre, correo o documento..." onkeyup="filtrarPersonal()" style="max-width:280px;">
+                <input type="text" class="form-control form-control-sm rounded-pill" id="buscador-personal" placeholder="Buscar por nombre, correo o documento..." oninput="filtrarPersonal()" onkeyup="filtrarPersonal()" style="max-width:280px;">
             </div>
         </div>
 
@@ -248,11 +251,27 @@ $tituloPagina = 'Gestión de Usuarios y Claves';
 $breadcrumb = 'Administración &bull; Usuarios y Claves';
 
 $scriptExtra = <<<JS
+function normalizarTextoPersonal(str) {
+    return (str || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[°º\-]/g, ' ')
+        .trim();
+}
+
 function filtrarPersonal() {
-    const q = document.getElementById('buscador-personal').value.toLowerCase().trim();
+    const input = document.getElementById('buscador-personal');
+    if (!input) return;
+    const q = normalizarTextoPersonal(input.value);
+    const terminos = q.split(/\s+/).filter(t => t.length > 0);
+
     document.querySelectorAll('.fila-personal').forEach(fila => {
-        const texto = fila.dataset.texto;
-        fila.style.display = (!q || texto.includes(q)) ? '' : 'none';
+        const rawTexto = fila.dataset.texto || fila.textContent;
+        const texto = normalizarTextoPersonal(rawTexto);
+        const match = terminos.length === 0 || terminos.every(term => texto.includes(term));
+        fila.style.display = match ? '' : 'none';
     });
 }
 

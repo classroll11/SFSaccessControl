@@ -1,7 +1,9 @@
 {
-    "timestamp":  "2026-09-06 22:06:24",
-    "status":  "esperando",
-    "codigo":  "LISTO",
-    "modo":  "identify",
-    "mensaje":  "Coloque el dedo sobre el lector..."
+    "status": "iniciando",
+    "codigo": "ENROLL_STARTING",
+    "mensaje": "Iniciando enrolamiento de 'Indice Derecho' para slot 1...",
+    "usuario_id": 445,
+    "slot": 1,
+    "dedo": "Indice Derecho",
+    "timestamp": "2026-09-15 05:06:26"
 }

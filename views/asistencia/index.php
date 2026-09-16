@@ -93,9 +93,6 @@ ob_start();
                 <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold" onclick="marcarTodosPresentes()">
                     <i class="fa-solid fa-check-double me-1"></i> Todos Presentes
                 </button>
-                <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold" onclick="guardarPlanillaAsistencia()">
-                    <i class="fa-solid fa-floppy-disk me-1"></i> Guardar Planilla
-                </button>
             </div>
         </div>
 
@@ -158,14 +155,6 @@ ob_start();
             </table>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-            <small class="text-muted">
-                <i class="fa-solid fa-circle-info me-1"></i> Recuerda hacer clic en <strong>Guardar Planilla</strong> al finalizar la sesión de clase.
-            </small>
-            <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" onclick="guardarPlanillaAsistencia()">
-                <i class="fa-solid fa-floppy-disk me-1"></i> Guardar Planilla
-            </button>
-        </div>
     </div>
 
 </main>
@@ -192,7 +181,7 @@ async function cargarAsistenciaAula() {
 
         if (data.status === 'ok' && data.alumnos && data.alumnos.length > 0) {
             tbody.innerHTML = data.alumnos.map((a, idx) => {
-                const estado = a.estado_asistencia || 'PRESENTE';
+                const estado = a.estado_asistencia || 'SIN_REGISTRO';
                 return `
                     <tr data-id="\${a.estudiante_id}" id="fila-est-\${a.estudiante_id}">
                         <td class="text-muted small">\${idx + 1}</td>
@@ -202,22 +191,22 @@ async function cargarAsistenciaAula() {
                         </td>
                         <td><span class="badge bg-light text-dark border">\${a.matricula || a.documento}</span></td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm asist-btn-group" role="group">
-                                <input type="radio" class="btn-check" name="asist_\${a.estudiante_id}" id="p_\${a.estudiante_id}" value="PRESENTE" \${estado === 'PRESENTE' || estado === 'SIN_REGISTRO' ? 'checked' : ''}>
-                                <label class="btn btn-outline-success" for="p_\${a.estudiante_id}">✅ Presente</label>
+                            <div class="btn-group btn-group-sm asist-btn-group" role="group" style="pointer-events: none; user-select: none;">
+                                <input type="radio" class="btn-check" name="asist_\${a.estudiante_id}" id="p_\${a.estudiante_id}" value="PRESENTE" tabindex="-1" \${estado === 'PRESENTE' ? 'checked' : ''}>
+                                <label class="btn btn-outline-success" for="p_\${a.estudiante_id}" style="cursor: default;">✅ Presente</label>
 
-                                <input type="radio" class="btn-check" name="asist_\${a.estudiante_id}" id="f_\${a.estudiante_id}" value="FALTA_INJUSTIFICADA" \${estado === 'FALTA_INJUSTIFICADA' ? 'checked' : ''}>
-                                <label class="btn btn-outline-danger" for="f_\${a.estudiante_id}">❌ Falta</label>
+                                <input type="radio" class="btn-check" name="asist_\${a.estudiante_id}" id="f_\${a.estudiante_id}" value="FALTA_INJUSTIFICADA" tabindex="-1" \${estado === 'FALTA_INJUSTIFICADA' ? 'checked' : ''}>
+                                <label class="btn btn-outline-danger" for="f_\${a.estudiante_id}" style="cursor: default;">❌ Falta</label>
 
-                                <input type="radio" class="btn-check" name="asist_\${a.estudiante_id}" id="r_\${a.estudiante_id}" value="RETARDO" \${estado === 'RETARDO' ? 'checked' : ''}>
-                                <label class="btn btn-outline-warning" for="r_\${a.estudiante_id}">⏳ Retardo</label>
+                                <input type="radio" class="btn-check" name="asist_\${a.estudiante_id}" id="r_\${a.estudiante_id}" value="RETARDO" tabindex="-1" \${estado === 'RETARDO' ? 'checked' : ''}>
+                                <label class="btn btn-outline-warning" for="r_\${a.estudiante_id}" style="cursor: default;">⏳ Retardo</label>
 
-                                <input type="radio" class="btn-check" name="asist_\${a.estudiante_id}" id="j_\${a.estudiante_id}" value="FALTA_JUSTIFICADA" \${estado === 'FALTA_JUSTIFICADA' ? 'checked' : ''}>
-                                <label class="btn btn-outline-info" for="j_\${a.estudiante_id}">📝 Justificada</label>
+                                <input type="radio" class="btn-check" name="asist_\${a.estudiante_id}" id="j_\${a.estudiante_id}" value="FALTA_JUSTIFICADA" tabindex="-1" \${estado === 'FALTA_JUSTIFICADA' ? 'checked' : ''}>
+                                <label class="btn btn-outline-info" for="j_\${a.estudiante_id}" style="cursor: default;">📝 Justificada</label>
                             </div>
                         </td>
                         <td>
-                            <input type="text" class="form-control form-control-sm input-obs" style="max-width:200px;" placeholder="Nota opcional..." value="\${a.observaciones || ''}">
+                            <input type="text" class="form-control form-control-sm input-obs" style="max-width:200px;" placeholder="Nota opcional..." value="\${a.observaciones || ''}" onchange="guardarPlanillaAsistencia(true)">
                         </td>
                     </tr>
                 `;
@@ -236,10 +225,13 @@ function marcarTodosPresentes() {
         const radio = document.getElementById(`p_\${id}`);
         if (radio) radio.checked = true;
     });
+    guardarPlanillaAsistencia(true);
 }
 
-async function guardarPlanillaAsistencia() {
-    const grado = document.getElementById('select-asist-grado').value;
+async function guardarPlanillaAsistencia(silencioso = false) {
+    const gradoSelect = document.getElementById('select-asist-grado');
+    if (!gradoSelect) return;
+    const grado = gradoSelect.value;
     const fecha = document.getElementById('input-asist-fecha').value;
     const materia = document.getElementById('input-asist-materia').value;
     const alertBox = document.getElementById('alerta-asist-aula');
@@ -253,6 +245,10 @@ async function guardarPlanillaAsistencia() {
         }
     });
 
+    if (Object.keys(asistencias).length === 0) {
+        return;
+    }
+
     const fd = new FormData();
     fd.append('grado', grado);
     fd.append('fecha', fecha);
@@ -263,17 +259,19 @@ async function guardarPlanillaAsistencia() {
         const resp = await fetch('index.php?c=acceso&a=guardarTomaAsistencia', { method: 'POST', body: fd });
         const data = await resp.json();
 
-        alertBox.classList.remove('d-none', 'alert-success', 'alert-danger');
-        if (data.status === 'ok') {
-            alertBox.classList.add('alert-success');
-            alertBox.innerHTML = `<strong><i class="fa-solid fa-circle-check me-1"></i> \${data.mensaje}</strong>`;
-        } else {
-            alertBox.classList.add('alert-danger');
-            alertBox.innerHTML = `<strong><i class="fa-solid fa-triangle-exclamation me-1"></i> \${data.mensaje}</strong>`;
+        if (!silencioso && alertBox) {
+            alertBox.classList.remove('d-none', 'alert-success', 'alert-danger');
+            if (data.status === 'ok') {
+                alertBox.classList.add('alert-success');
+                alertBox.innerHTML = `<strong><i class="fa-solid fa-circle-check me-1"></i> \${data.mensaje}</strong>`;
+            } else {
+                alertBox.classList.add('alert-danger');
+                alertBox.innerHTML = `<strong><i class="fa-solid fa-triangle-exclamation me-1"></i> \${data.mensaje}</strong>`;
+            }
+            alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-        alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (e) {
-        alert('Error al guardar la planilla de asistencia.');
+        if (!silencioso) alert('Error al guardar la planilla de asistencia.');
     }
 }
 

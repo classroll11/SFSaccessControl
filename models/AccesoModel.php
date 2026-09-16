@@ -342,4 +342,49 @@ class AccesoModel {
             return [];
         }
     }
+
+    /**
+     * Reinicia los registros de asistencia (aula y/o portería).
+     * @param string $tipo 'aula', 'acceso', 'todo'
+     * @param string $alcance 'hoy', 'todo'
+     * @return array
+     */
+    public function reiniciarRegistrosAsistencia(string $tipo = 'todo', string $alcance = 'todo'): array {
+        try {
+            $borradosAula = 0;
+            $borradosAcceso = 0;
+            $whereFechaAula = ($alcance === 'hoy') ? " WHERE fecha = CURDATE()" : "";
+            $whereFechaAcceso = ($alcance === 'hoy') ? " WHERE DATE(fecha_hora) = CURDATE()" : "";
+
+            if ($tipo === 'aula' || $tipo === 'todo') {
+                $stmt = $this->db->prepare("DELETE FROM asistencias_clase" . $whereFechaAula);
+                $stmt->execute();
+                $borradosAula = $stmt->rowCount();
+                if ($alcance === 'todo') {
+                    try { $this->db->exec("ALTER TABLE asistencias_clase AUTO_INCREMENT = 1"); } catch (Exception $e) {}
+                }
+            }
+
+            if ($tipo === 'acceso' || $tipo === 'todo') {
+                $stmt = $this->db->prepare("DELETE FROM registros_acceso" . $whereFechaAcceso);
+                $stmt->execute();
+                $borradosAcceso = $stmt->rowCount();
+                if ($alcance === 'todo') {
+                    try { $this->db->exec("ALTER TABLE registros_acceso AUTO_INCREMENT = 1"); } catch (Exception $e) {}
+                }
+            }
+
+            return [
+                'exito' => true,
+                'borrados_aula' => $borradosAula,
+                'borrados_acceso' => $borradosAcceso
+            ];
+        } catch (Exception $e) {
+            error_log("Error al reiniciar registros de asistencia: " . $e->getMessage());
+            return [
+                'exito' => false,
+                'mensaje' => $e->getMessage()
+            ];
+        }
+    }
 }

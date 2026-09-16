@@ -211,6 +211,20 @@ ob_start();
                     </div>
                 </a>
             </div>
+
+            <div class="col-12 col-md-4">
+                <a href="javascript:void(0)" onclick="abrirModalReiniciarAsistencias()" class="text-decoration-none">
+                    <div class="p-3 rounded-3 border h-100 d-flex align-items-center gap-3 bg-light hover-shadow transition" style="border-left: 4px solid #ef4444 !important;">
+                        <div class="rounded-3 p-3 text-white" style="background: linear-gradient(135deg, #dc2626, #ef4444); font-size: 1.4rem;">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-danger">Reiniciar Asistencias</h6>
+                            <p class="small text-muted mb-0">Herramienta administrativa para resetear registros de aula o portería.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
             <?php endif; ?>
         </div>
     </div>

@@ -306,20 +306,93 @@
         @keyframes scan { from { top: 0; } to { top: 100%; } }
 
         /* ── Finger slots ────────────────────────────────────── */
-        .finger-slots-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
-        .finger-slot {
-            position: relative; width: 100%; padding-top: 100%;
-            background: #f1f5f9; border: 2px dashed #cbd5e1;
-            border-radius: 16px; cursor: pointer; transition: var(--transition);
+        .finger-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
         }
-        .finger-slot:hover { border-color: #38bdf8; background: rgba(56,189,248,0.08); }
-        .finger-slot.registered { background: rgba(16,185,129,0.08); border: 2px solid rgba(16,185,129,0.4); }
-        .finger-slot.registered:hover { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.4); }
-        .finger-slot-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; text-align: center; }
-        .slot-badge { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #10b981; color: #fff; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
-        .slot-delete { position: absolute; top: -6px; left: -6px; width: 18px; height: 18px; border-radius: 50%; background: #ef4444; color: #fff; font-size: 0.55rem; display: none; align-items: center; justify-content: center; border: 2px solid #fff; cursor: pointer; }
+        .finger-slot {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 12px 16px;
+            min-height: 130px;
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            overflow: hidden;
+        }
+        .finger-slot::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            background: radial-gradient(ellipse at center, rgba(56,189,248,0.12) 0%, transparent 70%);
+        }
+        .finger-slot:hover { border-color: #38bdf8; background: #f0f9ff; }
+        .finger-slot:hover::before { opacity: 1; }
+        .finger-slot.registered {
+            background: linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(5,150,105,0.04) 100%);
+            border: 2px solid rgba(16,185,129,0.45);
+            box-shadow: 0 2px 12px rgba(16,185,129,0.1);
+        }
+        .finger-slot.registered::before {
+            background: radial-gradient(ellipse at center, rgba(16,185,129,0.1) 0%, transparent 70%);
+        }
+        .finger-slot.registered:hover {
+            background: linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(220,38,38,0.04) 100%);
+            border-color: rgba(239,68,68,0.5);
+            box-shadow: 0 2px 12px rgba(239,68,68,0.1);
+        }
+        .slot-badge {
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(16,185,129,0.35);
+        }
+        .slot-delete {
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            font-size: 0.6rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(239,68,68,0.35);
+            transition: transform 0.2s ease;
+        }
+        .slot-delete:hover { transform: scale(1.15); }
         .finger-slot.registered:hover .slot-delete { display: flex; }
         .finger-slot.registered:hover .slot-badge  { display: none; }
+        .slot-number-badge {
+            position: absolute;
+            top: 8px; left: 10px;
+            font-size: 0.6rem;
+            font-weight: 800;
+            color: #94a3b8;
+            letter-spacing: 0.03em;
+        }
+        .finger-slot.registered .slot-number-badge { color: #6ee7b7; }
         .huella-progress { height: 5px; border-radius: 99px; background: #e2e8f0; }
         .huella-progress-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #2563eb, #00f2fe); }
 
@@ -334,6 +407,14 @@
         .student-finger-card.selected { background: rgba(37,99,235,0.08) !important; border-color: #2563eb !important; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
 
         /* ── Attendance button group ─────────────────────────── */
+        .asist-btn-group {
+            pointer-events: none !important;
+            user-select: none;
+        }
+        .asist-btn-group .btn {
+            pointer-events: none !important;
+            cursor: default !important;
+        }
         .asist-btn-group .btn-check:checked + .btn-outline-success { background: #10b981; color: #fff; border-color: #10b981; }
         .asist-btn-group .btn-check:checked + .btn-outline-danger  { background: #ef4444; color: #fff; border-color: #ef4444; }
         .asist-btn-group .btn-check:checked + .btn-outline-warning { background: #f59e0b; color: #fff; border-color: #f59e0b; }
@@ -653,6 +734,14 @@
                     </span>
                     <span>Sensores & Hardware</span>
                 </a>
+
+                <a class="sb-item" href="javascript:void(0)" onclick="abrirModalReiniciarAsistencias()">
+                    <span class="sb-icon" style="background:rgba(239,68,68,0.18);color:#f87171;">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </span>
+                    <span style="color:#fca5a5; font-weight:600;">Reiniciar Asistencias</span>
+                    <span class="sb-badge" style="background:rgba(239,68,68,0.22);color:#fca5a5;border:1px solid rgba(239,68,68,0.35);">Reset</span>
+                </a>
             </div>
             <?php else: ?>
             <!-- Directorio para otros roles -->
@@ -679,14 +768,6 @@
                     <span>Sistema</span>
                     <span class="sh-line"></span>
                 </div>
-
-                <a class="sb-item" href="index.php?c=reporte&a=exportarCsv">
-                    <span class="sb-icon" style="background:rgba(16,185,129,0.12);color:#4ade80;">
-                        <i class="fa-solid fa-file-excel"></i>
-                    </span>
-                    <span>Exportar CSV</span>
-                </a>
-
                 <a class="sb-item danger" href="logout.php" onclick="return confirm('¿Deseas cerrar sesión?')" style="margin-top:0.3rem;">
                     <span class="sb-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
                     <span>Cerrar Sesión</span>
@@ -724,7 +805,6 @@
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div class="d-none d-sm-flex align-items-center gap-2">
-                    <img src="assets/img/jorge-robledo-logo.png" alt="Escudo" style="width:26px;height:26px;border-radius:50%;" onerror="this.style.display='none'">
                     <span class="fw-bold text-dark" style="font-family:'Outfit',sans-serif;font-size:0.95rem;">I.E. JORGE ROBLEDO</span>
                     <span class="text-muted small d-none d-md-inline">&bull; SFS Access Control</span>
                 </div>
@@ -762,6 +842,89 @@
     </div><!-- /.main-content -->
 </div><!-- /.app-wrapper -->
 
+<?php if (esAdmin()): ?>
+<!-- Modal Reiniciar Registros de Asistencia (Administrador) -->
+<div class="modal fade" id="modalReiniciarAsistencias" tabindex="-1" aria-labelledby="modalReiniciarAsistenciasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-danger text-white py-3 px-4">
+                <h5 class="modal-title fw-bold" id="modalReiniciarAsistenciasLabel">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> Reiniciar Registros de Asistencia
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-warning border-0 rounded-3 mb-3 d-flex align-items-start gap-2 py-2 px-3 small">
+                    <i class="fa-solid fa-circle-exclamation fs-5 text-warning mt-1"></i>
+                    <span><strong>Acción de Administrador:</strong> Esta acción limpiará los registros seleccionados en la base de datos institucional. Selecciona las opciones deseadas:</span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-dark mb-2">1. ¿Qué registros deseas reiniciar?</label>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="form-check p-2 rounded-3 border bg-light">
+                            <input class="form-check-input ms-1" type="radio" name="reinicio_tipo" id="tipo_todo" value="todo" checked>
+                            <label class="form-check-label ms-2 small fw-semibold text-dark" for="tipo_todo">
+                                <i class="fa-solid fa-layer-group text-danger me-1"></i> Todos los Registros (Aula + Portería)
+                                <span class="d-block text-muted fw-normal" style="font-size:0.75rem;">Borra listas de clases de docentes y accesos de torniquete/portería.</span>
+                            </label>
+                        </div>
+                        <div class="form-check p-2 rounded-3 border bg-light">
+                            <input class="form-check-input ms-1" type="radio" name="reinicio_tipo" id="tipo_aula" value="aula">
+                            <label class="form-check-label ms-2 small fw-semibold text-dark" for="tipo_aula">
+                                <i class="fa-solid fa-clipboard-user text-primary me-1"></i> Solo Asistencia en el Aula
+                                <span class="d-block text-muted fw-normal" style="font-size:0.75rem;">Borra los estados de listas de clases (Presentes, Faltas, Retardos).</span>
+                            </label>
+                        </div>
+                        <div class="form-check p-2 rounded-3 border bg-light">
+                            <input class="form-check-input ms-1" type="radio" name="reinicio_tipo" id="tipo_acceso" value="acceso">
+                            <label class="form-check-label ms-2 small fw-semibold text-dark" for="tipo_acceso">
+                                <i class="fa-solid fa-door-open text-success me-1"></i> Solo Accesos de Portería
+                                <span class="d-block text-muted fw-normal" style="font-size:0.75rem;">Borra el historial de ingresos y salidas del sensor de portería.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-dark mb-2">2. Alcance temporal:</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="form-check p-2 rounded-3 border bg-light h-100">
+                                <input class="form-check-input ms-1" type="radio" name="reinicio_alcance" id="alcance_hoy" value="hoy" checked>
+                                <label class="form-check-label ms-2 small fw-semibold text-dark" for="alcance_hoy">
+                                    <i class="fa-solid fa-calendar-day text-info me-1"></i> Solo Hoy
+                                    <span class="d-block text-muted fw-normal" style="font-size:0.75rem;"><?= date('d/m/Y') ?></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check p-2 rounded-3 border bg-light h-100">
+                                <input class="form-check-input ms-1" type="radio" name="reinicio_alcance" id="alcance_todo" value="todo">
+                                <label class="form-check-label ms-2 small fw-semibold text-dark" for="alcance_todo">
+                                    <i class="fa-solid fa-clock-rotate-left text-danger me-1"></i> Todo el Historial
+                                    <span class="d-block text-muted fw-normal" style="font-size:0.75rem;">Histórico completo</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="reinicio-feedback" class="alert d-none py-2 px-3 small rounded-3 mb-0"></div>
+            </div>
+            <div class="modal-footer bg-light px-4 py-3 border-top">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold btn-sm" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold btn-sm" id="btn-ejecutar-reinicio" onclick="ejecutarReinicioAsistencias()">
+                    <i class="fa-solid fa-trash-can me-1"></i> Confirmar Reinicio
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -781,6 +944,77 @@
         el.textContent = `${h}:${m} ${ampm}`;
     }
     setInterval(actualizarReloj, 30000);
+
+    /* Funciones globales de administración para reinicio de asistencias */
+    function abrirModalReiniciarAsistencias() {
+        const modalEl = document.getElementById('modalReiniciarAsistencias');
+        if (!modalEl) return;
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        const feedback = document.getElementById('reinicio-feedback');
+        if (feedback) feedback.classList.add('d-none');
+        const btn = document.getElementById('btn-ejecutar-reinicio');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-trash-can me-1"></i> Confirmar Reinicio';
+        }
+        modal.show();
+    }
+
+    async function ejecutarReinicioAsistencias() {
+        const btn = document.getElementById('btn-ejecutar-reinicio');
+        const feedback = document.getElementById('reinicio-feedback');
+        const tipo = document.querySelector('input[name="reinicio_tipo"]:checked')?.value || 'todo';
+        const alcance = document.querySelector('input[name="reinicio_alcance"]:checked')?.value || 'todo';
+
+        if (!confirm('¿Estás COMPLETAMENTE seguro(a) de que deseas reiniciar los registros seleccionados? Esta acción no se puede deshacer.')) {
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Reiniciando...';
+        }
+
+        const fd = new FormData();
+        fd.append('tipo', tipo);
+        fd.append('alcance', alcance);
+
+        try {
+            const resp = await fetch('index.php?c=admin&a=reiniciarAsistencia', {
+                method: 'POST',
+                body: fd
+            });
+            const data = await resp.json();
+
+            if (feedback) {
+                feedback.classList.remove('d-none', 'alert-success', 'alert-danger');
+                if (data.status === 'ok') {
+                    feedback.classList.add('alert-success');
+                    feedback.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> ${data.mensaje}`;
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1800);
+                } else {
+                    feedback.classList.add('alert-danger');
+                    feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${data.mensaje}`;
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-trash-can me-1"></i> Confirmar Reinicio';
+                    }
+                }
+            }
+        } catch (e) {
+            if (feedback) {
+                feedback.classList.remove('d-none');
+                feedback.classList.add('alert-danger');
+                feedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Error de comunicación con el servidor.';
+            }
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-trash-can me-1"></i> Confirmar Reinicio';
+            }
+        }
+    }
 
     <?= $scriptExtra ?? '' ?>
 </script>

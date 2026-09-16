@@ -56,7 +56,7 @@ require_once __DIR__ . '/config/auth.php';
         <div class="team-grid">
             
             <div class="team-card">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=500" alt="Sofía Ocampo" class="team-img">
+                <img src="assets/img/Sofia.jpg" alt="Sofía Ocampo" class="team-img" onerror="this.src='img/Sofia.jpg'">
                 <div class="team-info">
                     <h3 class="team-name">Sofía Ocampo Loaiza</h3>
                     <p class="team-role"><i class="fa-solid fa-code"></i> Desarrolladora Full-Stack</p>
@@ -65,7 +65,9 @@ require_once __DIR__ . '/config/auth.php';
             </div>
 
             <div class="team-card">
-                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=500" alt="Solangy Arias" class="team-img">
+                <div class="team-img-placeholder">
+                    <i class="fa-solid fa-user"></i>
+                </div>
                 <div class="team-info">
                     <h3 class="team-name">Solangy Arias Rivas</h3>
                     <p class="team-role"><i class="fa-solid fa-palette"></i> Diseñadora UX / UI</p>
@@ -74,7 +76,7 @@ require_once __DIR__ . '/config/auth.php';
             </div>
 
             <div class="team-card">
-                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=500" alt="Fernanda Sánchez" class="team-img">
+                <img src="assets/img/Fernanda.jpg" alt="Fernanda Sánchez" class="team-img" onerror="this.src='img/Fernanda.jpg'">
                 <div class="team-info">
                     <h3 class="team-name">Fernanda Sánchez Colina</h3>
                     <p class="team-role"><i class="fa-solid fa-diagram-project"></i> Product Manager</p>

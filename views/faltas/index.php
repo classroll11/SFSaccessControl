@@ -107,7 +107,7 @@ ob_start();
                 <small class="text-muted">Registro consolidado de novedades tomadas por los docentes</small>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <input type="text" class="form-control form-control-sm rounded-pill" id="buscador-faltas" placeholder="Buscar alumno, grado o materia..." onkeyup="filtrarFaltas()" style="max-width:250px;">
+                <input type="text" class="form-control form-control-sm rounded-pill" id="buscador-faltas" placeholder="Buscar alumno, grado o materia..." oninput="filtrarFaltas()" onkeyup="filtrarFaltas()" style="max-width:250px;">
                 <select class="form-select form-select-sm rounded-pill" id="filtro-estado-faltas" onchange="filtrarFaltas()" style="max-width:180px;">
                     <option value="">Todos los estados</option>
                     <option value="FALTA_INJUSTIFICADA">Falta Injustificada</option>
@@ -192,14 +192,29 @@ $tituloPagina = 'Control de Faltas';
 $breadcrumb = 'Supervisión &bull; Control de Faltas';
 
 $scriptExtra = <<<JS
+function normalizarTextoFaltas(str) {
+    return (str || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[°º\-]/g, ' ')
+        .trim();
+}
+
 function filtrarFaltas() {
-    const q = document.getElementById('buscador-faltas').value.toLowerCase().trim();
+    const input = document.getElementById('buscador-faltas');
+    if (!input) return;
+    const q = normalizarTextoFaltas(input.value);
+    const terminos = q.split(/\s+/).filter(t => t.length > 0);
     const estado = document.getElementById('filtro-estado-faltas').value;
 
     document.querySelectorAll('.fila-falta').forEach(fila => {
-        const texto = fila.dataset.texto;
+        const rawTexto = fila.dataset.texto || fila.textContent;
+        const texto = normalizarTextoFaltas(rawTexto);
         const filaEstado = fila.dataset.estado;
-        const matchQ = !q || texto.includes(q);
+
+        const matchQ = terminos.length === 0 || terminos.every(term => texto.includes(term));
         const matchEstado = !estado || filaEstado === estado;
         fila.style.display = (matchQ && matchEstado) ? '' : 'none';
     });

@@ -36,6 +36,9 @@ ob_start();
             </div>
             <div class="d-flex align-items-center gap-2">
                 <?php if (esAdmin()): ?>
+                <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 fw-semibold shadow-sm" onclick="abrirModalReiniciarAsistencias()">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reiniciar Asistencias
+                </button>
                 <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" onclick="abrirModalCrearEstudiante()">
                     <i class="fa-solid fa-user-plus me-2"></i> + Nuevo Estudiante
                 </button>
@@ -56,7 +59,7 @@ ob_start();
             <div class="col-12 col-md-5">
                 <div class="position-relative">
                     <input type="text" class="form-control form-control-sm ps-4 rounded-pill" id="buscador-estudiantes-dir"
-                           placeholder="Buscar por nombre, documento o matrícula..." onkeyup="filtrarEstudiantesDirectorio()">
+                           placeholder="Buscar por nombre, documento o matrícula..." oninput="filtrarEstudiantesDirectorio()" onkeyup="filtrarEstudiantesDirectorio()">
                     <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left:12px; top:50%; transform:translateY(-50%); font-size:0.75rem;"></i>
                 </div>
             </div>
@@ -114,7 +117,7 @@ ob_start();
                             <?php 
                             $huellas = (int)($st['total_huellas'] ?? 0);
                             $pct = round(($huellas / 6) * 100);
-                            $txt = strtolower(htmlspecialchars($st['nombre'] . ' ' . $st['documento'] . ' ' . ($st['matricula'] ?? '')));
+                            $txt = strtolower(htmlspecialchars($st['nombre'] . ' ' . $st['documento'] . ' ' . ($st['matricula'] ?? '') . ' ' . $st['grado']));
                             ?>
                             <tr class="fila-estudiante" data-texto="<?= $txt ?>" data-grado="<?= $st['grado'] ?>" data-huellas="<?= $huellas ?>">
                                 <td class="text-muted small"><?= $idx + 1 ?></td>
@@ -231,18 +234,32 @@ $tituloPagina = 'Directorio Estudiantil';
 $breadcrumb = 'Directorio &bull; Estudiantes';
 
 $scriptExtra = <<<JS
+function normalizarTextoDirectorio(str) {
+    return (str || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[°º\-]/g, ' ')
+        .trim();
+}
+
 function filtrarEstudiantesDirectorio() {
-    const q = document.getElementById('buscador-estudiantes-dir').value.toLowerCase().trim();
+    const input = document.getElementById('buscador-estudiantes-dir');
+    if (!input) return;
+    const q = normalizarTextoDirectorio(input.value);
+    const terminos = q.split(/\s+/).filter(t => t.length > 0);
     const grado = document.getElementById('filtro-grado-dir').value;
     const huellasFiltro = document.getElementById('filtro-huellas-dir').value;
 
     let visibles = 0;
     document.querySelectorAll('.fila-estudiante').forEach(fila => {
-        const texto = fila.dataset.texto;
+        const rawTexto = fila.dataset.texto || fila.textContent;
+        const texto = normalizarTextoDirectorio(rawTexto);
         const filaGrado = fila.dataset.grado;
         const totalHuellas = parseInt(fila.dataset.huellas || '0', 10);
 
-        const matchQ = !q || texto.includes(q);
+        const matchQ = terminos.length === 0 || terminos.every(term => texto.includes(term));
         const matchGrado = !grado || filaGrado === grado;
         let matchHuellas = true;
         if (huellasFiltro === 'con_huella') matchHuellas = (totalHuellas > 0);
