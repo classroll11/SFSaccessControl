@@ -26,7 +26,7 @@ function isLoggedIn(): bool {
 function requireLogin(): void {
     if (empty($_SESSION['usuario_id'])) {
         $base = getBaseUrl();
-        header('Location: ' . $base . 'login.php');
+        header('Location: ' . $base . 'login');
         exit;
     }
 
@@ -48,9 +48,9 @@ function requireLogin(): void {
 
     // Si el usuario tiene marcada la obligación de cambiar contraseña por defecto
     if (!empty($_SESSION['usuario_debe_cambiar_password'])) {
-        $scriptActual = basename($_SERVER['SCRIPT_NAME'] ?? '');
-        if ($scriptActual !== 'cambiar_password.php' && $scriptActual !== 'logout.php') {
-            header('Location: ' . getBaseUrl() . 'cambiar_password.php');
+        $reqUri = $_SERVER['REQUEST_URI'] ?? '';
+        if (strpos($reqUri, 'cambiar_password') === false && strpos($reqUri, 'logout') === false) {
+            header('Location: ' . getBaseUrl() . 'cambiar_password');
             exit;
         }
     }
@@ -63,7 +63,7 @@ function requireRol(array $rolesPermitidos): void {
     requireLogin();
     $rolActual = $_SESSION['usuario_rol'] ?? '';
     if (!in_array($rolActual, $rolesPermitidos) && !in_array('ADMINISTRADOR', $rolesPermitidos)) {
-        header('Location: ' . getBaseUrl() . 'dashboard.php?acceso=denegado');
+        header('Location: ' . getBaseUrl() . 'dashboard?acceso=denegado');
         exit;
     }
 }

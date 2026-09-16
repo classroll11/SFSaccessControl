@@ -11,10 +11,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../config/auth.php';
 requireLogin();
-require_once __DIR__ . '/models/AccesoModel.php';
+require_once __DIR__ . '/../../models/AccesoModel.php';
 
 // Obtener datos del usuario logueado o usar datos predeterminados
 $usuarioNombre = $_SESSION['usuario_nombre'] ?? 'Prof. Carlos Andrés Restrepo';

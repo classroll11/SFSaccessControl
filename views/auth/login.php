@@ -17,8 +17,8 @@ if (!empty($_SESSION['usuario_id'])) {
     exit;
 }
 
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/models/UsuarioModel.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../models/UsuarioModel.php';
 
 $mensajeError = '';
 $mensajeExito = '';

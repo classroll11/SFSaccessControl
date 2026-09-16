@@ -6,7 +6,7 @@
  * DESCRIPCIÓN: Página del Blog institucional en PHP nativo.
  * ============================================================================
  */
-require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/../../config/auth.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">

@@ -9,9 +9,9 @@
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/config/auth.php';
-require_once __DIR__ . '/models/UsuarioModel.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../config/auth.php';
+require_once __DIR__ . '/../../models/UsuarioModel.php';
 
 if (empty($_SESSION['usuario_id'])) {
     header('Location: login.php');

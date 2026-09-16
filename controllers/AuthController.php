@@ -30,7 +30,7 @@ class AuthController {
 
             if (empty($correo) || empty($password)) {
                 $mensajeError = 'Por favor complete todos los campos (correo y contraseña).';
-                require_once __DIR__ . '/../login.php';
+                require_once __DIR__ . '/../views/auth/login.php';
                 return;
             }
 
@@ -46,7 +46,7 @@ class AuthController {
             if ($usuario && !empty($usuario['password']) && password_verify($password, $usuario['password'])) {
                 if ($usuario['estado'] !== 'ACTIVO') {
                     $mensajeError = 'Su cuenta se encuentra inactiva o suspendida. Contacte a la administración.';
-                    require_once __DIR__ . '/../login.php';
+                    require_once __DIR__ . '/../views/auth/login.php';
                     return;
                 }
 
@@ -64,22 +64,22 @@ class AuthController {
                 $_SESSION['usuario_debe_cambiar_password'] = $debeCambiar ? 1 : 0;
 
                 if ($debeCambiar) {
-                    header('Location: ' . getBaseUrl() . 'cambiar_password.php');
+                    header('Location: ' . getBaseUrl() . 'cambiar_password');
                     exit;
                 }
 
                 // Redirigir al Dashboard principal (acceso protegido)
-                header('Location: ' . getBaseUrl() . 'dashboard.php');
+                header('Location: ' . getBaseUrl() . 'dashboard');
                 exit;
             } else {
                 $mensajeError = 'Credenciales incorrectas. Verifique su correo y contraseña.';
-                require_once __DIR__ . '/../login.php';
+                require_once __DIR__ . '/../views/auth/login.php';
                 return;
             }
         }
 
         // Si es petición GET, mostrar página de login
-        require_once __DIR__ . '/../login.php';
+        require_once __DIR__ . '/../views/auth/login.php';
     }
 
     /**
@@ -87,7 +87,7 @@ class AuthController {
      */
     public function cambiarPassword(): void {
         if (empty($_SESSION['usuario_id'])) {
-            header('Location: ' . getBaseUrl() . 'login.php');
+            header('Location: ' . getBaseUrl() . 'login');
             exit;
         }
 
@@ -98,25 +98,25 @@ class AuthController {
 
             if (empty($passwordNueva) || empty($passwordConfirmar)) {
                 $mensajeError = 'Por favor complete todos los campos de contraseña nueva.';
-                require_once __DIR__ . '/../cambiar_password.php';
+                require_once __DIR__ . '/../views/auth/cambiar_password.php';
                 return;
             }
 
             if (strlen($passwordNueva) < 6) {
                 $mensajeError = 'La nueva contraseña debe tener al menos 6 caracteres.';
-                require_once __DIR__ . '/../cambiar_password.php';
+                require_once __DIR__ . '/../views/auth/cambiar_password.php';
                 return;
             }
 
             if ($passwordNueva !== $passwordConfirmar) {
                 $mensajeError = 'Las contraseñas nuevas no coinciden.';
-                require_once __DIR__ . '/../cambiar_password.php';
+                require_once __DIR__ . '/../views/auth/cambiar_password.php';
                 return;
             }
 
             if ($passwordNueva === '123456') {
                 $mensajeError = 'No puedes usar la contraseña por defecto (123456). Elige una clave personalizada.';
-                require_once __DIR__ . '/../cambiar_password.php';
+                require_once __DIR__ . '/../views/auth/cambiar_password.php';
                 return;
             }
 
@@ -125,23 +125,23 @@ class AuthController {
 
             if ($exito) {
                 $_SESSION['usuario_debe_cambiar_password'] = 0;
-                header('Location: ' . getBaseUrl() . 'dashboard.php?clave=actualizada');
+                header('Location: ' . getBaseUrl() . 'dashboard?clave=actualizada');
                 exit;
             } else {
                 $mensajeError = 'Error al actualizar la contraseña en el servidor.';
-                require_once __DIR__ . '/../cambiar_password.php';
+                require_once __DIR__ . '/../views/auth/cambiar_password.php';
                 return;
             }
         }
 
-        require_once __DIR__ . '/../cambiar_password.php';
+        require_once __DIR__ . '/../views/auth/cambiar_password.php';
     }
 
     /**
      * El registro público está deshabilitado. Redirige a login.
      */
     public function registro(): void {
-        header('Location: login.php');
+        header('Location: ' . getBaseUrl() . 'login');
         exit;
     }
 
@@ -158,7 +158,7 @@ class AuthController {
             );
         }
         session_destroy();
-        header('Location: ' . getBaseUrl() . 'login.php');
+        header('Location: ' . getBaseUrl() . 'login');
         exit;
     }
 }

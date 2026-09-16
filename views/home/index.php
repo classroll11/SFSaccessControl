@@ -1,0 +1,165 @@
+<?php
+/**
+ * ============================================================================
+ * PROYECTO: SFS ACCESS CONTROL - I.E. JORGE ROBLEDO
+ * ARCHIVO: views/home/index.php
+ * DESCRIPCIÓN: Vista principal de bienvenida / Landing Institucional.
+ * ============================================================================
+ */
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFS Access Control - Seguridad y Control Biométrico Institucional</title>
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="index.php" class="logo">
+            <div class="logo-icon-emblem">
+                <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
+            </div>
+            <div class="logo-title-group">
+                <span class="logo-brand-text">SFS <span>ACCESS</span></span>
+                <span class="logo-tag-text">CONTROL BIOMÉTRICO</span>
+            </div>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.php" class="active"><i class="fa-solid fa-house-chimney"></i> INICIO</a></li>
+            <li><a href="nosotros"><i class="fa-solid fa-users"></i> NOSOTROS</a></li>
+            <li><a href="blog"><i class="fa-solid fa-newspaper"></i> BLOG</a></li>
+            <?php if (isLoggedIn()): ?>
+                <li><a href="dashboard" class="btn-perfil"><i class="fa-solid fa-gauge-high"></i> PANEL EN VIVO</a></li>
+                <li><a href="logout" class="fa-solid fa-right-from-bracket"> SALIR</a></li>
+            <?php else: ?>
+                <li><a href="login" class="fa-solid fa-arrow-right-to-bracket"> LOGIN</a></li>
+            <?php endif; ?>
+        </ul>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <main class="hero-dark">
+        <div style="width: 100%; max-width: 1320px; margin: auto; position: relative; z-index: 10;">
+            <div class="inicio-container">
+                <div>
+                    <div class="tag-badge">
+                        <i class="fa-solid fa-shield-halved"></i> SEGURIDAD BIOMÉTRICA CERTIFICADA &bull; I.E. JORGE ROBLEDO
+                    </div>
+                    <h1 class="hero-title">Gestiona el ingreso, simplifica el aforo y protege tu comunidad.</h1>
+                    <p class="hero-desc">
+                        Optimizamos el control de acceso en la <strong>I.E. Jorge Robledo</strong> con tecnología biométrica dactilar de vanguardia, reemplazando registros manuales en cuadernos y controlando la asistencia a clases en tiempo real.
+                    </p>
+                    <div class="hero-btn-group">
+                        <?php if (isLoggedIn()): ?>
+                            <a href="dashboard" class="btn-primary">
+                                <i class="fa-solid fa-gauge-high"></i> Ir al Panel en Vivo
+                            </a>
+                            <a href="logout" class="btn-secondary-dark">
+                                <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                            </a>
+                        <?php else: ?>
+                            <a href="login" class="btn-primary">
+                                <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión Institucional
+                            </a>
+                            <a href="nosotros" class="btn-secondary-dark">
+                                <i class="fa-solid fa-users"></i> Conocer el Proyecto
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="cards-2x2">
+                    <div class="feature-card">
+                        <i class="fa-solid fa-fingerprint"></i>
+                        <h3>Verificación Biométrica</h3>
+                        <p>Lectura dactilar instantánea que elimina la suplantación de identidad y agiliza el flujo en portería.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                        <h3>Asistencia a Clases</h3>
+                        <p>Registro y consolidación automática de asistencia por grado y aula para docentes y directivas.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <h3>Métricas y Reportes</h3>
+                        <p>Exportación a CSV y estadísticas en tiempo real por grado escolar para directivas y coordinadores.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <h3>Entorno Protegido</h3>
+                        <p>Auditoría de seguridad continua con bloqueo inmediato de intrusos y usuarios no autorizados.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-strip">
+                <div class="stat-item">
+                    <div class="stat-number">+1,250</div>
+                    <div class="stat-label">Estudiantes Registrados</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">&lt; 0.4s</div>
+                    <div class="stat-label">Tiempo de Verificación</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Precisión de Asistencia</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Filas y Suplantaciones</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <a href="index.php" class="logo" style="margin-bottom: 1.2rem; display: inline-flex;">
+                    <div class="logo-icon-emblem" style="width: 32px; height: 32px;">
+                        <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
+                    </div>
+                    <div class="logo-title-group">
+                        <span class="logo-brand-text">SFS <span>ACCESS</span></span>
+                        <span class="logo-tag-text">I.E. JORGE ROBLEDO</span>
+                    </div>
+                </a>
+                <p>Líderes en soluciones de control de acceso estudiantil y corporativo. Seguridad, tecnología y precisión integradas para la I.E. Jorge Robledo.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Contacto Directo</h4>
+                <p><i class="fa-regular fa-envelope"></i> sfsaccesscontrol@gmail.com</p>
+                <p style="margin-top: 0.5rem;"><i class="fa-solid fa-location-dot"></i> Sede Central - Medellín, Colombia</p>
+            </div>
+            <div class="footer-col">
+                <h4>Navegación</h4>
+                <ul>
+                    <li><a href="index.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Inicio</a></li>
+                    <li><a href="nosotros"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Nosotros</a></li>
+                    <li><a href="blog"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Blog</a></li>
+                    <li><a href="login"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Iniciar Sesión</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Redes Sociales</h4>
+                <div class="social-icons">
+                    <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                    <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

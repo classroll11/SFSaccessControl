@@ -3,11 +3,11 @@
  * ============================================================================
  * PROYECTO: SFS ACCESS CONTROL - I.E. JORGE ROBLEDO
  * ARCHIVO: index.php
- * DESCRIPCIÓN: Enrutador Front Controller & Página Principal Institucional (PHP Nativo).
+ * DESCRIPCIÓN: Front Controller & Enrutador Principal MVC (PHP Nativo).
  * ============================================================================
  */
 
-// Configuración básica de zona horaria y reporte de errores
+// Zona horaria y manejo de errores
 date_default_timezone_set('America/Bogota');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -16,202 +16,144 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/auth.php';
 
-// Si se recibe el parámetro de controlador por URL (?c=acceso, ?c=reporte, ?c=auth), despachar al controlador correspondiente
+// Iniciar sesión si no está activa
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// -----------------------------------------------------------------------------
+// 1. OBTENER RUTA SOLICITADA
+// -----------------------------------------------------------------------------
+$route = $_GET['route'] ?? '';
+
+// Si la ruta viene vacía, verificar REQUEST_URI como fallback
+if (empty($route)) {
+    $requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+    $scriptDir  = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+    if (!empty($scriptDir) && strpos($requestUri, $scriptDir) === 0) {
+        $requestUri = substr($requestUri, strlen($scriptDir));
+    }
+    $route = trim($requestUri, '/');
+}
+
+// Limpiar extensión .php si viene en la URL para total compatibilidad
+$route = preg_replace('/\.php$/i', '', trim($route, '/'));
+
+// -----------------------------------------------------------------------------
+// 2. SOPORTE PARA PARÁMETROS LEGADOS (?c=controlador&a=accion)
+// -----------------------------------------------------------------------------
 if (isset($_GET['c'])) {
-    $controladorNombre = ucfirst(strtolower(trim($_GET['c']))) . 'Controller';
-    $accion = isset($_GET['a']) ? trim($_GET['a']) : 'index';
-
-    $controladoresDisponibles = [
-        'AccesoController'       => __DIR__ . '/controllers/AccesoController.php',
-        'DashboardController'    => __DIR__ . '/controllers/DashboardController.php',
-        'AsistenciaController'   => __DIR__ . '/controllers/AsistenciaController.php',
-        'PorteriaController'     => __DIR__ . '/controllers/PorteriaController.php',
-        'HuellaController'       => __DIR__ . '/controllers/HuellaController.php',
-        'SupervisionController'  => __DIR__ . '/controllers/SupervisionController.php',
-        'HistorialController'    => __DIR__ . '/controllers/HistorialController.php',
-        'AdminController'        => __DIR__ . '/controllers/AdminController.php',
-        'ReporteController'      => __DIR__ . '/controllers/ReporteController.php',
-        'AuthController'         => __DIR__ . '/controllers/AuthController.php'
-    ];
-
-    if (!array_key_exists($controladorNombre, $controladoresDisponibles)) {
-        http_response_code(404);
-        die("<div style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px;'>
-                <h1 style='color: #e11d48;'>Error 404 - Controlador no encontrado</h1>
-                <p>El recurso solicitado <code>{$controladorNombre}</code> no existe en el sistema SFS Access.</p>
-                <a href='index.php' style='color: #0062ff; text-decoration: none; font-weight: bold;'>&larr; Volver al Inicio</a>
-             </div>");
-    }
-
-    require_once $controladoresDisponibles[$controladorNombre];
-    $instanciaControlador = new $controladorNombre();
-
-    if (!method_exists($instanciaControlador, $accion)) {
-        http_response_code(404);
-        die("<div style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px;'>
-                <h1 style='color: #e11d48;'>Error 404 - Acción no encontrada</h1>
-                <p>El método <code>{$accion}</code> no existe en el controlador <code>{$controladorNombre}</code>.</p>
-                <a href='index.php' style='color: #0062ff; text-decoration: none; font-weight: bold;'>&larr; Volver al Inicio</a>
-             </div>");
-    }
-
-    $instanciaControlador->$accion();
+    $c = ucfirst(strtolower(trim($_GET['c']))) . 'Controller';
+    $a = isset($_GET['a']) ? trim($_GET['a']) : 'index';
+    despacharControlador($c, $a);
     exit;
 }
+
+// -----------------------------------------------------------------------------
+// 3. TABLA DE RUTAS PRINCIPALES DEL SISTEMA
+// -----------------------------------------------------------------------------
+$rutas = [
+    // Páginas Públicas
+    ''                  => ['HomeController', 'index'],
+    'index'             => ['HomeController', 'index'],
+    'inicio'            => ['HomeController', 'index'],
+    'nosotros'          => ['HomeController', 'nosotros'],
+    'blog'              => ['HomeController', 'blog'],
+
+    // Autenticación
+    'login'             => ['AuthController', 'login'],
+    'logout'            => ['AuthController', 'logout'],
+    'registro'          => ['AuthController', 'registro'],
+    'cambiar_password'  => ['AuthController', 'cambiarPassword'],
+
+    // Perfil
+    'perfil'            => ['PerfilController', 'index'],
+
+    // Módulos del Sistema (Protegidos)
+    'dashboard'         => ['DashboardController', 'index'],
+    'panel'             => ['DashboardController', 'index'],
+    'asistencia'        => ['AsistenciaController', 'index'],
+    'porteria'          => ['PorteriaController', 'index'],
+    'huellas'           => ['HuellaController', 'index'],
+    'usuarios'          => ['AdminController', 'usuarios'],
+    'estudiantes'       => ['AdminController', 'estudiantes'],
+    'sensores'          => ['AdminController', 'sensores'],
+    'faltas'            => ['SupervisionController', 'faltas'],
+    'aforo'             => ['SupervisionController', 'aforo'],
+    'historial'         => ['HistorialController', 'index'],
+];
+
+// Si la ruta coincide directamente en la tabla
+if (array_key_exists($route, $rutas)) {
+    [$controlador, $accion] = $rutas[$route];
+    despacharControlador($controlador, $accion);
+    exit;
+}
+
+// -----------------------------------------------------------------------------
+// 4. DESPACHO DINÁMICO (ej: ruta = acceso/obtenerHuellasEstudiante)
+// -----------------------------------------------------------------------------
+$partes = explode('/', $route);
+if (count($partes) >= 1 && !empty($partes[0])) {
+    $controladorNombre = ucfirst(strtolower($partes[0])) . 'Controller';
+    $accionNombre      = $partes[1] ?? 'index';
+
+    $archivoControlador = __DIR__ . '/controllers/' . $controladorNombre . '.php';
+    if (file_exists($archivoControlador)) {
+        despacharControlador($controladorNombre, $accionNombre);
+        exit;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// 5. RUTA 404 NO ENCONTRADA
+// -----------------------------------------------------------------------------
+http_response_code(404);
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SFS Access Control - Seguridad y Control Biométrico Institucional</title>
-    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+    <title>404 - Página no encontrada | SFS Access</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <!-- FontAwesome 6 Icons CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-
-<body>
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <a href="index.php" class="logo">
-            <div class="logo-icon-emblem">
-                <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
-            </div>
-            <div class="logo-title-group">
-                <span class="logo-brand-text">SFS <span>ACCESS</span></span>
-                <span class="logo-tag-text">CONTROL BIOMÉTRICO</span>
-            </div>
-        </a>
-        <ul class="nav-links">
-            <li><a href="index.php" class="active"><i class="fa-solid fa-house-chimney"></i> INICIO</a></li>
-            <li><a href="nosotros.php"><i class="fa-solid fa-users"></i> NOSOTROS</a></li>
-            <li><a href="blog.php"><i class="fa-solid fa-newspaper"></i> BLOG</a></li>
-            <?php if (isLoggedIn()): ?>
-                <li><a href="dashboard.php" class="btn-perfil"><i class="fa-solid fa-gauge-high"></i> PANEL EN VIVO</a></li>
-                <li><a href="logout.php"><i class="fa-solid fa-right-from-bracket"></i> SALIR</a></li>
-            <?php else: ?>
-                <li><a href="login.php"><i class="fa-solid fa-arrow-right-to-bracket"></i> LOGIN</a></li>
-            <?php endif; ?>
-        </ul>
-    </nav>
-
-    <!-- HERO SECTION -->
-    <main class="hero-dark">
-        <div style="width: 100%; max-width: 1320px; margin: auto; position: relative; z-index: 10;">
-            <div class="inicio-container">
-                <div>
-                    <div class="tag-badge">
-                        <i class="fa-solid fa-shield-halved"></i> SEGURIDAD BIOMÉTRICA CERTIFICADA &bull; I.E. JORGE ROBLEDO
-                    </div>
-                    <h1 class="hero-title">Gestiona el ingreso, simplifica el aforo y protege tu comunidad.</h1>
-                    <p class="hero-desc">
-                        Optimizamos el control de acceso en la <strong>I.E. Jorge Robledo</strong> con tecnología biométrica dactilar de vanguardia, reemplazando registros manuales en cuadernos y controlando la asistencia a clases en tiempo real.
-                    </p>
-                    <div class="hero-btn-group">
-                        <?php if (isLoggedIn()): ?>
-                            <a href="dashboard.php" class="btn-primary">
-                                <i class="fa-solid fa-gauge-high"></i> Ir al Panel en Vivo
-                            </a>
-                            <a href="logout.php" class="btn-secondary-dark">
-                                <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
-                            </a>
-                        <?php else: ?>
-                            <a href="login.php" class="btn-primary">
-                                <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión Institucional
-                            </a>
-                            <a href="nosotros.php" class="btn-secondary-dark">
-                                <i class="fa-solid fa-users"></i> Conocer el Proyecto
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <div class="cards-2x2">
-                    <div class="feature-card">
-                        <i class="fa-solid fa-fingerprint"></i>
-                        <h3>Verificación Biométrica</h3>
-                        <p>Lectura dactilar instantánea que elimina la suplantación de identidad y agiliza el flujo en portería.</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fa-solid fa-chalkboard-user"></i>
-                        <h3>Asistencia a Clases</h3>
-                        <p>Registro y consolidación automática de asistencia por grado y aula para docentes y directivas.</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fa-solid fa-chart-pie"></i>
-                        <h3>Métricas y Reportes</h3>
-                        <p>Exportación a CSV y estadísticas en tiempo real por grado escolar para directivas y coordinadores.</p>
-                    </div>
-                    <div class="feature-card">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <h3>Entorno Protegido</h3>
-                        <p>Auditoría de seguridad continua con bloqueo inmediato de intrusos y usuarios no autorizados.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Bar -->
-            <div class="stats-strip">
-                <div class="stat-item">
-                    <div class="stat-number">+1,250</div>
-                    <div class="stat-label">Estudiantes Registrados</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">&lt; 0.4s</div>
-                    <div class="stat-label">Tiempo de Verificación</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Precisión de Asistencia</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Filas y Suplantaciones</div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="footer-grid">
-            <div class="footer-col">
-                <a href="index.php" class="logo" style="margin-bottom: 1.2rem; display: inline-flex;">
-                    <div class="logo-icon-emblem" style="width: 32px; height: 32px;">
-                        <img src="assets/img/logo.jpeg" alt="SFS Logo" onerror="this.src='logo.jpeg'">
-                    </div>
-                    <div class="logo-title-group">
-                        <span class="logo-brand-text">SFS <span>ACCESS</span></span>
-                        <span class="logo-tag-text">I.E. JORGE ROBLEDO</span>
-                    </div>
-                </a>
-                <p>Líderes en soluciones de control de acceso estudiantil y corporativo. Seguridad, tecnología y precisión integradas para la I.E. Jorge Robledo.</p>
-            </div>
-            <div class="footer-col">
-                <h4>Contacto Directo</h4>
-                <p><i class="fa-regular fa-envelope"></i> sfsaccesscontrol@gmail.com</p>
-                <p style="margin-top: 0.5rem;"><i class="fa-solid fa-location-dot"></i> Sede Central - Medellín, Colombia</p>
-            </div>
-            <div class="footer-col">
-                <h4>Navegación</h4>
-                <ul>
-                    <li><a href="index.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Inicio</a></li>
-                    <li><a href="nosotros.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Nosotros</a></li>
-                    <li><a href="blog.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Blog</a></li>
-                    <li><a href="login.php"><i class="fa-solid fa-chevron-right me-1" style="font-size: 0.7rem;"></i> Iniciar Sesión</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>Redes Sociales</h4>
-                <div class="social-icons">
-                    <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                    <a href="#" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
+<body style="display:flex;align-items:center;justify-content:center;height:100vh;background:#090d16;color:#fff;font-family:'Segoe UI',sans-serif;text-align:center;margin:0;">
+    <div style="max-width:500px;padding:2rem;">
+        <h1 style="font-size:4rem;color:#38bdf8;margin:0 0 1rem;">404</h1>
+        <h2 style="margin:0 0 1rem;font-weight:600;">Página no encontrada</h2>
+        <p style="color:#94a3b8;margin-bottom:2rem;">La ruta solicitada <code>/<?= htmlspecialchars($route) ?></code> no existe en la aplicación.</p>
+        <a href="<?= getBaseUrl() ?>" style="display:inline-block;padding:0.75rem 1.5rem;background:linear-gradient(135deg,#0284c7,#2563eb);color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">Volver al Inicio</a>
+    </div>
 </body>
 </html>
+<?php
+exit;
+
+// -----------------------------------------------------------------------------
+// FUNCIÓN AUXILIAR DE DESPACHO
+// -----------------------------------------------------------------------------
+function despacharControlador(string $controladorNombre, string $accion): void {
+    $archivo = __DIR__ . '/controllers/' . $controladorNombre . '.php';
+
+    if (!file_exists($archivo)) {
+        http_response_code(404);
+        die("Controlador [{$controladorNombre}] no encontrado.");
+    }
+
+    require_once $archivo;
+
+    if (!class_exists($controladorNombre)) {
+        http_response_code(500);
+        die("La clase [{$controladorNombre}] no está definida.");
+    }
+
+    $instancia = new $controladorNombre();
+
+    if (!method_exists($instancia, $accion)) {
+        http_response_code(404);
+        die("La acción [{$accion}] no existe en el controlador [{$controladorNombre}].");
+    }
+
+    $instancia->$accion();
+}
