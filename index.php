@@ -26,18 +26,31 @@ if (session_status() === PHP_SESSION_NONE) {
 // -----------------------------------------------------------------------------
 $route = $_GET['route'] ?? '';
 
-// Si la ruta viene vacía, verificar REQUEST_URI como fallback
+// Si la ruta viene vacía o por REQUEST_URI
 if (empty($route)) {
-    $requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+    $requestUri = rawurldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH));
     $scriptDir  = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
-    if (!empty($scriptDir) && strpos($requestUri, $scriptDir) === 0) {
+    if (!empty($scriptDir) && stripos($requestUri, $scriptDir) === 0) {
         $requestUri = substr($requestUri, strlen($scriptDir));
     }
-    $route = trim($requestUri, '/');
+    $route = $requestUri;
+} else {
+    $route = rawurldecode($route);
 }
 
-// Limpiar extensión .php si viene en la URL para total compatibilidad
-$route = preg_replace('/\.php$/i', '', trim($route, '/'));
+// Remover subdirectorio si aún está presente en la ruta
+$scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+$scriptDirRel = trim($scriptDir, '/');
+if (!empty($scriptDirRel) && stripos(trim($route, '/'), $scriptDirRel) === 0) {
+    $route = substr(trim($route, '/'), strlen($scriptDirRel));
+}
+
+// Limpiar slashes y extensiones .php
+$route = trim($route, '/');
+$route = preg_replace('/\.php$/i', '', $route);
+if ($route === 'index') {
+    $route = '';
+}
 
 // -----------------------------------------------------------------------------
 // 2. SOPORTE PARA PARÁMETROS LEGADOS (?c=controlador&a=accion)
