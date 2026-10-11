@@ -14,6 +14,7 @@ USE `sfs_access_control`;
 -- 2. ELIMINACIÓN DE TABLAS PREVIAS (SI EXISTEN) PARA IMPORTACIÓN LIMPIA
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `registros_acceso`;
+DROP TABLE IF EXISTS `asistencias_clase`;
 DROP TABLE IF EXISTS `sesiones_admin`;
 DROP TABLE IF EXISTS `blog_articulos`;
 DROP TABLE IF EXISTS `dispositivos_sensores`;
@@ -212,7 +213,10 @@ INSERT INTO `usuarios` (`id`, `documento`, `matricula`, `correo`, `nombre`, `gra
 (4, '10000004', 'DOC-PROF-01', 'docente.arango@jorgerobledo.edu.co', 'Lic. Fernando Arango (Profesor)', 'DOCENCIA', 'FINGERPRINT_HASH_DOC_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'DOCENTE', 0, 'ACTIVO'),
 
 -- 5. CELADOR / PORTERÍA (Registro biométrico de ingreso y salida en puerta)
-(5, '10000005', 'PER-CEL-01', 'porteria@jorgerobledo.edu.co', 'Don Jaime Alberto Gómez (Celador)', 'PORTERÍA', 'FINGERPRINT_HASH_CEL_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'CELADOR', 0, 'ACTIVO');
+(5, '10000005', 'PER-CEL-01', 'porteria@jorgerobledo.edu.co', 'Don Jaime Alberto Gómez (Celador)', 'PORTERÍA', 'FINGERPRINT_HASH_CEL_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'CELADOR', 0, 'ACTIVO'),
+
+-- 6. DESARROLLADORA FULL-STACK / SISTEMAS (Equipo de desarrollo y administración)
+(16, '1025895535', NULL, 'sofiaocampo@iejorgerobledo.edu.co', 'SOFIA OCAMPO LOAIZA', 'SISTEMAS', NULL, '$2y$10$HQk8FMWrnHupjNb4HAwF0.AS2LQMMdu2S0Rid.ickwDmh4SFgrMcK', 'ADMINISTRADOR', 0, 'ACTIVO');
 
 -- ESTUDIANTES REALES DE LA INSTITUCIÓN EDUCATIVA JORGE ROBLEDO (515 Estudiantes por Grados)
 INSERT INTO `usuarios` (`documento`, `matricula`, `correo`, `nombre`, `grado`, `huella_template`, `password`, `rol`, `estado`) VALUES

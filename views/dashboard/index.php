@@ -114,120 +114,170 @@ ob_start();
         </div>
     </div>
 
-    <!-- 2. ACCESOS RÁPIDOS SEGÚN ROL -->
-    <div class="card-surface mb-4">
-        <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
-            <i class="fa-solid fa-bolt text-warning"></i>
-            Módulos y Acciones Rápidas
-        </h5>
-        <div class="row g-3">
-            <?php if (esDocente() || esAdmin()): ?>
-            <div class="col-12 col-md-4">
-                <a href="asistencia.php" class="text-decoration-none">
-                    <div class="p-3 rounded-3 border h-100 d-flex align-items-center gap-3 bg-light hover-shadow transition" style="border-left: 4px solid #2563eb !important;">
-                        <div class="rounded-3 p-3 text-white" style="background: linear-gradient(135deg, #1d4ed8, #3b82f6); font-size: 1.4rem;">
-                            <i class="fa-solid fa-clipboard-user"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 text-dark">Tomar Asistencia</h6>
-                            <p class="small text-muted mb-0">Pasar lista por grado o con lector de huella en clase.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <?php endif; ?>
+    <!-- 2. ACCESOS RÁPIDOS SEGÚN ROL (ACORDEÓN DESPLEGABLE) -->
+    <?php
+    $accionesRapidas = [];
 
-            <?php if (esCelador() || esAdmin()): ?>
-            <div class="col-12 col-md-4">
-                <a href="porteria.php" class="text-decoration-none">
-                    <div class="p-3 rounded-3 border h-100 d-flex align-items-center gap-3 bg-light hover-shadow transition" style="border-left: 4px solid #059669 !important;">
-                        <div class="rounded-3 p-3 text-white" style="background: linear-gradient(135deg, #059669, #10b981); font-size: 1.4rem;">
-                            <i class="fa-solid fa-door-open"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 text-dark">Terminal Portería</h6>
-                            <p class="small text-muted mb-0">Validar ingresos y salidas en torniquetes y puertas.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
+    if (esDocente() || esAdmin()) {
+        $accionesRapidas[] = [
+            'url'     => 'asistencia.php',
+            'border'  => '#2563eb',
+            'grad'    => 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+            'icono'   => 'fa-solid fa-clipboard-user',
+            'titulo'  => 'Tomar Asistencia',
+            'desc'    => 'Pasar lista por grado o con lector de huella en clase.',
+            'onclick' => null
+        ];
+    }
 
-            <div class="col-12 col-md-4">
-                <a href="huellas.php" class="text-decoration-none">
-                    <div class="p-3 rounded-3 border h-100 d-flex align-items-center gap-3 bg-light hover-shadow transition" style="border-left: 4px solid #0284c7 !important;">
-                        <div class="rounded-3 p-3 text-white" style="background: linear-gradient(135deg, #0284c7, #38bdf8); font-size: 1.4rem;">
-                            <i class="fa-solid fa-fingerprint"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 text-dark">Biometría & Huellas</h6>
-                            <p class="small text-muted mb-0">Enrolar y administrar los 6 slots dactilares por alumno.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <?php endif; ?>
+    if (esCelador() || esAdmin()) {
+        $accionesRapidas[] = [
+            'url'     => 'porteria.php',
+            'border'  => '#059669',
+            'grad'    => 'linear-gradient(135deg, #059669, #10b981)',
+            'icono'   => 'fa-solid fa-door-open',
+            'titulo'  => 'Terminal Portería',
+            'desc'    => 'Validar ingresos y salidas en torniquetes y puertas.',
+            'onclick' => null
+        ];
+        $accionesRapidas[] = [
+            'url'     => 'huellas.php',
+            'border'  => '#0284c7',
+            'grad'    => 'linear-gradient(135deg, #0284c7, #38bdf8)',
+            'icono'   => 'fa-solid fa-fingerprint',
+            'titulo'  => 'Biometría & Huellas',
+            'desc'    => 'Enrolar y administrar los 6 slots dactilares por alumno.',
+            'onclick' => null
+        ];
+    }
 
-            <?php if (esCoordinador() || esRector() || esAdmin()): ?>
-            <div class="col-12 col-md-4">
-                <a href="faltas.php" class="text-decoration-none">
-                    <div class="p-3 rounded-3 border h-100 d-flex align-items-center gap-3 bg-light hover-shadow transition" style="border-left: 4px solid #d97706 !important;">
-                        <div class="rounded-3 p-3 text-white" style="background: linear-gradient(135deg, #d97706, #f59e0b); font-size: 1.4rem;">
-                            <i class="fa-solid fa-user-xmark"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 text-dark">Control de Faltas</h6>
-                            <p class="small text-muted mb-0">Auditar ausencias no justificadas y expedir permisos.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
+    if (esCoordinador() || esRector() || esAdmin()) {
+        $accionesRapidas[] = [
+            'url'     => 'faltas.php',
+            'border'  => '#d97706',
+            'grad'    => 'linear-gradient(135deg, #d97706, #f59e0b)',
+            'icono'   => 'fa-solid fa-user-xmark',
+            'titulo'  => 'Control de Faltas',
+            'desc'    => 'Auditar ausencias no justificadas y expedir permisos.',
+            'onclick' => null
+        ];
+        $accionesRapidas[] = [
+            'url'     => 'aforo.php',
+            'border'  => '#475569',
+            'grad'    => 'linear-gradient(135deg, #334155, #64748b)',
+            'icono'   => 'fa-solid fa-chart-pie',
+            'titulo'  => 'Aforo Institucional',
+            'desc'    => 'Distribución de estudiantes dentro del colegio por grado.',
+            'onclick' => null
+        ];
+    }
 
-            <div class="col-12 col-md-4">
-                <a href="aforo.php" class="text-decoration-none">
-                    <div class="p-3 rounded-3 border h-100 d-flex align-items-center gap-3 bg-light hover-shadow transition" style="border-left: 4px solid #475569 !important;">
-                        <div class="rounded-3 p-3 text-white" style="background: linear-gradient(135deg, #334155, #64748b); font-size: 1.4rem;">
-                            <i class="fa-solid fa-chart-pie"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 text-dark">Aforo Institucional</h6>
-                            <p class="small text-muted mb-0">Distribución de estudiantes dentro del colegio por grado.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <?php endif; ?>
+    if (esAdmin()) {
+        $accionesRapidas[] = [
+            'url'     => 'usuarios.php',
+            'border'  => '#7c3aed',
+            'grad'    => 'linear-gradient(135deg, #7c3aed, #a855f7)',
+            'icono'   => 'fa-solid fa-users-gear',
+            'titulo'  => 'Usuarios y Claves',
+            'desc'    => 'Gestión de profesores, celadores y reinicio de contraseñas (123456).',
+            'onclick' => null
+        ];
+        $accionesRapidas[] = [
+            'url'          => 'javascript:void(0)',
+            'border'       => '#ef4444',
+            'grad'         => 'linear-gradient(135deg, #dc2626, #ef4444)',
+            'icono'        => 'fa-solid fa-rotate-left',
+            'titulo'       => 'Reiniciar Asistencias',
+            'titulo_class' => 'text-danger',
+            'desc'         => 'Herramienta administrativa para resetear registros de aula o portería.',
+            'onclick'      => 'abrirModalReiniciarAsistencias()'
+        ];
+    }
 
-            <?php if (esAdmin()): ?>
-            <div class="col-12 col-md-4">
-                <a href="usuarios.php" class="text-decoration-none">
-                    <div class="p-3 rounded-3 border h-100 d-flex align-items-center gap-3 bg-light hover-shadow transition" style="border-left: 4px solid #7c3aed !important;">
-                        <div class="rounded-3 p-3 text-white" style="background: linear-gradient(135deg, #7c3aed, #a855f7); font-size: 1.4rem;">
-                            <i class="fa-solid fa-users-gear"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 text-dark">Usuarios y Claves</h6>
-                            <p class="small text-muted mb-0">Gestión de profesores, celadores y reinicio de contraseñas (123456).</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
+    $totalAcciones = count($accionesRapidas);
+    if ($totalAcciones === 1) {
+        $colClass = 'col-12 col-md-8 col-lg-6';
+    } elseif ($totalAcciones === 2) {
+        $colClass = 'col-12 col-md-6';
+    } elseif ($totalAcciones === 4) {
+        $colClass = 'col-12 col-md-6 col-xl-3';
+    } else {
+        $colClass = 'col-12 col-md-6 col-lg-4';
+    }
+    ?>
 
-            <div class="col-12 col-md-4">
-                <a href="javascript:void(0)" onclick="abrirModalReiniciarAsistencias()" class="text-decoration-none">
-                    <div class="p-3 rounded-3 border h-100 d-flex align-items-center gap-3 bg-light hover-shadow transition" style="border-left: 4px solid #ef4444 !important;">
-                        <div class="rounded-3 p-3 text-white" style="background: linear-gradient(135deg, #dc2626, #ef4444); font-size: 1.4rem;">
-                            <i class="fa-solid fa-rotate-left"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 text-danger">Reiniciar Asistencias</h6>
-                            <p class="small text-muted mb-0">Herramienta administrativa para resetear registros de aula o portería.</p>
-                        </div>
-                    </div>
-                </a>
+    <?php if ($totalAcciones > 0): ?>
+    <style>
+        .header-accordion-modulos {
+            transition: background-color 0.2s ease;
+        }
+        .header-accordion-modulos:hover {
+            background-color: #f8fafc !important;
+        }
+        .header-accordion-modulos .flecha-acordeon {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .header-accordion-modulos.collapsed .flecha-acordeon {
+            transform: rotate(180deg);
+        }
+    </style>
+    <div class="card-surface mb-4 p-0 overflow-hidden shadow-sm border">
+        <div class="p-3 px-4 d-flex align-items-center justify-content-between header-accordion-modulos"
+             role="button"
+             data-bs-toggle="collapse"
+             data-bs-target="#collapseModulosRapidos"
+             aria-expanded="true"
+             aria-controls="collapseModulosRapidos"
+             id="headerModulosRapidos"
+             style="cursor: pointer; user-select: none;">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning" style="width: 38px; height: 38px; font-size: 1.15rem;">
+                    <i class="fa-solid fa-bolt"></i>
+                </span>
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">Módulos y Acciones Rápidas</h5>
+                    <small class="text-muted">Atajos directos según tu rol en el sistema</small>
+                </div>
+                <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 ms-sm-2 fw-medium">
+                    <?= $totalAcciones ?> <?= $totalAcciones === 1 ? 'módulo' : 'módulos' ?>
+                </span>
             </div>
-            <?php endif; ?>
+            <div class="d-flex align-items-center gap-2">
+                <span class="small d-none d-sm-inline fw-semibold text-muted">Desplegar / Ocultar</span>
+                <span class="btn btn-sm btn-light rounded-circle shadow-none p-0 d-flex align-items-center justify-content-center border"
+                      style="width: 32px; height: 32px;">
+                    <i class="fa-solid fa-chevron-up flecha-acordeon text-secondary"></i>
+                </span>
+            </div>
+        </div>
+
+        <div class="collapse show" id="collapseModulosRapidos">
+            <div class="p-4 pt-3 border-top bg-light-subtle">
+                <div class="row g-3 <?= ($totalAcciones === 1) ? 'justify-content-center' : '' ?>">
+                    <?php foreach ($accionesRapidas as $item): ?>
+                    <div class="<?= $colClass ?>">
+                        <a href="<?= $item['url'] ?>" 
+                           <?= !empty($item['onclick']) ? 'onclick="' . $item['onclick'] . '"' : '' ?> 
+                           class="text-decoration-none d-block h-100">
+                            <div class="p-3 rounded-3 border h-100 d-flex align-items-center gap-3 bg-white hover-shadow transition" 
+                                 style="border-left: 4px solid <?= $item['border'] ?> !important;">
+                                <div class="rounded-3 p-3 text-white flex-shrink-0" 
+                                     style="background: <?= $item['grad'] ?>; font-size: 1.4rem; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="<?= $item['icono'] ?>"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1 <?= $item['titulo_class'] ?? 'text-dark' ?>"><?= $item['titulo'] ?></h6>
+                                    <p class="small text-muted mb-0"><?= $item['desc'] ?></p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- 3. TABLA DE ACTIVIDAD RECIENTE & AFORO RÁPIDO -->
     <div class="row g-4">
@@ -377,6 +427,27 @@ async function recargarKPIs() {
     } catch(e) {}
 }
 setInterval(recargarKPIs, 10000);
+
+// Persistencia de estado del acordeón de módulos rápidos
+document.addEventListener('DOMContentLoaded', function() {
+    const colMod = document.getElementById('collapseModulosRapidos');
+    const headMod = document.getElementById('headerModulosRapidos');
+    if (colMod && headMod && window.bootstrap) {
+        const estado = localStorage.getItem('sfs_modulos_rapidos_estado');
+        if (estado === 'cerrado') {
+            const bsCol = bootstrap.Collapse.getOrCreateInstance(colMod, { toggle: false });
+            bsCol.hide();
+            headMod.classList.add('collapsed');
+            headMod.setAttribute('aria-expanded', 'false');
+        }
+        colMod.addEventListener('hidden.bs.collapse', function () {
+            localStorage.setItem('sfs_modulos_rapidos_estado', 'cerrado');
+        });
+        colMod.addEventListener('shown.bs.collapse', function () {
+            localStorage.setItem('sfs_modulos_rapidos_estado', 'abierto');
+        });
+    }
+});
 JS;
 
 require __DIR__ . '/../layout/app_layout.php';

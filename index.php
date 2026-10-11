@@ -82,17 +82,21 @@ $rutas = [
     // Perfil
     'perfil'            => ['PerfilController', 'index'],
 
-    // Módulos del Sistema (Protegidos)
+    // Módulos del Sistema por Usuario / Rol
     'dashboard'         => ['DashboardController', 'index'],
     'panel'             => ['DashboardController', 'index'],
-    'asistencia'        => ['AsistenciaController', 'index'],
+    'asistencia'        => ['DocenteController', 'index'],
+    'docente'           => ['DocenteController', 'index'],
     'porteria'          => ['PorteriaController', 'index'],
     'huellas'           => ['HuellaController', 'index'],
     'usuarios'          => ['AdminController', 'usuarios'],
     'estudiantes'       => ['AdminController', 'estudiantes'],
     'sensores'          => ['AdminController', 'sensores'],
-    'faltas'            => ['SupervisionController', 'faltas'],
-    'aforo'             => ['SupervisionController', 'aforo'],
+    'admin'             => ['AdminController', 'usuarios'],
+    'faltas'            => ['CoordinacionController', 'faltas'],
+    'coordinacion'      => ['CoordinacionController', 'faltas'],
+    'aforo'             => ['RectoriaController', 'aforo'],
+    'rectoria'          => ['RectoriaController', 'aforo'],
     'historial'         => ['HistorialController', 'index'],
 ];
 
@@ -111,8 +115,7 @@ if (count($partes) >= 1 && !empty($partes[0])) {
     $controladorNombre = ucfirst(strtolower($partes[0])) . 'Controller';
     $accionNombre      = $partes[1] ?? 'index';
 
-    $archivoControlador = __DIR__ . '/controllers/' . $controladorNombre . '.php';
-    if (file_exists($archivoControlador)) {
+    if (buscarArchivoControlador($controladorNombre) !== null) {
         despacharControlador($controladorNombre, $accionNombre);
         exit;
     }
@@ -144,12 +147,30 @@ http_response_code(404);
 exit;
 
 // -----------------------------------------------------------------------------
-// FUNCIÓN AUXILIAR DE DESPACHO
+// FUNCIONES AUXILIARES DE DESPACHO
 // -----------------------------------------------------------------------------
-function despacharControlador(string $controladorNombre, string $accion): void {
-    $archivo = __DIR__ . '/controllers/' . $controladorNombre . '.php';
+function buscarArchivoControlador(string $controladorNombre): ?string {
+    $rutasPosibles = [
+        __DIR__ . '/controllers/admin/' . $controladorNombre . '.php',
+        __DIR__ . '/controllers/docente/' . $controladorNombre . '.php',
+        __DIR__ . '/controllers/rectoria/' . $controladorNombre . '.php',
+        __DIR__ . '/controllers/coordinacion/' . $controladorNombre . '.php',
+        __DIR__ . '/controllers/porteria/' . $controladorNombre . '.php',
+        __DIR__ . '/controllers/' . $controladorNombre . '.php',
+    ];
 
-    if (!file_exists($archivo)) {
+    foreach ($rutasPosibles as $ruta) {
+        if (file_exists($ruta)) {
+            return $ruta;
+        }
+    }
+    return null;
+}
+
+function despacharControlador(string $controladorNombre, string $accion): void {
+    $archivo = buscarArchivoControlador($controladorNombre);
+
+    if (!$archivo) {
         http_response_code(404);
         die("Controlador [{$controladorNombre}] no encontrado.");
     }

@@ -49,7 +49,9 @@ class UsuarioModel {
                 INDEX `idx_asist_docente` (`docente_id`),
                 INDEX `idx_asist_fecha` (`fecha`),
                 INDEX `idx_asist_grado` (`grado`),
-                INDEX `idx_asist_estado` (`estado_asistencia`)
+                INDEX `idx_asist_estado` (`estado_asistencia`),
+                CONSTRAINT `fk_asist_estudiante` FOREIGN KEY (`estudiante_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                CONSTRAINT `fk_asist_docente` FOREIGN KEY (`docente_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
             // 4. Sincronizar cuentas de demostración institucionales con contraseña 123456

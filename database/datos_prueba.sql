@@ -14,6 +14,7 @@ USE `sfs_access_control`;
 -- 2. ELIMINACIÓN DE TABLAS PREVIAS (SI EXISTEN) PARA IMPORTACIÓN LIMPIA
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `registros_acceso`;
+DROP TABLE IF EXISTS `asistencias_clase`;
 DROP TABLE IF EXISTS `sesiones_admin`;
 DROP TABLE IF EXISTS `blog_articulos`;
 DROP TABLE IF EXISTS `dispositivos_sensores`;
@@ -34,7 +35,8 @@ CREATE TABLE `usuarios` (
     `grado` VARCHAR(20) NULL DEFAULT NULL COMMENT 'Grado escolar (Ej. 6°01, 11°02) o Cargo',
     `huella_template` TEXT NULL COMMENT 'Hash o template biométrico de la huella dactilar',
     `password` VARCHAR(255) NULL COMMENT 'Hash bcrypt para inicio de sesión en panel administrativo',
-    `rol` ENUM('ADMINISTRADOR', 'ESTUDIANTE', 'DOCENTE', 'SENSOR') NOT NULL DEFAULT 'ESTUDIANTE',
+    `rol` ENUM('ADMINISTRADOR', 'DOCENTE', 'CELADOR', 'COORDINADOR', 'RECTOR', 'ESTUDIANTE', 'SENSOR') NOT NULL DEFAULT 'ESTUDIANTE',
+    `debe_cambiar_password` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 si el usuario debe cambiar su contraseña por defecto en el primer ingreso',
     `estado` ENUM('ACTIVO', 'INACTIVO', 'SUSPENDIDO') NOT NULL DEFAULT 'ACTIVO' COMMENT 'Permiso de acceso a la institución',
     `creado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `actualizado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -42,7 +44,41 @@ CREATE TABLE `usuarios` (
     INDEX `idx_usuarios_matricula` (`matricula`),
     INDEX `idx_usuarios_correo` (`correo`),
     INDEX `idx_usuarios_rol` (`rol`),
-    INDEX `idx_usuarios_estado` (`estado`)
+    INDEX `idx_usuarios_estado` (`estado`),
+    INDEX `idx_usuarios_debe_cambiar` (`debe_cambiar_password`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- 3.0. TABLA: asistencias_clase
+-- Registro de toma de asistencia en el aula por parte de los Docentes
+-- ============================================================================
+CREATE TABLE `asistencias_clase` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `estudiante_id` INT NOT NULL COMMENT 'ID del estudiante',
+    `docente_id` INT NOT NULL COMMENT 'ID del docente que registra la asistencia',
+    `grado` VARCHAR(20) NOT NULL COMMENT 'Grado del grupo (Ej. 6°01)',
+    `fecha` DATE NOT NULL COMMENT 'Fecha de la clase',
+    `estado_asistencia` ENUM('PRESENTE', 'FALTA_INJUSTIFICADA', 'FALTA_JUSTIFICADA', 'RETARDO') NOT NULL DEFAULT 'PRESENTE',
+    `materia` VARCHAR(100) NULL DEFAULT 'GENERAL',
+    `observaciones` VARCHAR(255) NULL DEFAULT NULL,
+    `creado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `actualizado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_estudiante_fecha_materia` (`estudiante_id`, `fecha`, `materia`),
+    INDEX `idx_asist_estudiante` (`estudiante_id`),
+    INDEX `idx_asist_docente` (`docente_id`),
+    INDEX `idx_asist_fecha` (`fecha`),
+    INDEX `idx_asist_grado` (`grado`),
+    INDEX `idx_asist_estado` (`estado_asistencia`),
+    CONSTRAINT `fk_asist_estudiante`
+        FOREIGN KEY (`estudiante_id`)
+        REFERENCES `usuarios` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT `fk_asist_docente`
+        FOREIGN KEY (`docente_id`)
+        REFERENCES `usuarios` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================
@@ -177,7 +213,10 @@ INSERT INTO `usuarios` (`id`, `documento`, `matricula`, `correo`, `nombre`, `gra
 (4, '10000004', 'DOC-PROF-01', 'docente.arango@jorgerobledo.edu.co', 'Lic. Fernando Arango (Profesor)', 'DOCENCIA', 'FINGERPRINT_HASH_DOC_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'DOCENTE', 0, 'ACTIVO'),
 
 -- 5. CELADOR / PORTERÍA (Registro biométrico de ingreso y salida en puerta)
-(5, '10000005', 'PER-CEL-01', 'porteria@jorgerobledo.edu.co', 'Don Jaime Alberto Gómez (Celador)', 'PORTERÍA', 'FINGERPRINT_HASH_CEL_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'CELADOR', 0, 'ACTIVO');
+(5, '10000005', 'PER-CEL-01', 'porteria@jorgerobledo.edu.co', 'Don Jaime Alberto Gómez (Celador)', 'PORTERÍA', 'FINGERPRINT_HASH_CEL_001', '$2y$10$GWKjw3wl3XS0sHmKpW.fLOdDWjmdNgnTJGWkdKQENhV03LWRweCS.', 'CELADOR', 0, 'ACTIVO'),
+
+-- 6. DESARROLLADORA FULL-STACK / SISTEMAS (Equipo de desarrollo y administración)
+(16, '1025895535', NULL, 'sofiaocampo@iejorgerobledo.edu.co', 'SOFIA OCAMPO LOAIZA', 'SISTEMAS', NULL, '$2y$10$HQk8FMWrnHupjNb4HAwF0.AS2LQMMdu2S0Rid.ickwDmh4SFgrMcK', 'ADMINISTRADOR', 0, 'ACTIVO');
 
 -- ESTUDIANTES REALES DE LA INSTITUCIÓN EDUCATIVA JORGE ROBLEDO (515 Estudiantes por Grados)
 INSERT INTO `usuarios` (`documento`, `matricula`, `correo`, `nombre`, `grado`, `huella_template`, `password`, `rol`, `estado`) VALUES

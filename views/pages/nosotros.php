@@ -65,9 +65,7 @@ require_once __DIR__ . '/../../config/auth.php';
             </div>
 
             <div class="team-card">
-                <div class="team-img-placeholder">
-                    <i class="fa-solid fa-user"></i>
-                </div>
+                <img src="assets/img/Solangy.jpg" alt="Solangy Arias" class="team-img" onerror="this.src='img/Solangy.jpg'">
                 <div class="team-info">
                     <h3 class="team-name">Solangy Arias Rivas</h3>
                     <p class="team-role"><i class="fa-solid fa-palette"></i> Diseñadora UX / UI</p>
