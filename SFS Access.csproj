@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>SFS_Access</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SourceAFIS" Version="3.14.0" />
+    <Compile Remove="api\DigitalPersonaCapture.cs" />
+    <Compile Remove="Archivo\**" />
+    <Reference Include="SecuGen.FDxSDKPro.DotNet.Windows">
+      <HintPath>C:\SecuGen\FDx_SDK_Pro_Windows_v4.3.1_J1.21\FDx SDK Pro for Windows v4.3.1\DotNET\Bin\i386\SecuGen.FDxSDKPro.DotNet.Windows.dll</HintPath>
+    </Reference>
+    <Content Include="C:\SecuGen\FDx_SDK_Pro_Windows_v4.3.1_J1.21\FDx SDK Pro for Windows v4.3.1\bin\i386\sgfpamx.dll">
+      <Link>sgfpamx.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\SecuGen\FDx_SDK_Pro_Windows_v4.3.1_J1.21\FDx SDK Pro for Windows v4.3.1\bin\i386\sgfplib.dll">
+      <Link>sgfplib.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\SecuGen\FDx_SDK_Pro_Windows_v4.3.1_J1.21\FDx SDK Pro for Windows v4.3.1\bin\i386\sgwsqlib.dll">
+      <Link>sgwsqlib.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

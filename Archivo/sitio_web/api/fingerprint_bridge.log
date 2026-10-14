@@ -1,0 +1,132 @@
+﻿=== INICIO LOG ===
+[2026-09-06 21:57:46] INFO: WinBioAPI compilado OK.
+[2026-09-06 21:57:46] INFO: Sesion abierta handle=1
+[2026-09-06 21:58:31] INFO: WinBioAPI compilado OK.
+[2026-09-06 21:58:31] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 21:58:31] INFO: Sesion abierta handle=1
+[2026-09-06 21:58:31] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 21:59:28] INFO: WinBioAPI compilado OK.
+[2026-09-06 21:59:28] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 21:59:29] INFO: Sesion abierta handle=1
+[2026-09-06 21:59:29] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:01:37] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:01:37] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 22:01:37] INFO: Sesion abierta handle=1
+[2026-09-06 22:01:37] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:01:49] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:01:49] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 22:01:49] INFO: Sesion abierta handle=1
+[2026-09-06 22:01:49] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:02:03] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:02:03] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-09-06 22:02:04] INFO: Sesion abierta handle=1
+[2026-09-06 22:02:04] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:05:40] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:05:41] INFO: Enroll usuario=386 slot=1 dedo=Pulgar Derecho
+[2026-09-06 22:05:41] INFO: Sesion abierta handle=1
+[2026-09-06 22:05:41] INFO: Esperando toque en sensor Ã³ptico...
+[2026-09-06 22:05:55] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:05:55] INFO: Modo identify - esperando dedo...
+[2026-09-06 22:05:55] INFO: Sesion abierta handle=1
+[2026-09-06 22:06:24] INFO: WinBioAPI compilado OK.
+[2026-09-06 22:06:24] INFO: Modo identify - esperando dedo...
+[2026-09-06 22:06:24] INFO: Sesion abierta handle=1
+[2026-09-12 22:02:28] INFO: WinBioAPI compilado OK.
+[2026-09-12 22:02:28] INFO: Modo identify - esperando dedo...
+[2026-09-12 22:02:28] INFO: Sesion abierta handle=1
+[2026-10-11 16:16:02] INFO: WinBioAPI compilado OK.
+[2026-10-11 16:16:03] INFO: Sesion abierta handle=1
+[2026-10-11 16:17:09] INFO: WinBioAPI compilado OK.
+[2026-10-11 16:17:10] INFO: Sesion abierta handle=1
+[2026-10-11 16:37:06] INFO: WinBioAPI compilado OK.
+[2026-10-11 16:37:06] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-10-11 16:37:07] INFO: Sesion abierta handle=1
+[2026-10-11 16:37:07] INFO: Esperando toque en sensor Ã³ptico...
+[2026-10-11 16:39:33] INFO: WinBioAPI compilado OK.
+[2026-10-11 16:39:34] INFO: Sesion abierta handle=1
+[2026-10-11 16:53:12] INFO: WinBioAPI compilado OK.
+[2026-10-11 16:53:12] INFO: Modo identify - esperando dedo...
+[2026-10-11 16:53:13] INFO: Sesion abierta handle=1
+[2026-10-11 16:53:33] INFO: WinBioAPI compilado OK.
+[2026-10-11 16:53:33] INFO: Modo identify - esperando dedo...
+[2026-10-11 16:53:33] INFO: Sesion abierta handle=1
+[2026-10-11 16:54:25] INFO: WinBioAPI compilado OK.
+[2026-10-11 16:54:25] INFO: Enroll usuario=488 slot=6 dedo=Indice Derecho
+[2026-10-11 16:54:25] INFO: Sesion abierta handle=1
+[2026-10-11 16:54:25] INFO: Esperando toque en sensor Ã³ptico...
+[2026-10-11 17:01:43] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:01:44] INFO: Sesion abierta handle=1
+[2026-10-11 17:12:42] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:12:42] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-10-11 17:12:42] INFO: Sesion abierta handle=1
+[2026-10-11 17:12:42] INFO: Esperando toque en sensor Ã³ptico...
+[2026-10-11 17:13:35] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:13:35] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-10-11 17:13:35] INFO: Sesion abierta handle=1
+[2026-10-11 17:13:35] INFO: Esperando toque en sensor Ã³ptico...
+[2026-10-11 17:14:29] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:14:29] INFO: Modo identify - esperando dedo...
+[2026-10-11 17:14:29] INFO: Sesion abierta handle=1
+[2026-10-11 17:15:20] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:15:20] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-10-11 17:15:20] INFO: Sesion abierta handle=1
+[2026-10-11 17:15:20] INFO: Esperando toque en sensor Ã³ptico...
+[2026-10-11 17:27:10] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:27:10] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-10-11 17:27:10] INFO: Sesion abierta handle=1
+[2026-10-11 17:27:10] INFO: Usando unitId=3 para enroll...
+[2026-10-11 17:27:10] INFO: WinBioEnrollBegin HR=S_OK
+[2026-10-11 17:27:10] INFO: EnrollBegin OK. Capturando muestra con WinBioEnrollCapture...
+[2026-10-11 17:27:10] INFO: Captura 1 de 4...
+[2026-10-11 17:39:02] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:39:03] INFO: Sesion abierta handle=1
+[2026-10-11 17:41:11] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:41:11] INFO: Modo identify - esperando contacto en sensor...
+[2026-10-11 17:41:12] INFO: Sesion abierta handle=1
+[2026-10-11 17:41:12] INFO: Esperando dedo con WinBioLocateSensor...
+[2026-10-11 17:41:32] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:41:32] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-10-11 17:41:32] INFO: Sesion abierta handle=1
+[2026-10-11 17:41:32] INFO: Esperando contacto fÃ­sico del dedo con WinBioLocateSensor...
+[2026-10-11 17:42:29] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:42:29] INFO: Modo identify - esperando contacto en sensor...
+[2026-10-11 17:42:29] INFO: Sesion abierta handle=1
+[2026-10-11 17:42:29] INFO: Esperando dedo con WinBioLocateSensor...
+[2026-10-11 17:43:12] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:43:13] INFO: Modo identify - esperando contacto en sensor...
+[2026-10-11 17:43:13] INFO: Sesion abierta handle=1
+[2026-10-11 17:43:13] INFO: Esperando dedo con WinBioLocateSensor...
+[2026-10-11 17:43:40] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:43:40] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-10-11 17:43:40] INFO: Sesion abierta handle=1
+[2026-10-11 17:43:40] INFO: Esperando contacto fÃ­sico del dedo con WinBioLocateSensor...
+[2026-10-11 17:50:21] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:50:21] INFO: Sesion abierta handle=1
+[2026-10-11 17:50:21] INFO: Sesion WBF abierta con exito handle=1
+[2026-10-11 17:50:36] INFO: Ventana cerrada y sesion WBF liberada.
+[2026-10-11 17:50:43] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:50:43] INFO: Sesion abierta handle=1
+[2026-10-11 17:50:43] INFO: Sesion WBF abierta con exito handle=1
+[2026-10-11 17:50:49] INFO: Ventana cerrada y sesion WBF liberada.
+[2026-10-11 17:50:59] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:50:59] INFO: Sesion abierta handle=1
+[2026-10-11 17:50:59] INFO: Sesion WBF abierta con exito handle=1
+[2026-10-11 17:51:27] INFO: Ventana cerrada y sesion WBF liberada.
+[2026-10-11 17:51:38] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:51:38] INFO: Sesion abierta handle=1
+[2026-10-11 17:51:38] INFO: Sesion WBF abierta con exito handle=1
+[2026-10-11 17:51:43] INFO: Ventana cerrada y sesion WBF liberada.
+[2026-10-11 17:55:50] INFO: WinBioAPI compilado OK.
+[2026-10-11 17:55:50] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-10-11 17:55:50] INFO: Sesion abierta handle=1
+[2026-10-11 17:55:51] INFO: Encendiendo sensor optico con WinBioIdentify...
+[2026-10-11 18:03:15] INFO: WinBioAPI compilado OK.
+[2026-10-11 18:03:15] INFO: Enroll usuario=386 slot=1 dedo=Indice Derecho
+[2026-10-11 18:03:16] INFO: Sesion abierta handle=1
+[2026-10-11 18:03:16] INFO: Encendiendo sensor optico con WinBioIdentify...
+[2026-10-11 18:10:41] INFO: WinBioAPI compilado OK.
+[2026-10-11 18:10:41] INFO: Modo identify - encendiendo sensor...
+[2026-10-11 18:10:42] INFO: Sesion abierta handle=1
+[2026-10-11 18:46:22] ERROR: Excepción al llamar a "Identify" con los argumentos "1": "No hay plantillas compatibles. Vuelve a enrolar las huellas con el SDK."
+[2026-10-11 18:46:25] ERROR: Excepción al llamar a "Identify" con los argumentos "1": "No hay plantillas compatibles. Vuelve a enrolar las huellas con el SDK."
+[2026-10-11 18:53:42] ERROR: Excepción al llamar a "Identify" con los argumentos "1": "No se recibiÃ³ una captura vÃ¡lida en 60 segundos."

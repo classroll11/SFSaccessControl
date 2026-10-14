@@ -33,7 +33,7 @@ CREATE TABLE `usuarios` (
     `correo` VARCHAR(100) NULL UNIQUE COMMENT 'Correo electrónico para inicio de sesión',
     `nombre` VARCHAR(120) NOT NULL COMMENT 'Nombre completo del usuario',
     `grado` VARCHAR(20) NULL DEFAULT NULL COMMENT 'Grado escolar (Ej. 6°01, 11°02) o Cargo',
-    `huella_template` TEXT NULL COMMENT 'Hash o template biométrico de la huella dactilar',
+    `huella_template` MEDIUMTEXT NULL COMMENT 'Plantilla biométrica serializada',
     `password` VARCHAR(255) NULL COMMENT 'Hash bcrypt para inicio de sesión en panel administrativo',
     `rol` ENUM('ADMINISTRADOR', 'DOCENTE', 'CELADOR', 'COORDINADOR', 'RECTOR', 'ESTUDIANTE', 'SENSOR') NOT NULL DEFAULT 'ESTUDIANTE',
     `debe_cambiar_password` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 si el usuario debe cambiar su contraseña por defecto en el primer ingreso',
@@ -90,11 +90,10 @@ CREATE TABLE `huellas_dactilares` (
     `usuario_id` INT NOT NULL COMMENT 'ID del usuario propietario de la huella',
     `slot_numero` TINYINT NOT NULL COMMENT 'Número de slot: 1 al 6 (máximo 6 huellas por usuario)',
     `dedo` VARCHAR(50) NOT NULL COMMENT 'Nombre del dedo (Ej: Pulgar Derecho, Índice Izquierdo)',
-    `huella_template` TEXT NOT NULL COMMENT 'Hash SHA-256 o template biométrico de la huella',
+    `huella_template` MEDIUMTEXT NOT NULL COMMENT 'Plantilla biométrica serializada',
     `creado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `actualizado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY `uk_usuario_slot` (`usuario_id`, `slot_numero`),
-    UNIQUE KEY `uk_huella_template` (`huella_template`(255)),
     INDEX `idx_huella_usuario` (`usuario_id`),
     CONSTRAINT `fk_huella_usuario`
         FOREIGN KEY (`usuario_id`)

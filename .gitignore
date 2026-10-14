@@ -1,0 +1,8 @@
+/bin/
+/obj/
+/\.venv/
+__pycache__/
+*.py[cod]
+/api/fingerprint_agent*
+/api/fingerprint_cancel_*.flag
+/api/fingerprint_job_*.tmp

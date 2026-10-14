@@ -1,0 +1,3 @@
+<FilesMatch "^(fingerprint_status\.json|fingerprint_bridge\.(log|ps1)|fingerprint_agent.*|fingerprint_cancel_.*|digitalpersona_bridge\.ps1|DigitalPersonaCapture\.cs|bridge\.pid)$">
+    Require all denied
+</FilesMatch>

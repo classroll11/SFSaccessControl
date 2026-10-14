@@ -1,9 +1,5 @@
 {
-    "status": "iniciando",
-    "codigo": "ENROLL_STARTING",
-    "mensaje": "Iniciando enrolamiento de 'Indice Derecho' para slot 1...",
-    "usuario_id": 387,
-    "slot": 1,
-    "dedo": "Indice Derecho",
-    "timestamp": "2026-09-16 21:27:07"
+  "status": "lector_apagado",
+  "codigo": "READER_OFF",
+  "mensaje": "Huellero SecuGen apagado."
 }

@@ -1,145 +1,68 @@
-# 🏫 SFS ACCESS CONTROL - I.E. JORGE ROBLEDO
+# SFS Access — aplicación local para Windows
 
-Sistema web de control de acceso estudiantil y gestión de asistencia a clases en tiempo real para la **I.E. Jorge Robledo**. Diseñado para reemplazar los registros manuales en cuadernos mediante la integración con lectores biométricos de huella dactilar y consolidación automática de asistencia por grado y aula.
+Aplicación de escritorio en Python/PySide6 para administrar estudiantes, personal,
+huellas y asistencia. Utiliza MySQL/MariaDB y el lector **SecuGen Hamster Pro**;
+la captura biométrica se ejecuta en un agente .NET con SourceAFIS.
 
----
+## Requisitos
 
-## 🚀 Arquitectura Técnica
+- Windows.
+- Python 3.10 o superior.
+- .NET 10 SDK para compilar el agente.
+- MySQL/MariaDB con la base `sfs_access_control`.
+- Controladores y SDK de SecuGen instalados para usar el lector.
 
-- **Lenguaje:** PHP 8.x Nativo (Sin frameworks externos).
-- **Patrón de Diseño:** Modelo - Vista - Controlador (MVC).
-- **Base de Datos:** MySQL / MariaDB (Motor `InnoDB`, Codificación `utf8mb4`).
-- **Capa de Datos:** PDO (PHP Data Objects) con Sentencias Preparadas contra Inyección SQL.
-- **Frontend:** HTML5, CSS3, Bootstrap 5, FontAwesome 6, JavaScript Vanilla (AJAX Fetch API).
-- **Integración Hardware:** Endpoint API REST (JSON) compatible con lectores biométricos (Arduino, ESP32, Python, etc.).
+## Primera instalación
 
----
+Desde PowerShell, en la carpeta de este proyecto:
 
-## 📁 Estructura del Proyecto
-
-```text
-SFS Access/
-│
-├── api/
-│   ├── registrar_huella.php        # Endpoint REST para sensores y scripts
-│   └── simular_sensor.py           # Script Python para pruebas de integración hardware
-│
-├── assets/
-│   ├── css/
-│   │   └── styles.css              # Hoja de estilos institucionales y componentes UI
-│   └── img/                        # Logotipos, íconos SVG e imágenes de interfaz
-│
-├── config/
-│   ├── auth.php                    # Middleware de control de sesiones y autenticación
-│   └── database.php                # Conexión Singleton PDO a MySQL
-│
-├── controllers/
-│   ├── AccesoController.php        # Lógica de validación biométrica y control de acceso
-│   ├── AuthController.php          # Lógica de autenticación, login y registro
-│   └── ReporteController.php       # Consolidación de datos y reportes de asistencia escolar
-│
-├── database/
-│   ├── sfs_access_control.sql      # Script DDL/DML principal para phpMyAdmin
-│   ├── datos_prueba.sql            # Script DML de datos de prueba institucionales
-│   ├── diagrama_relacional_bd.drawio # Diagrama Relacional de la BD
-│   └── modelo_entidad_relacion.drawio# Modelo Entidad-Relación (MER)
-│
-├── docs/
-│   ├── diagramas/                  # Diagramas de arquitectura y modelado
-│   └── mockups/                    # Prototipos y maquetas HTML originales
-│
-├── models/
-│   ├── AccesoModel.php             # Registros de entrada/salida y métricas de aforo
-│   └── UsuarioModel.php            # Consultas de usuarios, roles y huellas
-│
-├── views/
-│   └── dashboard.php               # Vista interactiva con KPIs en vivo y simulador
-│
-├── index.php                       # Front Controller y Portal de Inicio
-├── login.php                       # Inicio de sesión con autenticación PHP y sesiones
-├── registro.php                    # Registro de usuarios y estudiantes
-├── nosotros.php                    # Información del equipo y proyecto
-├── blog.php                        # Artículos de tecnología biométrica
-├── perfil.php                      # Perfil de usuario dinámico y auditoría
-├── dashboard.php                   # Acceso directo al Panel de Control en Vivo
-├── logout.php                      # Cierre de sesión seguro
-└── README.md                       # Documentación técnica
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-desktop.txt
+dotnet build "SFS Access.csproj"
 ```
 
----
+Después, abre **Iniciar SFS Access.bat** con doble clic. El lanzador requiere el
+entorno `.venv`; no es necesario iniciar el agente biométrico manualmente.
 
-## 🛠️ Guía de Instalación en XAMPP
+## Base de datos
 
-1. **Ubicación del Proyecto:**
-   - Coloca la carpeta `SFS Access` dentro del directorio `htdocs` de XAMPP:
-     `C:\xampp\htdocs\SFS Access\`
+Inicia MySQL/MariaDB antes de abrir la aplicación. Por defecto, la app intenta
+conectarse a `localhost:3306`, base `sfs_access_control`, usuario `root` y
+contraseña vacía. Configura estas variables de entorno si tu conexión es distinta:
 
-2. **Iniciar Servicios:**
-   - Abre el **XAMPP Control Panel** e inicia los módulos **Apache** y **MySQL**.
+- `SFS_DB_HOST`
+- `SFS_DB_PORT`
+- `SFS_DB_NAME`
+- `SFS_DB_USER`
+- `SFS_DB_PASSWORD`
 
-3. **Importar Base de Datos:**
-   - Ingresa a [http://localhost/phpmyadmin](http://localhost/phpmyadmin).
-   - Ve a la pestaña **Importar** y selecciona el archivo [`database/sfs_access_control.sql`](file:///c:/xampp/htdocs/SFS%20Access/database/sfs_access_control.sql).
-   - Haz clic en **Continuar**. Se creará la base de datos `sfs_access_control` con sus tablas y datos de prueba.
+La aplicación usa las tablas existentes y no las crea ni modifica al iniciar.
+Para una instalación nueva, consulta los scripts SQL de `database/`. Ejecuta las
+migraciones solo si tu base aún no tiene los cambios correspondientes:
 
-4. **Abrir el Sistema:**
-   - Abre tu navegador web e ingresa a:
-     [http://localhost/SFS%20Access/](http://localhost/SFS%20Access/)
+- `migrate_single_student_fingerprint.sql`: deja una huella por estudiante.
+- `migrate_fingerprint_template_capacity.sql`: amplía el espacio de las plantillas.
+- `migrate_sourceafis_templates.sql`: prepara plantillas SourceAFIS cuando aplique.
 
----
+## Lector SecuGen
 
-## 🧪 Casos de Prueba Incluidos
+Conecta el Hamster Pro y confirma que el controlador del fabricante esté instalado.
+El agente usa las DLL x86 del SDK SecuGen y el proyecto .NET las configura mediante
+`SFS Access.csproj`. La aplicación permite enrolar huellas y registrar asistencia
+continua desde la pestaña **Asistencia**; una huella desconocida no detiene el
+lector. La opción **Apagar huellero** detiene el escaneo.
 
-El script SQL incluye usuarios precargados para verificar todas las reglas de negocio:
+## Estructura activa
 
-| Documento | Nombre | Grado | Rol | Estado | Huella Template | Resultado Esperado |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `10359001` | Alejandra Martínez | 11°A | ESTUDIANTE | **ACTIVO** | `HUELLA_HEX_SAMPLE_001` | ✅ **APROBADO** (Registra Entrada / Salida) |
-| `10359002` | Carlos Rodríguez | 10°B | ESTUDIANTE | **ACTIVO** | `HUELLA_HEX_SAMPLE_002` | ✅ **APROBADO** (Registra Asistencia a Clases) |
-| `10359003` | Lucía Gómez | 11°A | ESTUDIANTE | **INACTIVO** | `HUELLA_HEX_SAMPLE_003` | 🚫 **RECHAZADO** (Permiso denegado) |
-| `99999999` | No Registrado | N/A | N/A | N/A | `HUELLA_DESCONOCIDA` | 🚫 **RECHAZADO** (Persona ajena) |
+- `main.py`, `sfs_desktop/`: interfaz y lógica de la aplicación Python.
+- `requirements-desktop.txt`: dependencias Python.
+- `SFS Access.csproj`, `Program.cs`, `Biometrics/`: agente del lector.
+- `database/`: scripts de esquema, datos y migraciones SQL.
+- `assets/img/logo.png` y `assets/img/logo-transparent.png`: logos usados por la app.
+- `api/`: archivos de comunicación temporal entre la app y el agente biométrico.
+- `tests/`: pruebas automatizadas.
 
----
-
-## 📡 API REST para Sensores Biométricos
-
-- **URL:** `http://localhost/SFS%20Access/api/registrar_huella.php`
-- **Método:** `POST`
-- **Content-Type:** `application/json`
-
-### Ejemplo de Payload (Entrada):
-```json
-{
-  "huella": "HUELLA_HEX_SAMPLE_001",
-  "tipo_evento": "ENTRADA"
-}
-```
-
-### Ejemplo de Respuesta Exitosa (HTTP 200):
-```json
-{
-  "status": "exito",
-  "codigo": "ACCESO_CONCEDIDO",
-  "mensaje": "¡Bienvenido(a)! ENTRADA registrada correctamente.",
-  "acceso_permitido": true,
-  "tipo_evento": "ENTRADA",
-  "usuario": {
-    "id": 2,
-    "nombre": "Alejandra Martínez",
-    "documento": "10359001",
-    "grado": "11°A",
-    "rol": "ESTUDIANTE"
-  },
-  "registro_id": 5,
-  "fecha_hora": "2026-08-21 15:50:00"
-}
-```
-
----
-
-## 📚 Módulo de Control de Asistencia a Clases
-
-El sistema calcula en tiempo real:
-1. **Total de Estudiantes Presentes:** Conteo de estudiantes cuyo último registro hoy fue `ENTRADA` con estado `APROBADO`.
-2. **Desglose de Asistencia por Grado:** Cantidad de alumnos presentes por salón (ej. 10°A, 11°B) para control docente y académico.
-3. **Descarga en CSV:** Exportación directa para auditoría y planillas de asistencia escolar con un solo clic.
+El antiguo sitio PHP y sus recursos se conservaron, sin borrarlos, dentro de
+`Archivo/sitio_web/`. Diagramas y material institucional archivados están en sus
+respectivas carpetas bajo `Archivo/`; no son necesarios para ejecutar la app Python.
